@@ -1,0 +1,177 @@
+{
+	"jpsType": "install",
+	"application": {
+        "description": "Get your highly available and scalable clustered solution for Magento, the extremely popular open source e-commerce platform. This package is designed to ensure the load tracking and distribution, as well as automatic adjusting the amount of allocated resources according to it.",
+		"logo": "https://download.jelastic.com/public.php?service=files&t=c5e6f253e273a8d0874e5574c8a13daf&download",
+		"name": "Magento(varnish)TEST Cluster Sample Data",
+		"env": {
+			"topology": {
+				"nodes": [{
+						"docker": {
+							"image": "jelastic/magento2varnish:4.1.1"
+						},
+						"cloudlets": 8,
+						"count": 2,
+						"nodeGroup": "bl",
+						"displayName": "Balancer"
+					}, {
+						"docker": {
+							"volumeMounts": {
+								"/var/www/webroot/ROOT": {
+									"readOnly": false,
+									"sourcePath": "/data",
+									"sourceNodeGroup": "storage"
+								}
+							},
+							"image": "jelastic/magento2-nginxphp:1.8.0-php5.6.20",
+							"links": ["db:DB", "redis:REDIS", "memcached:MEMCACHED"],
+							"volumes": ["/var/www/webroot/ROOT"]
+						},
+						"cloudlets": 8,
+						"count": 2,
+						"nodeGroup": "cp",
+						"displayName": "AppServer"
+					}, {
+						"docker": {
+							"image": "jelastic/magento2-storage-sample"
+						},
+						"cloudlets": 8,
+						"nodeGroup": "storage",
+						"displayName": "Storage"
+					}, {
+						"docker": {
+							"image": "jelastic/magento2-mysql56-sample:5.6.31"
+						},
+						"cloudlets": 8,
+						"count": 2,
+						"nodeGroup": "db",
+						"displayName": "Database"
+					}, {
+						"docker": {
+							"image": "jelastic/magento2-memcached:latest"
+						},
+						"cloudlets": 4,
+						"count": 2,
+						"nodeGroup": "memcached",
+						"displayName": "Memcached"
+					}
+				]
+			},
+			"onAfterScaleIn[nodeGroup:cp]": {
+				"call": "ScaleNodes"
+			},
+			"onAfterScaleOut[nodeGroup:cp]": {
+				"call": "ScaleNodes"
+			}
+		},
+        "globals" :{
+            "defaultVCLPath": "/etc/varnish/default.vcl",
+            "replicateLog": "/var/log/replicate.log",
+            "phpIni": "/etc/php.ini",
+            "mysqlMsJSON": "/var/lib/jelastic/mysqlnd_ms.json",
+            "varnishInitD": "/etc/init.d/varnish",
+            "dataEnvPHPPath": "/data/app/etc/env.php"
+        },
+		"success": "Below you will find your admin panel link, username and password.<\/br><\/br> <table style='font-size:13px; border: none;'><tr><td>Admin panel URL:<\/td><td style='padding-left: 10px;'><a href='${env.protocol}://${env.domain}/admin/' target='_blank'>${env.protocol}://${env.domain}/admin/<\/a><\/td><\/tr>  <tr><td>Admin name:<\/td><td style='padding-left: 10px;'>admin<\/td><\/tr><tr><td>Password:<\/td><td style='padding-left: 10px;'>${user.appPassword}<\/td><\/tr><\/table><\/br>To add custom domain name for your Magento Cluster installation follow the steps described in our <a href='http://docs.jelastic.com/custom-domains' target='_blank'>documentation<\/a>",
+		"procedures": [{
+				"id": "enableAutoScaling",
+				"onCall": {
+						"executeScript": {
+								"description": "Enable AutoScaling trigger",
+								"type": "js",
+								"script": "https://goo.gl/FXOQRd"
+							}
+					}
+			}, {
+				"id": "configuringBalancers",
+				"onCall": [{
+						"forEach(nodes.cp)": {
+							"execCmd": {
+								"commands": ["jem balancer addCommonHost -h \"${@i.intIP}\" ",  "grep -q \".url = \"/\"\" ${globals.defaultVCLPath} ||  sed -ri 's| .url = \"/\"|.url = \"/varnish-probe.php\"|g' ${globals.defaultVCLPath}", "${globals.varnishInitD} reload"],
+								"nodeGroup": "bl"
+							}
+						}
+					}
+				]
+			},{
+    			"id": "configuringReplication",
+				"onCall": [{
+    					"execCmd": [{
+        						"nodeId": "${nodes.db[0].id}",
+								"commands": ["sed -i 's|server-id.*|server-id=2\\nauto_increment_increment = 2\\nauto_increment_offset = 2|g' /etc/my.cnf"]
+							},{
+								"nodeGroup": "db",
+								"commands": ["service mysql restart"]
+							}
+						]
+					}, {
+						"execCmd": [{
+								"nodeId": "${nodes.db[0].id}",
+								"commands": ["mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e \"GRANT REPLICATION SLAVE ON *.* TO rpl@${nodes.db[1].address} IDENTIFIED BY 'rpl';\" 2>>${globals.replicateLog} 1>>${globals.replicateLog}", "mysqlreplicate --master=root:${MYSQL_ROOT_PASSWORD}@${nodes.db[0].address}:3306 --slave=root:${MYSQL_ROOT_PASSWORD}@${nodes.db[1].address}:3306 --rpl-user=rpl:rpl 2>>${globals.replicateLog} 1>>${globals.replicateLog}"]
+							}
+						]
+					}, {
+						"execCmd": [{
+								"nodeId": "${nodes.db[1].id}",
+								"commands": ["mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e \"GRANT REPLICATION SLAVE ON *.* TO rpl@${nodes.db[0].address} IDENTIFIED BY 'rpl';\" 2>>${globals.replicateLog} 1>>${globals.replicateLog}", "mysqlreplicate --master=root:${MYSQL_ROOT_PASSWORD}@${nodes.db[1].address}:3306 --slave=root:${MYSQL_ROOT_PASSWORD}@${nodes.db[0].address}:3306 --rpl-user=rpl:rpl 2>>${globals.replicateLog} 1>>${globals.replicateLog}"]
+							}
+						]
+					}
+				]
+			}, {
+				"id": "setAdminPassword",
+				"onCall": [{
+        				"execCmd": [{
+								"commands": ["sed -i 's|gethostbyname(DB_1)|DB_1|g' ${globals.mysqlMsJSON}", "sed -i 's|gethostbyname(DB_2)|DB_2|g' ${globals.mysqlMsJSON}", "service nginx restart", "/etc/init.d/php-fpm restart"],
+								"nodeGroup": "cp"
+							}
+						]
+					},{
+						"execCmd": [{
+								"nodeId": "${nodes.db[0].id}",
+								"commands": ["mysql -uroot -p${MYSQL_ROOT_PASSWORD} -e \"UPDATE magento.admin_user SET email='${user.email}' WHERE user_id=1;\" 2>&1"]
+							}, {
+								"nodeId": "${nodes.cp[0].id}",
+								"commands": ["php /var/www/webroot/ROOT/bin/magento admin:user:create --admin-user=\"admin\" --admin-password=\"${user.appPassword}\" --admin-firstname=\"Admin\" --admin-lastname=\"Admin\" --admin-email=\"${user.email}\" ", "chmod -R 777 /var/www/webroot/ROOT/var"]
+							}, {
+								"commands": ["curl -fsSL 'https://goo.gl/1u4h1G' -o /root/init.sh", "bash /root/init.sh  2>&1 1>>/root/init.log"],
+								"nodeGroup": "cp"
+							}
+						]
+					}, {
+						"forEach(memcached:nodes.memcached)": {
+							"execCmd": [{
+									"commands": ["grep \"MEMCACHE_1\" ${globals.phpIni} && sed -i \"s|MEMCACHE_1|\"${@memcached.intIP}\"|g\" ${globals.phpIni} || sed -i \"s|MEMCACHE_2|\"${@memcached.intIP}\"|g\" ${globals.phpIni}"],
+									"nodeGroup": "cp"
+								}, {
+									"commands": "grep \"MEMCACHE_1\" ${globals.dataEnvPHPPath} && sed -i \"s|MEMCACHE_1|\"${@memcached.intIP}\"|g\" ${globals.dataEnvPHPPath} || sed -i \"s|MEMCACHE_2|\"${@memcached.intIP}\"|g\" ${globals.dataEnvPHPPath}",
+									"nodeGroup": "storage"
+								}
+							]
+						}
+					}
+				]
+			}, {
+				"id": "ScaleNodes",
+				"onCall": [{
+						"execCmd": [{
+								"commands": ["sed -i 's|gethostbyname(DB_1)|${nodes.db[0].address}|g' ${globals.mysqlMsJSON}", "sed -i 's|gethostbyname(DB_2)|${nodes.db[1].address}|g' ${globals.mysqlMsJSON}", "service nginx restart", "/etc/init.d/php-fpm restart"],
+								"nodeGroup": "cp"
+							}
+						]
+					},{
+    					"forEach(nodes.cp)": {
+							"execCmd": {
+								"commands": ["jem balancer addCommonHost -h \"${@i.intIP}\" ", "${globals.varnishInitD} reload"],
+								"nodeGroup": "bl"
+							}
+						}
+					}
+				]
+			}
+		],
+		"onInstall": {
+			"call": ["enableAutoScaling", "configuringBalancers", "configuringReplication", "setAdminPassword"]
+		}
+	}
+}

@@ -1,3 +1,4 @@
 ![Magento Cluster](/images/magento.png)
-# magento-cluster
-Magento Cluster
+# Magento Cluster
+Get your highly available and scalable clustered solution for Magento, the extremely popular open source e-commerce platform. This package is designed to ensure the load tracking and distribution, as well as automatic adjusting the amount of allocated resources according to it.
+

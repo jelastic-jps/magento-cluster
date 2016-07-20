@@ -31,6 +31,11 @@ ST     |  Shared Storage |          1                     |           1/8       
 **MySQL Database**: 5.6.31<br/>
 **Memcached Version**: 1.4.15
 
+### Additional functioanlity:
+* MySQL databases with configured asynchronous master-master replication;
+* horizontal scaling enabled on compute nodes by CPU load. New AppServer will be added while 70% loading;
+* Memcached HA for session storage.
+
 ### Deployment
 
 In order to get this solution instantly deployed, click the "Get It Hosted Now" button, specify your email address within the widget, choose one of the [Jelastic Public Cloud providers](https://jelastic.cloud) and press Install.

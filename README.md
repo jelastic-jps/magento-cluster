@@ -31,7 +31,7 @@ ST     |  Shared Storage |          1                     |           1/8       
 **MySQL Database**: 5.6.31<br/>
 **Memcached Version**: 1.4.15
 
-### Additional functioanlity:
+### Additional functionality:
 * MySQL databases with configured asynchronous master-master replication;
 * horizontal scaling enabled on compute nodes by CPU load. New AppServer will be added while 70% loading;
 * Memcached HA for session storage.

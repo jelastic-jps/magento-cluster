@@ -7,3 +7,12 @@ Get your highly available and scalable clustered solution for Magento, the extre
 
 ##Environment Topology
 ![Cluster Topology](images/topology.png)
+
+##Specifics
+Layer | Server | Number of CTs by default | Cloudlets per CT (reserved/dynamic) | Options
+----- | ------ | ------------------------ | ----------------------------------- | -------
+LB | NGINX | 2 | 1/8 | -
+AS | NGINX (PHP-FPM) | 2 | 1/8 | -
+DB | MySQL | 2 | 1/8 | -
+CH | Memcached | 2 | 1/8 | -
+ST | Shared Storage | 1 | 1/8 | -

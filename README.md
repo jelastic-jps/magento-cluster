@@ -9,8 +9,8 @@ Get your highly available and scalable clustered solution for Magento, the extre
 ![Cluster Topology](images/topology.png)
 
 ##Specifics
-Layer | Server | Number of CTs by default | Cloudlets per CT (reserved/dynamic) | Options
------ | ------ | ------------- | ----------------- | -------
+Layer | Server | Number of CTs <br/> by default | Cloudlets per CT <br/> (reserved/dynamic) | Options
+----- | ------ | ------------------------ | :---------------------------------: | :-----:
 LB | NGINX | 2 | 1/8 | -
 AS | NGINX (PHP-FPM) | 2 | 1/8 | -
 DB | MySQL | 2 | 1/8 | -

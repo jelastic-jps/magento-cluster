@@ -10,12 +10,12 @@ Get your highly available and scalable clustered solution for Magento, the extre
 
 ###Specifics
  Layer | Server          | Number of CTs <br/> by default | Cloudlets per CT <br/> (reserved/dynamic) | Options
--------|-----------------| :-----------------------|:------------------------------------------------:|:-----:
-LB     |      Nginx      |           2             |                1/8                               |   -
-AS     | Nginx (PHP-FPM) |            2            |               1/8                                |  -
-DB     |      MySQL      |          2              |                1/8                               |  -
-CH     |     Memcached   |           2             |               1/8                                |-
-ST     |  Shared Storage |          1             |                  1/8                              |   -
+-------|-----------------| :------------------------------|:-----------------------------------------:|:-----:
+LB     |      Nginx      |           2                    |          1/8                               |   -
+AS     | Nginx (PHP-FPM) |            2                   |         1/8                                |  -
+DB     |      MySQL      |          2                     |          1/8                               |  -
+CH     |     Memcached   |           2                    |         1/8                                |-
+ST     |  Shared Storage |          1                     |           1/8                              |   -
 
 * LB - Load balancer
 * AS - Application server

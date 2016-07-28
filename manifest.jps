@@ -134,7 +134,7 @@
 								"nodeId": "${nodes.cp[0].id}",
 								"commands": ["php /var/www/webroot/ROOT/bin/magento admin:user:create --admin-user=\"admin\" --admin-password=\"${user.appPassword}\" --admin-firstname=\"Admin\" --admin-lastname=\"Admin\" --admin-email=\"${user.email}\" ", "chmod -R 777 /var/www/webroot/ROOT/var"]
 							}, {
-								"commands": ["curl -fsSL 'https://goo.gl/1u4h1G' -o /root/init.sh", "bash /root/init.sh  2>&1 1>>/root/init.log"],
+								"commands": ["curl -fsSL 'https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/scripts/initCP.sh' -o /root/init.sh", "bash /root/init.sh  2>&1 1>>/root/init.log"],
 								"nodeGroup": "cp"
 							}
 						]

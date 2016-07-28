@@ -2,7 +2,7 @@
 	"jpsType": "install",
 	"application": {
         "description": "Get your highly available and scalable clustered solution for Magento, the extremely popular open source e-commerce platform. This package is designed to ensure the load tracking and distribution, as well as automatic adjusting the amount of allocated resources according to it.",
-		"logo": "https://download.jelastic.com/public.php?service=files&t=c5e6f253e273a8d0874e5574c8a13daf&download",
+		"logo": "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/images/magento_70x70.png",
 		"name": "Magento Cluster Sample Data",
 		"env": {
 			"topology": {
@@ -79,7 +79,7 @@
 						"executeScript": {
 								"description": "Enable AutoScaling trigger",
 								"type": "js",
-								"script": "https://goo.gl/FXOQRd"
+								"script": "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/scripts/addTriggers.js"
 							}
 					}
 			}, {

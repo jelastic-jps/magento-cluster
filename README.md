@@ -34,6 +34,7 @@ ST     |  Shared Storage |          1                     |           1/8       
 ### Additional functionality:
 * MySQL databases with configured asynchronous master-master replication;
 * horizontal scaling enabled on compute nodes by CPU load. New AppServer will be added while 70% loading;
+* failover sql connection between MySQL and CP nodes based on [mysqlnd_ms](http://php.net/manual/ru/book.mysqlnd-ms.php) plugin;
 * Memcached HA for session storage.
 
 ### Deployment

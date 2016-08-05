@@ -1,5 +1,7 @@
-![Magento Cluster](/images/magento.png)
-# Magento Cluster
+# Highly Available and Auto-scalable Magento Cluster
+
+[![Deploy](https://github.com/jelastic-jps/git-push-deploy/raw/master/images/deploy-to-jelastic.png)](https://jelastic.com/install-application/?manifest=https%3A%2F%2Fgithub.com%2Fjelastic-jps%2Fmagento-cluster%2Fraw%2Fmaster%2Fmanifest.jps) 
+
 The JPS package deploy Magento 2 that initially contains 2 balancers, 2 application servers, 2 MySQL databases, 2 Memcached and 1 storage container.
 
 ##Highlights
@@ -37,11 +39,13 @@ ST     |  Shared Storage |          1                     |           1/8       
 * failover sql connection between MySQL and CP nodes based on [mysqlnd_ms](http://php.net/manual/ru/book.mysqlnd-ms.php) plugin;
 * Memcached HA for session storage.
 
+---
+
 ### Deployment
 
 In order to get this solution instantly deployed, click the "Get It Hosted Now" button, specify your email address within the widget, choose one of the [Jelastic Public Cloud providers](https://jelastic.cloud) and press Install.
 
-[![GET IT HOSTED](https://raw.githubusercontent.com/jelastic-jps/jpswiki/master/images/getithosted.png)](https://jelastic.com/install-application/?manifest=https%3A%2F%2Fgithub.com%2Fjelastic-jps%2Falfresco%2Fraw%2Fmaster%2Fmanifest.jps)
+[![Deploy](https://github.com/jelastic-jps/git-push-deploy/raw/master/images/deploy-to-jelastic.png)](https://jelastic.com/install-application/?manifest=https%3A%2F%2Fgithub.com%2Fjelastic-jps%2Fmagento-cluster%2Fraw%2Fmaster%2Fmanifest.jps) 
 
 To deploy this package to Jelastic Private Cloud, import [this JPS manifest](../../raw/master/manifest.jps) within your dashboard ([detailed instruction](https://docs.jelastic.com/environment-export-import#import)).
 

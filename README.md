@@ -41,7 +41,9 @@ ST     |  Shared Storage |          1                     |           1/8       
 
 ---
 
-### Deployment
+## Deployment
+
+### Public Cloud
 
 In order to get this solution instantly deployed, click the "Deploy" button, specify your email address within the widget, choose one of the [Jelastic Public Cloud providers](https://jelastic.cloud) and press Install.
 

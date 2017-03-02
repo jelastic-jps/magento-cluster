@@ -1,3 +1,5 @@
+# THIS PACKAGE IS DEPRECATED - Please check the new version https://github.com/jelastic-jps/magento/tree/master/magento-cluster)
+
 # Highly Available and Auto-scalable Magento Cluster
 
 [![Deploy](https://github.com/jelastic-jps/git-push-deploy/raw/master/images/deploy-to-jelastic.png)](https://jelastic.com/install-application/?manifest=https%3A%2F%2Fgithub.com%2Fjelastic-jps%2Fmagento-cluster%2Fraw%2Fmaster%2Fmanifest.jps) 

@@ -1,4 +1,4 @@
-# THIS PACKAGE IS DEPRECATED - Please check the new version https://github.com/jelastic-jps/magento/tree/master/magento-cluster)
+# THIS PACKAGE IS DEPRECATED - Please check the new version https://github.com/jelastic-jps/magento)
 
 # Highly Available and Auto-scalable Magento Cluster
 

@@ -38,7 +38,6 @@
         "cloudlets": 8,
         "nodeGroup": "cp",
         "links": ["redis:REDIS"],
-        "volumes": ["/var/www/webroot/ROOT"],
         "volumeMounts": {
             "/var/www/webroot/ROOT": {
                 "readOnly": false,
@@ -122,10 +121,12 @@
         "setEnvs": {
             "forEach(nodes.sqldb)": {
                 "if (${@i.ismaster})": {
-                    "cmd [${this.filter}]": "echo ${@i.intIP} DB_MASTER >> /etc/hosts"
+                    "cmd [${this.filter}]": "echo ${@i.intIP} DB_MASTER >> /etc/hosts",
+                    "user": "root"
                 },
                 "if (!${@i.ismaster})": {
-                    "cmd [${this.filter}]": "echo ${@i.intIP} DB_SLAVE >> /etc/hosts"
+                    "cmd [${this.filter}]": "echo ${@i.intIP} DB_SLAVE >> /etc/hosts",
+                    "user": "root"
                 }
             }
         },

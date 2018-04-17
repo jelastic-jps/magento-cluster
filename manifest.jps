@@ -2,12 +2,10 @@
     "jpsType": "install",
     "homepage": "https://github.com/jelastic-jps/magento/tree/master/magento2-php7-varnish-mysql-redis-memcache-storage",
     "description": {
-        "text": "Auto-scalable and highly-available Magento eCommerce cluster with out-of-box auto-scaling, even load and traffic distribution, master-slave data replication, page caching and user session storage, run in Docker containers.",
+        "text": "Auto-scalable and highly-available Magento eCommerce cluster with out-of-box auto-scaling, even load and traffic distribution, master-master data replication, page caching and user session storage, run in Docker containers.",
         "short": "Auto-scalable and highly-available Magento cluster with load balancing, data replication, content caching and user session storage."
     },
-    "categories": [
-        "apps/clusters"
-    ],
+    "categories": ["apps/clustered-dbs", "apps/popular", "apps/clusters", "apps/dev-and-admin-tools"],
     "logo": "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/images/magento_70x70.png",
     "name": "Auto-Scalable Magento 2.x Cluster",
     "settings": {
@@ -16,9 +14,9 @@
             "caption": "Magento version",
             "type": "list",
             "values": {
-                "https://www.dropbox.com/s/tyfa58jwa6w3n3w/Magento-CE-2.2.0.tar.gz?dl=0": "Magento CE 2.2.0",
-                "https://www.dropbox.com/s/36ws835tvp7efrx/Magento-CE-2.1.9.tar.gz?dl=0": "Magento CE 2.1.9",
-                "https://www.dropbox.com/s/eu8bifravqgh0g0/Magento-CE-2.0.16.tar.gz?dl=0": "Magento CE 2.0.16"
+                "https://www.dropbox.com/s/tyfa58jwa6w3n3w/Magento-CE-2.2.0.tar.gz?dl=0": "Magento CE 2.2.x",
+                "https://www.dropbox.com/s/36ws835tvp7efrx/Magento-CE-2.1.9.tar.gz?dl=0": "Magento CE 2.1.x",
+                "https://www.dropbox.com/s/eu8bifravqgh0g0/Magento-CE-2.0.16.tar.gz?dl=0": "Magento CE 2.0.x"
             },
             "default": "https://www.dropbox.com/s/tyfa58jwa6w3n3w/Magento-CE-2.2.0.tar.gz?dl=0"
         }
@@ -33,11 +31,11 @@
     },
     "success": "Below you will find your admin panel URL, username and password.</br></br> <table style='font-size:13px; border: none;'><tr><td>Admin panel URL:</td><td style='padding-left: 10px;'><a href='${env.protocol}://${env.domain}/admin/' target='_blank'>${env.protocol}://${env.domain}/admin/</a></td></tr>  <tr><td>Admin name:</td><td style='padding-left: 10px;'>admin</td></tr><tr><td>Password:</td><td style='padding-left: 10px;'>${globals.ADMIN_PASSWD}</td></tr></table></br>To add a custom domain name for your Magento Cluster installation, follow the steps described in our <a href='http://docs.jelastic.com/custom-domains' target='_blank'>documentation</a>",
     "nodes": [{
-        "image": "jelastic/nginxphp:1.10.1-php-7.0.21",
+        "nodeType": "nginxphp-dockerized",
         "count": 2,
         "cloudlets": 8,
         "nodeGroup": "cp",
-        "links": ["cache:REDIS", "session:MEMCACHE"],
+        "links": ["cache:REDIS", "session:REDIS"],
         "volumes": ["/var/www/webroot/ROOT", "/mnt"],
         "volumeMounts": {
             "/mnt": {

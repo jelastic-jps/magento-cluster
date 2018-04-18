@@ -68,12 +68,32 @@
         "cloudlets": 8,
         "nodeGroup": "redis"
     }],
+    "onAfterScaleOut[nodeGroup:cp]": {
+        "forEach(event.response.nodes)": {
+            "cmd [${@i.id}]": "sudo service nginx reload",
+            "setNodeDisplayName [${@i.id}]": "AppServer"
+        }
+    },
+    "onAfterScaleOut[nodeGroup:bl]": {
+        "forEach(event.response.nodes)": {
+            "setNodeDisplayName [${@i.id}]": "Load balancer"
+        }
+    },
     "onInstall": [{
+        "log": "Set Display Name"
+    }, {
+        "setNodeDisplayName [cp]": "AppServer",
+        "setNodeDisplayName [bl]": "Load balancer"
+    }, {
+        "log": "Load balancer Setup"
+    }, {
         "cmd[bl]": [
             "wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib",
             "wget ${globals.PATH}/configs/varnish/default.vcl -O /etc/varnish/default.vcl"
         ],
         "user": "root"
+    }, {
+        "log": "App Servers Setup"
     }, {
         "cmd[cp]": [
             "wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf",
@@ -153,35 +173,14 @@
                 }
             }
         }],
-        "setupCPNode": [{
-            "cmd[${this.filter}]": [
-                "mkdir -p /etc/nginx/sites-enabled && cp /mnt/nginx.conf /etc/nginx/nginx.conf && cp /mnt/default.conf /etc/nginx/sites-enabled/default.conf",
-                "cp /mnt/extensions.ini /etc/php.d/extensions.ini && cp /mnt/memcache.ini /etc/php.d/memcache.ini",
-                "service nginx restart"
-            ]
-        }, {
-            "setNodeDisplayName[${this.filter}]": "AppServer"
-        }, {
-            "cmd[bl]": [
-                "jem balancer addCommonHost -h ${this.intIP} ",
-                "grep -q \".url = \"/\"\" /etc/varnish/default.vcl ||  sed -ri 's| .url = \"/\"|.url = \"/varnish-probe.php\"|g' /etc/varnish/default.vcl",
-                "service varnish reload"
-            ]
-        }],
-        "removeCPNode": {
-            "cmd[bl]": "jem balancer RemoveCommonHost -h ${this.intIP} && service varnish reload"
-        },
         "setupBLNode": [{
             "forEach(nodes.cp)": {
                 "cmd[${this.filter}]": [
                     "jem balancer addCommonHost -h ${@i.intIP} ",
-                    "grep -q \".url = \"/\"\" /etc/varnish/default.vcl ||  sed -ri 's| .url = \"/\"|.url = \"/varnish-probe.php\"|g' /etc/varnish/default.vcl",
                     "sudo service varnish reload"
                 ],
                 "user": "root"
             }
-        }, {
-            "setNodeDisplayName[${this.filter}]": "Balancer"
         }]
     }
 }

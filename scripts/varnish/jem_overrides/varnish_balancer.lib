@@ -24,7 +24,7 @@ function addCommonHostConfig(){
         [ -n "$existing_host" ] && return 0;
         local host_num=`cat /etc/varnish/default.vcl | grep "backend serv" | awk '{print $2}' | sed 's/serv//g' | sort -n | tail -n1`;
         let "host_num+=1";
-        sed -i '/import directors;/a backend serv'$host_num' { .host = "'${host}'"; .port = "80"; .probe = { .url = "\/"; .timeout = 1s; .interval = 5s; .window = 5; .threshold = 2; } }' /etc/varnish/default.vcl;
+        sed -i '/import directors;/a backend serv'$host_num' { .host = "'${host}'"; .port = "80"; .probe = { .url = "\/varnish-probe.php"; .timeout = 1s; .interval = 5s; .window = 5; .threshold = 2; } }' /etc/varnish/default.vcl;
         sed -i '/new myclust = directors.*;/a myclust.add_backend(serv'$host_num');' /etc/varnish/default.vcl;
         sed -i '/acl purge*/a "'${host}'";' /etc/varnish/default.vcl;
         sed -i '/backend default { .host = "127.0.0.1"/d' /etc/varnish/default.vcl;

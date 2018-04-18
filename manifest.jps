@@ -79,7 +79,16 @@
             "setNodeDisplayName [${@i.id}]": "Load balancer"
         }
     },
-    "onInstall": [{
+    "onInstall": [
+    {
+        "if (/Magento-CE-2/.test(\"${settings.magento_version}\"))": {
+            "cmd[cp]": "echo test >> /tmp/1"
+           
+        }
+    },
+    
+    
+    {
         "log": "Set Display Name"
     }, {
         "setNodeDisplayName [cp]": "AppServer",

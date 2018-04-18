@@ -69,59 +69,66 @@
         "nodeGroup": "redis"
     }],
     "onInstall": [{
-            "cmd[bl]": [
-                "wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib",
-                "wget ${globals.PATH}/configs/varnish/default.vcl -O /etc/varnish/default.vcl"
-            ],
-            "user": "root"
-        }, {
-            "cmd[cp]": [
-                "wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf",
-                "wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf",
-                "wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini",
-                "sudo /etc/init.d/nginx restart"
-            ]
-        }, {
-            "log": "DB Cluster Setup"
-        }, {
-            "installJps": {
-                "jps": "https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/cluster-configuration.jps",
-                "settings": {
-                    "db_user": "${globals.DB_USER}",
-                    "db_pass": "${globals.DB_PASS}",
-                    "custom_conf": "${globals.PATH}/configs/mysql/db.cnf"
-                }
+        "cmd[bl]": [
+            "wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib",
+            "wget ${globals.PATH}/configs/varnish/default.vcl -O /etc/varnish/default.vcl"
+        ],
+        "user": "root"
+    }, {
+        "cmd[cp]": [
+            "wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf",
+            "wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf",
+            "wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini",
+            "sudo /etc/init.d/nginx restart"
+        ]
+    }, {
+        "log": "DB Cluster Setup"
+    }, {
+        "installJps": {
+            "jps": "https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/cluster-configuration.jps",
+            "settings": {
+                "db_user": "${globals.DB_USER}",
+                "db_pass": "${globals.DB_PASS}",
+                "custom_conf": "${globals.PATH}/configs/mysql/db.cnf"
             }
-        }, {
-            "setupBLNode": {
-                "filter": "bl"
-            }
-        }, {
-            "setEnvs": {
-                "filter": "cp"
-            }
-        }, {
-            "cmd[redis]": "jem passwd set -p ${globals.RD_PASS}"
-        },
-        {
-            "log": "Downloading, Unpacking, Installation and Patching Magento"
-        }, {
-            "cmd[storage]": [
-                "rm -rf /data/* && wget -qO- '${settings.magento_version}' | tar xz -C /data/",
-                "wget ${globals.PATH}/configs/varnish/varnish-probe.php -O /data/pub/varnish-probe.php",
-                "chown 700:700 -R /data/*"
-            ]
-        }, {
-            "cmd[${nodes.cp.first.id}]": [
-                "wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD} ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log",
-                "wget ${globals.PATH}/configs/magento/env.php -O ${globals.MAGE_ROOT}/app/etc/env.php",
-                "sed -ri 's|_DBNAME_|${globals.DB_NAME}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
-                "sed -ri 's|_DBUSER_|${globals.DB_USER}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
-                "sed -ri 's|_DBPASS_|${globals.DB_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
-                "sed -ri 's|_RDPASS_|${globals.RD_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php"
-            ]
         }
-    ],
+    }, {
+        "setupBLNode": {
+            "filter": "bl"
+        }
+    }, {
+        "setEnvs": {
+            "filter": "cp"
+        }
+    }, {
+        "forEach(nodes.redis)": {
+            "if (${@i.ismaster})": {
+                "cmd [${@i.id}]": "jem passwd set -p ${globals.RD_PASS}",
+                "setNodeDisplayName[${@i.id}]": "Session Storage"
+            },
+            "if (!${@i.ismaster})": {
+                "cmd [${@i.id}]": "jem passwd set -p ${globals.RD_PASS}",
+                "setNodeDisplayName[${@i.id}]": "Cache Storage"
+            }
+        }
+    }, {
+        "log": "Downloading, Unpacking, Installation and Patching Magento"
+    }, {
+        "cmd[storage]": [
+            "rm -rf /data/* && wget -qO- '${settings.magento_version}' | tar xz -C /data/",
+            "wget ${globals.PATH}/configs/varnish/varnish-probe.php -O /data/pub/varnish-probe.php",
+            "chown 700:700 -R /data/*"
+        ]
+    }, {
+        "cmd[${nodes.cp.first.id}]": [
+            "wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD} ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log",
+            "wget ${globals.PATH}/configs/magento/env.php -O ${globals.MAGE_ROOT}/app/etc/env.php",
+            "sed -ri 's|_DBNAME_|${globals.DB_NAME}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
+            "sed -ri 's|_DBUSER_|${globals.DB_USER}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
+            "sed -ri 's|_DBPASS_|${globals.DB_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
+            "sed -ri 's|_RDPASS_|${globals.RD_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php"
+        ]
+    }],
     "actions": {
         "setEnvs": [{
             "forEach(i:nodes.sqldb)": {

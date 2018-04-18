@@ -81,6 +81,10 @@
         }
     },
     "onInstall": [{
+        "log": "Auto Scaling Triggers"
+    }, {
+        "script": "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/scripts/addTriggers.js"
+    }, {
         "log": "Set Display Name"
     }, {
         "setNodeDisplayName [cp]": "AppServer",

@@ -14,11 +14,11 @@
             "caption": "Magento version",
             "type": "list",
             "values": {
-                "https://www.dropbox.com/s/tyfa58jwa6w3n3w/Magento-CE-2.2.0.tar.gz?dl=0": "Magento CE 2.2.x",
-                "https://www.dropbox.com/s/36ws835tvp7efrx/Magento-CE-2.1.9.tar.gz?dl=0": "Magento CE 2.1.x",
-                "https://www.dropbox.com/s/eu8bifravqgh0g0/Magento-CE-2.0.16.tar.gz?dl=0": "Magento CE 2.0.x"
+                "https://www.dropbox.com/s/b353spuqstr86sw/Magento-CE-2.2.3.tar.gz?dl=0": "Magento CE 2.2.x",
+                "https://www.dropbox.com/s/1fxp075d5yeez9f/Magento-CE-2.1.12.tar.gz?dl=0": "Magento CE 2.1.x",
+                "https://www.dropbox.com/s/g7024okd90op0cw/Magento-CE-2.0.18.tar.gz?dl=0": "Magento CE 2.0.x"
             },
-            "default": "https://www.dropbox.com/s/tyfa58jwa6w3n3w/Magento-CE-2.2.0.tar.gz?dl=0"
+            "default": "https://www.dropbox.com/s/b353spuqstr86sw/Magento-CE-2.2.3.tar.gz?dl=0"
         }
     },
     "globals": {
@@ -27,7 +27,7 @@
         "DB_USER": "jelastic-${fn.random}",
         "DB_PASS": "${fn.password(20)}",
         "DB_NAME": "magento",
-        "RD_PASS": "${fn.password(20)}",
+        "RD_PASS": "${fn.password(10)}",
         "ADMIN_PASSWD": "${fn.password(10)}"
     },
     "success": "Below you will find your admin panel URL, username and password.</br></br> <table style='font-size:13px; border: none;'><tr><td>Admin panel URL:</td><td style='padding-left: 10px;'><a href='${env.protocol}://${env.domain}/admin/' target='_blank'>${env.protocol}://${env.domain}/admin/</a></td></tr>  <tr><td>Admin name:</td><td style='padding-left: 10px;'>admin</td></tr><tr><td>Password:</td><td style='padding-left: 10px;'>${globals.ADMIN_PASSWD}</td></tr></table></br>To add a custom domain name for your Magento Cluster installation, follow the steps described in our <a href='http://docs.jelastic.com/custom-domains' target='_blank'>documentation</a>",
@@ -69,56 +69,59 @@
         "nodeGroup": "redis"
     }],
     "onInstall": [{
-        "cmd[bl]": [
-            "wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib",
-            "wget ${globals.PATH}/configs/varnish/default.vcl -O /etc/varnish/default.vcl"
-        ],
-        "user": "root"
-    }, {
-        "cmd[cp]": [
-            "wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf",
-            "wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf",
-            "wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini",
-            "sudo /etc/init.d/nginx restart"
-        ]
-    }, {
-        "log": "DB Cluster Setup"
-    }, {
-        "installJps": {
-            "jps": "https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/cluster-configuration.jps",
-            "settings": {
-                "db_user": "${globals.DB_USER}",
-                "db_pass": "${globals.DB_PASS}",
-                "custom_conf": "${globals.PATH}/configs/mysql/db.cnf"
+            "cmd[bl]": [
+                "wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib",
+                "wget ${globals.PATH}/configs/varnish/default.vcl -O /etc/varnish/default.vcl"
+            ],
+            "user": "root"
+        }, {
+            "cmd[cp]": [
+                "wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf",
+                "wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf",
+                "wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini",
+                "sudo /etc/init.d/nginx restart"
+            ]
+        }, {
+            "log": "DB Cluster Setup"
+        }, {
+            "installJps": {
+                "jps": "https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/cluster-configuration.jps",
+                "settings": {
+                    "db_user": "${globals.DB_USER}",
+                    "db_pass": "${globals.DB_PASS}",
+                    "custom_conf": "${globals.PATH}/configs/mysql/db.cnf"
+                }
             }
+        }, {
+            "setupBLNode": {
+                "filter": "bl"
+            }
+        }, {
+            "setEnvs": {
+                "filter": "cp"
+            }
+        }, {
+            "cmd[redis]": "jem passwd set -p ${globals.RD_PASS}"
+        },
+        {
+            "log": "Downloading, Unpacking, Installation and Patching Magento"
+        }, {
+            "cmd[storage]": [
+                "rm -rf /data/* && wget -qO- '${settings.magento_version}' | tar xz -C /data/",
+                "wget ${globals.PATH}/configs/varnish/varnish-probe.php -O /data/pub/varnish-probe.php",
+                "chown 700:700 -R /data/*"
+            ]
+        }, {
+            "cmd[${nodes.cp.first.id}]": [
+                "wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD} ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log",
+                "wget ${globals.PATH}/configs/magento/env.php -O ${globals.MAGE_ROOT}/app/etc/env.php",
+                "sed -ri 's|_DBNAME_|${globals.DB_NAME}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
+                "sed -ri 's|_DBUSER_|${globals.DB_USER}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
+                "sed -ri 's|_DBPASS_|${globals.DB_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
+                "sed -ri 's|_RDPASS_|${globals.RD_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php"
+            ]
         }
-    }, {
-        "setupBLNode": {
-            "filter": "bl"
-        }
-    }, {
-        "setEnvs": {
-            "filter": "cp"
-        }
-    }, {
-        "log": "Downloading, Unpacking, Installation and Patching Magento"
-    }, {
-        "cmd[storage]": [
-            "rm -rf /data/* && wget -qO- 'https://www.dropbox.com/s/1fxp075d5yeez9f/Magento-CE-2.1.12.tar.gz?dl=0' | tar xz -C /data/",
-            "wget ${globals.PATH}/configs/varnish/varnish-probe.php -O /data/pub/varnish-probe.php",
-            "wget ${globals.PATH}/configs/magento/env.php -O ${globals.MAGE_ROOT}/app/etc/env.php",
-            "chown 700:700 -R /data/*"
-        ]
-    }, {
-        "cmd[${nodes.cp.first.id}]": [
-            "wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD} ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log",
-            "wget ${globals.PATH}/configs/magento/env.php -O ${globals.MAGE_ROOT}/app/etc/env.php",
-            "sed -ri 's|_DBNAME_|${globals.DB_NAME}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
-            "sed -ri 's|_DBUSER_|${globals.DB_USER}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
-            "sed -ri 's|_DBPASS_|${globals.DB_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
-            "sed -ri 's|_RDPASS_|${globals.RD_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php"
-        ]
-    }],
+    ],
     "actions": {
         "setEnvs": [{
             "forEach(i:nodes.sqldb)": {

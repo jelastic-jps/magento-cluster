@@ -37,7 +37,6 @@
         "count": 2,
         "cloudlets": 8,
         "nodeGroup": "cp",
-        "links": ["redis:REDIS"],
         "volumeMounts": {
             "/var/www/webroot/ROOT": {
                 "readOnly": false,
@@ -118,8 +117,8 @@
         ]
     }],
     "actions": {
-        "setEnvs": {
-            "forEach(nodes.sqldb)": {
+        "setEnvs": [{
+            "forEach(i:nodes.sqldb)": {
                 "if (${@i.ismaster})": {
                     "cmd [${this.filter}]": "echo ${@i.intIP} DB_MASTER >> /etc/hosts",
                     "user": "root"
@@ -128,8 +127,18 @@
                     "cmd [${this.filter}]": "echo ${@i.intIP} DB_SLAVE >> /etc/hosts",
                     "user": "root"
                 }
+            },
+            "forEach(k:nodes.redis)": {
+                "if (${@k.ismaster})": {
+                    "cmd [${this.filter}]": "echo ${@k.intIP} RDS >> /etc/hosts",
+                    "user": "root"
+                },
+                "if (!${@k.ismaster})": {
+                    "cmd [${this.filter}]": "echo ${@k.intIP} RDC >> /etc/hosts",
+                    "user": "root"
+                }
             }
-        },
+        }],
         "setupCPNode": [{
             "cmd[${this.filter}]": [
                 "mkdir -p /etc/nginx/sites-enabled && cp /mnt/nginx.conf /etc/nginx/nginx.conf && cp /mnt/default.conf /etc/nginx/sites-enabled/default.conf",
@@ -153,8 +162,9 @@
                 "cmd[${this.filter}]": [
                     "jem balancer addCommonHost -h ${@i.intIP} ",
                     "grep -q \".url = \"/\"\" /etc/varnish/default.vcl ||  sed -ri 's| .url = \"/\"|.url = \"/varnish-probe.php\"|g' /etc/varnish/default.vcl",
-                    "service varnish reload"
-                ]
+                    "sudo service varnish reload"
+                ],
+                "user": "root"
             }
         }, {
             "setNodeDisplayName[${this.filter}]": "Balancer"

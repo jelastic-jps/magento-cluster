@@ -36,6 +36,7 @@ function removeCommonHostConfig(){
         local target_host=`cat /etc/varnish/default.vcl | grep ${host} | awk '{print $2}'`;
         [ -z "$target_host" ] && return 0;
         sed -i '/'${host}'/d' /etc/varnish/default.vcl;
+        sed -i '/'${target_host}'/d' /etc/varnish/default.vcl;
         local least_hosts=`cat /etc/varnish/default.vcl | grep "backend serv"`;
         [ -z "$least_hosts" ] && sed -i '/import directors;/a backend default { .host = "127.0.0.1"; .port = "80"; }' /etc/varnish/default.vcl;
         service varnish reload &>/dev/null;

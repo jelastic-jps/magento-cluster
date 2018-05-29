@@ -64,7 +64,7 @@
         "nodeGroup": "bl",
         "displayName": "Balancer"
     }, {
-        "nodeType": "redis4",
+        "nodeType": "redis",
         "count": 2,
         "cloudlets": 8,
         "nodeGroup": "redis"

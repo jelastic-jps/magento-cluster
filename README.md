@@ -1,9 +1,9 @@
 # Auto-Scalable Magento 2.x Cluster in Docker Containers
 
-Advanced highly reliable and auto-scalable Magento 2.x cluster on top of Docker containers with embedded load balancing, a pair of replicated database servers, separate cache & session storages, and dedicated admin node for the whole cluster management.
+Advanced highly reliable and auto-scalable Magento cluster on top of Docker containers with embedded load balancing, a pair of replicated database servers, separate cache & session storages, and dedicated admin node for the whole cluster management.
 
 
-## Magento 2.x Cluster Topology Specifics
+## Magento Cluster Topology Specifics
 
 The topology of this Magento Cluster solution is designed to provide high availability and consistent performance of your service, being built of containers with the following Jelastic-managed dockerized stacks:
 
@@ -21,7 +21,7 @@ A pair of NGINX PHP application servers to handle Magento itself; are automatica
 
 NGINX PHP admin node to share static content between application server nodes via NFS and to provide access to _Magento Admin_ panel for managing its orders, catalogs, content, and configurations
 
-* _Session Storage_ (SS) - Memcached 1.4.24 (_[jelastic/memcached](https://hub.docker.com/r/jelastic/memcached/)_)
+* _Session Storage_ (SS) -  Redis (_[jelastic/redis](https://hub.docker.com/r/jelastic/memcached/)_)
 
 Memcache storage system to retain user session parameters so that in case one application server instance fails, the second one can retrieve the appropriate data and continue serving the clients  
 
@@ -51,7 +51,7 @@ The appropriate modifications are automatically applied to add or remove applica
 In case you’d like to change the conditions of automatic scaling, adjust the default trigger settings by following the [Automatic Horizontal Scaling](https://docs.jelastic.com/automatic-horizontal-scaling) guide.
 
 
-## How to Deploy Auto-Scalable Magento 2.x Cluster in Docker Containers
+## How to Deploy Auto-Scalable Magento Cluster in Docker Containers
 
 In order to get a clustered Magento 2.x installation up and running, click the **Deploy to Jelastic** button below and specify your email address in the opened widget. Then, select one of the [Jelastic Public Cloud](https://jelastic.cloud/) providers (in case you don’t have an account at the chosen platform, it will be created automatically) and click **Install**.
 

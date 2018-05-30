@@ -7,7 +7,7 @@
     },
     "categories": ["apps/clustered-dbs", "apps/popular", "apps/clusters", "apps/dev-and-admin-tools"],
     "logo": "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/images/magento_70x70.png",
-    "name": "Auto-Scalable Magento 2.x Cluster",
+    "name": "Auto-Scalable Magento Cluster",
     "settings": {
         "fields": {
             "name": "magento_version",
@@ -23,7 +23,7 @@
         }
     },
     "globals": {
-        "PATH": "https://raw.githubusercontent.com/sych74/magento-cluster-1/master",
+        "PATH": "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master",
         "MAGE_ROOT": "/var/www/webroot/ROOT",
         "DB_USER": "jelastic-${fn.random}",
         "DB_PASS": "${fn.password(20)}",

@@ -67,7 +67,7 @@
         "nodeType": "redis",
         "count": 2,
         "cloudlets": 8,
-        "nodeGroup": "redis"
+        "nodeGroup": "nosqldb"
     }],
     "onAfterScaleOut[nodeGroup:cp]": {
         "forEach(event.response.nodes)": {
@@ -133,7 +133,7 @@
             "filter": "cp"
         }
     }, {
-        "forEach(nodes.redis)": {
+        "forEach(nodes.nosqldb)": {
             "if (${@i.ismaster})": {
                 "cmd [${@i.id}]": "jem passwd set -p ${globals.RD_PASS}",
                 "setNodeDisplayName[${@i.id}]": "Session Storage",
@@ -187,7 +187,7 @@
                 }
             }
         }, {
-            "forEach(k:nodes.redis)": {
+            "forEach(k:nodes.nosqldb)": {
                 "if (${@k.ismaster})": {
                     "cmd [${this.filter}]": "echo ${@k.intIP} RDS >> /etc/hosts",
                     "user": "root"

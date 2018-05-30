@@ -136,11 +136,13 @@
         "forEach(nodes.redis)": {
             "if (${@i.ismaster})": {
                 "cmd [${@i.id}]": "jem passwd set -p ${globals.RD_PASS}",
-                "setNodeDisplayName[${@i.id}]": "Session Storage"
+                "setNodeDisplayName[${@i.id}]": "Session Storage",
+                "user": "root"
             },
             "if (!${@i.ismaster})": {
                 "cmd [${@i.id}]": "jem passwd set -p ${globals.RD_PASS}",
-                "setNodeDisplayName[${@i.id}]": "Cache Storage"
+                "setNodeDisplayName[${@i.id}]": "Cache Storage",
+                "user": "root"
             }
         }
     }, {

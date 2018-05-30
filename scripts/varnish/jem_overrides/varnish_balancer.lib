@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# Copyright 2015 Jelastic, Inc.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+# http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+function rebuildCommon(){
+        service varnish reload &>/dev/null;
+}
+
+function addCommonHostConfig(){
+        local existing_host=`cat /etc/varnish/default.vcl | grep $host`;
+        [ -n "$existing_host" ] && return 0;
+        local host_num=`cat /etc/varnish/default.vcl | grep "backend serv" | awk '{print $2}' | sed 's/serv//g' | sort -n | tail -n1`;
+        let "host_num+=1";
+        sed -i '/import directors;/a backend serv'$host_num' { .host = "'${host}'"; .port = "80"; .probe = { .url = "\/varnish-probe.php"; .timeout = 1s; .interval = 5s; .window = 5; .threshold = 2; } }' /etc/varnish/default.vcl;
+        sed -i '/new myclust = directors.*;/a myclust.add_backend(serv'$host_num');' /etc/varnish/default.vcl;
+        sed -i '/acl purge*/a "'${host}'";' /etc/varnish/default.vcl;
+        sed -i '/backend default { .host = "127.0.0.1"/d' /etc/varnish/default.vcl;
+        local RELOAD=`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c16`;
+        service varnish reload &>/dev/null;
+}
+
+function removeCommonHostConfig(){
+        local target_host=`cat /etc/varnish/default.vcl | grep ${host} | awk '{print $2}'`;
+        [ -z "$target_host" ] && return 0;
+        sed -i '/'${host}'/d' /etc/varnish/default.vcl;
+        sed -i '/'${target_host}'/d' /etc/varnish/default.vcl;
+        local least_hosts=`cat /etc/varnish/default.vcl | grep "backend serv"`;
+        [ -z "$least_hosts" ] && sed -i '/import directors;/a backend default { .host = "127.0.0.1"; .port = "80"; }' /etc/varnish/default.vcl;
+        service varnish reload &>/dev/null;
+}

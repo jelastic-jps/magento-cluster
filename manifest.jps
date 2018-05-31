@@ -2,7 +2,7 @@
     "jpsType": "install",
     "homepage": "https://github.com/jelastic-jps/magento-cluster/tree/master",
     "description": {
-        "text": "Auto-scalable and highly-available Magento eCommerce cluster with out-of-box auto-scaling, even load and traffic distribution, master-master data replication, page caching and user session storage, run in Docker containers.",
+        "text": "Auto-scalable and highly-available Magento eCommerce cluster with out-of-box auto-scaling, even load and traffic distribution, master-master data replication, page caching and user session storage on certified Jelastic dockerized stack templates.",
         "short": "Auto-scalable and highly-available Magento cluster with load balancing, data replication, content caching and user session storage."
     },
     "categories": ["apps/clustered-dbs", "apps/popular", "apps/clusters", "apps/dev-and-admin-tools"],

@@ -1,35 +1,35 @@
-# Auto-Scalable Magento 2.x Cluster in Docker Containers
+# Auto-Scalable Magento Cluster on certified Jelastic dockerized stack templates.
 
-Advanced highly reliable and auto-scalable Magento cluster on top of Docker containers with embedded load balancing, a pair of replicated database servers, separate cache & session storages, and dedicated admin node for the whole cluster management.
+Advanced highly reliable and auto-scalable Magento cluster on certified Jelastic dockerized stack templates with embedded load balancing, a pair of replicated database servers, separate cache & session storages, and dedicated admin node for the whole cluster management.
 
 
 ## Magento Cluster Topology Specifics
 
 The topology of this Magento Cluster solution is designed to provide high availability and consistent performance of your service, being built of containers with the following Jelastic-managed dockerized stacks:
 
-* _Load Balancer_ (LB) - Varnish 4.1.8 (_[jelastic/varnish](https://hub.docker.com/r/jelastic/varnish/)_)
+* _Load Balancer_ (LB) - Varnish (_[jelastic/varnish](https://hub.docker.com/r/jelastic/varnish/)_)
 
 Varnish load balancer to distribute incoming traffic within a cluster and cache all static content; is supplemented with NGINX servers as HTTPS proxy (can be manually [scaled](https://docs.jelastic.com/horizontal-scaling) after installation, with all the required changes being applied automatically)
 
 
-* _Application Server_ (AS) -  NGINX 1.10.1 powered by PHP 7.0.21 (_[jelastic/nginxphp](https://hub.docker.com/r/jelastic/nginxphp/)_)
+* _Application Server_ (AS) -  NGINX powered by PHP (_[jelastic/nginxphp](https://hub.docker.com/r/jelastic/nginxphp/)_)
 
 A pair of NGINX PHP application servers to handle Magento itself; are automatically scaled based on the incoming load
 
 
-* _Admin Node_ (AN) - NGINX 1.10.1 powered by PHP 7.0.21 (_[jelastic/nginxphp](https://hub.docker.com/r/jelastic/nginxphp/)_)
+* _Data Storage_ (DS) - **[Data Storage](https://docs.jelastic.com/data-storage-container)**
 
-NGINX PHP admin node to share static content between application server nodes via NFS and to provide access to _Magento Admin_ panel for managing its orders, catalogs, content, and configurations
+dedicated node with Magento-dedicated directory being mounted to all application server nodes, which allows them to operate the same data set rather than keeping and constantly synchronizing changes within their own content copies
 
-* _Session Storage_ (SS) -  Redis (_[jelastic/redis](https://hub.docker.com/r/jelastic/memcached/)_)
+* _Session Storage_ (SS) -  Redis (_[jelastic/redis](https://hub.docker.com/r/jelastic/redis/)_)
 
-Memcache storage system to retain user session parameters so that in case one application server instance fails, the second one can retrieve the appropriate data and continue serving the clients  
+Redis storage system to retain user session parameters so that in case one application server instance fails, the second one can retrieve the appropriate data and continue serving the clients  
 
-* _Cache_ (CH) - Redis 3.2.9 (_[devbeta/redis](https://hub.docker.com/r/devbeta/redis/tags/)_)
+* _Cache_ (CH) - Redis (_[jelastic/redis](https://hub.docker.com/r/jelastic/redis/)_)
 
 Redis node for the Magento content cache storing, which results in the shortened application response time and faster loading of the often requested pages
 
-* _Database_ (DB) - MySQL 5.7.-_latest_ (_[jelastic/mysql](https://hub.docker.com/r/jelastic/mysql/)_)
+* _Database_ (DB) - MySQL (_[jelastic/mysql](https://hub.docker.com/r/jelastic/mysql/)_)
 
 Two MySQL database servers with asynchronous master-slave replication to ensure high availability, increase data security, and alleviate system failures
 
@@ -55,13 +55,13 @@ In case you’d like to change the conditions of automatic scaling, adjust the d
 
 In order to get a clustered Magento 2.x installation up and running, click the **Deploy to Jelastic** button below and specify your email address in the opened widget. Then, select one of the [Jelastic Public Cloud](https://jelastic.cloud/) providers (in case you don’t have an account at the chosen platform, it will be created automatically) and click **Install**.
 
-[![Deploy](images/deploy-to-jelastic.png)](https://jelastic.com/install-application/?manifest=https://raw.githubusercontent.com/jelastic-jps/magento/master/magento2-php7-varnish-mysql-redis-memcache-storage/manifest.jps)
+[![Deploy](images/deploy-to-jelastic.png)](https://jelastic.com/install-application/?manifest=https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/manifest.jps)
 
 Alternatively, you can deploy the package manually by entering your Jelastic dashboard and [importing](https://docs.jelastic.com/environment-import) link to the _**manifest.jps**_ file above.
 
 ![magento-installation](images/magento-installation.png)
 
-Within the installation window, choose the required _Magento version_ (2.0.16, 2.1.9 and 2.2.0 are provided currently), type _Environment_ name and optional _Display Name_ ([environment alias](https://docs.jelastic.com/environment-aliases)), select the preferable [region](https://docs.jelastic.com/environment-regions) (if several ones are available) and click **Install**.
+Within the installation window, choose the required _Magento version_ (1.9.3.x, 2.0.x, 2.1.x and 2.2.x are provided currently), type _Environment_ name and optional _Display Name_ ([environment alias](https://docs.jelastic.com/environment-aliases)), select the preferable [region](https://docs.jelastic.com/environment-regions) (if several ones are available) and click **Install**.
 
 Wait a few minutes for Jelastic to prepare and configure an environment. Once the cluster is up, you will see an informational box with your admin data.
 

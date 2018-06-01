@@ -33,7 +33,7 @@ Redis node for the Magento content cache storing, which results in the shortened
 
 Two MySQL database servers with asynchronous master-slave replication to ensure high availability, increase data security, and alleviate system failures
 
-![magento2-topology](images/magento2-topology.png)
+![magento-topology](images/magento-topology.png)
 
 Each container within a cluster comes with predefined [vertical scaling](https://docs.jelastic.com/automatic-vertical-scaling) limit of _**8 cloudlets**_ (equals to 1 GiB of RAM and 3.2 GHz of CPU) and a set of [load alerts](https://docs.jelastic.com/load-alerts) (to notify you when the resources consumption is close to the limit).
 
@@ -53,7 +53,7 @@ In case you’d like to change the conditions of automatic scaling, adjust the d
 
 ## How to Deploy Auto-Scalable Magento Cluster in Docker Containers
 
-In order to get a clustered Magento 2.x installation up and running, click the **Deploy to Jelastic** button below and specify your email address in the opened widget. Then, select one of the [Jelastic Public Cloud](https://jelastic.cloud/) providers (in case you don’t have an account at the chosen platform, it will be created automatically) and click **Install**.
+In order to get a clustered Magento installation up and running, click the **Deploy to Jelastic** button below and specify your email address in the opened widget. Then, select one of the [Jelastic Public Cloud](https://jelastic.cloud/) providers (in case you don’t have an account at the chosen platform, it will be created automatically) and click **Install**.
 
 [![Deploy](images/deploy-to-jelastic.png)](https://jelastic.com/install-application/?manifest=https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/manifest.jps)
 

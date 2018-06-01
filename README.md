@@ -1,37 +1,17 @@
 # Auto-Scalable Magento Cluster on certified Jelastic dockerized stack templates.
 
-Advanced highly reliable and auto-scalable Magento cluster on certified Jelastic dockerized stack templates with embedded load balancing, a pair of replicated database servers, separate cache & session storages, and dedicated admin node for the whole cluster management.
+Advanced highly reliable and auto-scalable Magento cluster on certified Jelastic dockerized stack templates with embedded load balancing, a pair of replicated database servers, separate cache & session storages and storage node.
 
 
 ## Magento Cluster Topology Specifics
 
-The topology of this Magento Cluster solution is designed to provide high availability and consistent performance of your service, being built of containers with the following Jelastic-managed dockerized stacks:
-
-* _Load Balancer_ (LB) - Varnish (_[jelastic/varnish](https://hub.docker.com/r/jelastic/varnish/)_)
-
-Varnish load balancer to distribute incoming traffic within a cluster and cache all static content; is supplemented with NGINX servers as HTTPS proxy (can be manually [scaled](https://docs.jelastic.com/horizontal-scaling) after installation, with all the required changes being applied automatically)
-
-
-* _Application Server_ (AS) -  NGINX powered by PHP (_[jelastic/nginxphp](https://hub.docker.com/r/jelastic/nginxphp/)_)
-
-A pair of NGINX PHP application servers to handle Magento itself; are automatically scaled based on the incoming load
-
-
-* _Data Storage_ (DS) - **[Data Storage](https://docs.jelastic.com/data-storage-container)**
-
-dedicated node with Magento-dedicated directory being mounted to all application server nodes, which allows them to operate the same data set rather than keeping and constantly synchronizing changes within their own content copies
-
-* _Session Storage_ (SS) -  Redis (_[jelastic/redis](https://hub.docker.com/r/jelastic/redis/)_)
-
-Redis storage system to retain user session parameters so that in case one application server instance fails, the second one can retrieve the appropriate data and continue serving the clients  
-
-* _Cache_ (CH) - Redis (_[jelastic/redis](https://hub.docker.com/r/jelastic/redis/)_)
-
-Redis node for the Magento content cache storing, which results in the shortened application response time and faster loading of the often requested pages
-
-* _Database_ (DB) - MySQL (_[jelastic/mysql](https://hub.docker.com/r/jelastic/mysql/)_)
-
-Two MySQL database servers with asynchronous master-slave replication to ensure high availability, increase data security, and alleviate system failures
+Upon the package installation, a new environment with the following topology will be created:
+* **Varnish** load balancer to distribute incoming traffic within a cluster and cache all static content; is supplemented with **NGINX** servers as HTTPS proxy (can be manually [scaled](https://docs.jelastic.com/horizontal-scaling) after installation, with all the required changes being applied automatically)
+* a pair of **NGINX PHP** application servers to handle Magento itself; are automatically scaled based on the incoming load
+* dedicated **[Data Storage](https://docs.jelastic.com/data-storage-container)** node with WordPress-dedicated directory being mounted to all application server nodes, which allows them to operate the same data set rather than keeping and constantly synchronizing changes within their own content copies
+* **Redis** storage system to retain user session parameters so that in case one application server instance fails, the second one can retrieve the appropriate data and continue serving the clients  
+* **Redis** node for the Magento content cache storing, which results in the shortened application response time and faster loading of the often requested pages
+* two **MySQL** database servers with asynchronous master-slave replication to ensure high availability, increase data security, and alleviate system failures
 
 ![magento-topology](images/magento-topology.png)
 

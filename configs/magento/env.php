@@ -56,7 +56,7 @@ array(
        array(
          'server' => 'RDC',
          'port' => '6379',
-         'password' => '_RDPASS_',
+         'password' => 'RD_CACHE_PASS',
          'database' => '1',
          'compress_data' => '0'
        )

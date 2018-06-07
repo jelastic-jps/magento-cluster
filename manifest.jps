@@ -118,7 +118,7 @@ onInstall:
     cmd[storage]:
     - wget ${globals.PATH}/configs/magento/local.xml.template -O /data/app/etc/local.xml.template
     setupRDConnect:
-      config: ${globals.MAGE_ROOT}/app/etc/local.xml.template
+      config: /data/app/etc/local.xml.template
     cmd[${nodes.cp.first.id}]:
     - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/varnish-probe.php
     - wget ${globals.PATH}/scripts/setupMG19.sh -O /tmp/setupMG19.sh && bash -x /tmp/setupMG19.sh
@@ -135,7 +135,7 @@ onInstall:
     - sed -ri 's|_DBUSER_|${globals.DB_USER}|g' ${globals.MAGE_ROOT}/app/etc/env.php
     - sed -ri 's|_DBPASS_|${globals.DB_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php
     setupRDConnect:
-      config: ${globals.MAGE_ROOT}/app/etc/env.php
+      config: /data/app/etc/env.php
 actions:
   setEnvs:
   - forEach(i:nodes.sqldb):
@@ -159,19 +159,19 @@ actions:
       - sudo service varnish reload
       user: root
   setupRDConnect:
-  - forEach(nodes.nosqldb):
-    if (${@i.ismaster}):
-      setupRDconfig:
-        id: ${@i.id}
-        passtype: RD_SESSION_PASS
-        config: ${this.config}
-      setNodeDisplayName[${@i.id}]: Session Storage
-    if (!${@i.ismaster}):
-      setupRDconfig:
-        id: ${@i.id}
-        passtype: RD_CACHE_PASS
-        config: ${this.config}
-      setNodeDisplayName[${@i.id}]: Cache Storage
+  - forEach(i:nodes.nosqldb):
+      if (${@i.ismaster}):
+        setNodeDisplayName[${@i.id}]: Session Storage
+        setupRDconfig:
+          id: ${@i.id}
+          passtype: RD_SESSION_PASS
+          config: ${this.config}
+      if (!${@i.ismaster}):
+        setNodeDisplayName[${@i.id}]: Cache Storage
+        setupRDconfig:
+          id: ${@i.id}
+          passtype: RD_CACHE_PASS
+          config: ${this.config}
   setupRDconfig:
     script: |
       var resp = jelastic.env.control.ExecCmdById(getParam('TARGET_APPID'), session, nodeid, toJSON([{"command": "cat /etc/redis.conf | tail -1 | awk '{print $2}'"}])), obj = {};

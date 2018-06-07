@@ -1,212 +1,182 @@
-{
-    "jpsType": "install",
-    "jpsVersion": "1.4",
-    "homepage": "https://github.com/jelastic-jps/magento-cluster/tree/master",
-    "description": {
-        "text": "Auto-scalable and highly-available Magento eCommerce cluster with out-of-box auto-scaling, even load and traffic distribution, master-master data replication, page caching and user session storage on certified Jelastic dockerized stack templates.",
-        "short": "Auto-scalable and highly-available Magento cluster with load balancing, data replication, content caching and user session storage."
-    },
-    "categories": ["apps/clustered-dbs", "apps/popular", "apps/clusters", "apps/dev-and-admin-tools"],
-    "logo": "https://raw.githubusercontent.com/jelastic-jps/magento/master/magento21-php7-varnish-memcache-storage/images/magento.png",
-    "name": "Auto-Scalable Magento Cluster",
-    "settings": {
-        "fields": {
-            "name": "magento_version",
-            "caption": "Magento version",
-            "type": "list",
-            "values": {
-                "https://www.dropbox.com/s/b353spuqstr86sw/Magento-CE-2.2.3.tar.gz?dl=0": "Magento CE 2.2.x",
-                "https://www.dropbox.com/s/1fxp075d5yeez9f/Magento-CE-2.1.12.tar.gz?dl=0": "Magento CE 2.1.x",
-                "https://www.dropbox.com/s/g7024okd90op0cw/Magento-CE-2.0.18.tar.gz?dl=0": "Magento CE 2.0.x",
-                "https://www.dropbox.com/s/upf611iqdrbylai/Magento-CE-1.9.3.8.tar.gz?dl=0": "Magento CE 1.9.3.x"
-            },
-            "default": "https://www.dropbox.com/s/b353spuqstr86sw/Magento-CE-2.2.3.tar.gz?dl=0"
-        }
-    },
-    "globals": {
-        "PATH": "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master",
-        "MAGE_ROOT": "/var/www/webroot/ROOT",
-        "DB_USER": "jelastic-${fn.random}",
-        "DB_PASS": "${fn.password(20)}",
-        "DB_NAME": "magento",
-        "RD_PASS": "${fn.password(10)}",
-        "ADMIN_PASSWD": "${fn.password(10)}"
-    },
-    "success": "Below you will find your admin panel URL, username and password.</br></br> <table style='font-size:13px; border: none;'><tr><td>Admin panel URL:</td><td style='padding-left: 10px;'><a href='${env.protocol}://${env.domain}/admin/' target='_blank'>${env.protocol}://${env.domain}/admin/</a></td></tr>  <tr><td>Admin name:</td><td style='padding-left: 10px;'>admin</td></tr><tr><td>Password:</td><td style='padding-left: 10px;'>${globals.ADMIN_PASSWD}</td></tr></table></br>To add a custom domain name for your Magento Cluster installation, follow the steps described in our <a href='http://docs.jelastic.com/custom-domains' target='_blank'>documentation</a>",
-    "ssl": false,
-    "nodes": [{
-        "nodeType": "nginxphp-dockerized",
-        "tag": "1.12.2-php-7.0.27",
-        "count": 2,
-        "cloudlets": 8,
-        "nodeGroup": "cp",
-        "volumeMounts": {
-            "/var/www/webroot/ROOT": {
-                "readOnly": false,
-                "sourcePath": "/data",
-                "sourceNodeGroup": "storage"
-            }
-        },
-        "displayName": "AppServer"
-    }, {
-        "nodeType": "mysql5",
-        "count": 2,
-        "cloudlets": 8,
-        "nodeGroup": "sqldb",
-        "displayName": "Database"
-    }, {
-        "nodeType": "storage",
-        "cloudlets": 8,
-        "nodeGroup": "storage",
-        "displayName": "Storage"
-    }, {
-        "nodeType": "varnish",
-        "cloudlets": 8,
-        "nodeGroup": "bl",
-        "displayName": "Balancer"
-    }, {
-        "nodeType": "redis",
-        "count": 2,
-        "cloudlets": 8,
-        "nodeGroup": "nosqldb"
-    }],
-    "onAfterScaleOut[nodeGroup:cp]": {
-        "forEach(event.response.nodes)": {
-            "cmd [${@i.id}]": "sudo service nginx reload",
-            "setNodeDisplayName [${@i.id}]": "AppServer"
-        }
-    },
-    "onAfterScaleOut[nodeGroup:bl]": {
-        "forEach(event.response.nodes)": {
-            "setNodeDisplayName [${@i.id}]": "Load balancer"
-        }
-    },
-    "onInstall": [{
-        "log": "Auto Scaling Triggers"
-    }, {
-        "script": "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/scripts/addTriggers.js"
-    }, {
-        "log": "Set Display Name"
-    }, {
-        "setNodeDisplayName [cp]": "AppServer",
-        "setNodeDisplayName [bl]": "Load balancer"
-    }, {
-        "log": "Load balancer Setup"
-    }, {
-        "cmd[bl]": [
-            "wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib",
-            "wget ${globals.PATH}/configs/varnish/default.vcl -O /etc/varnish/default.vcl"
-        ],
-        "user": "root"
-    }, {
-        "log": "App Servers Setup"
-    }, {
-        "if (/Magento-CE-1.9/.test(\"${settings.magento_version}\"))": {
-            "cmd[cp]": "wget ${globals.PATH}/configs/nginx/site-default-mg19.conf -O /etc/nginx/conf.d/site-default.conf"
-        }
-    }, {
-        "if (/Magento-CE-2/.test(\"${settings.magento_version}\"))": {
-            "cmd[cp]": "wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf"
-        }
-    }, {
-        "cmd[cp]": [
-            "wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf",
-            "wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini",
-            "sudo /etc/init.d/nginx restart"
-        ]
-    }, {
-        "log": "DB Cluster Setup"
-    }, {
-        "installJps": {
-            "jps": "https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/cluster-configuration.jps",
-            "settings": {
-                "db_user": "${globals.DB_USER}",
-                "db_pass": "${globals.DB_PASS}",
-                "custom_conf": "${globals.PATH}/configs/mysql/db.cnf"
-            }
-        }
-    }, {
-        "setupBLNode": {
-            "filter": "bl"
-        }
-    }, {
-        "setEnvs": {
-            "filter": "cp"
-        }
-    }, {
-        "forEach(nodes.nosqldb)": {
-            "if (${@i.ismaster})": {
-                "cmd [${@i.id}]": "jem passwd set -p ${globals.RD_PASS}",
-                "setNodeDisplayName[${@i.id}]": "Session Storage",
-                "user": "root"
-            },
-            "if (!${@i.ismaster})": {
-                "cmd [${@i.id}]": "jem passwd set -p ${globals.RD_PASS}",
-                "setNodeDisplayName[${@i.id}]": "Cache Storage",
-                "user": "root"
-            }
-        }
-    }, {
-        "log": "Downloading, Unpacking, Installation and Patching Magento"
-    }, {
-        "cmd[storage]": [
-            "rm -rf /data/* && wget -qO- '${settings.magento_version}' | tar xz -C /data/",
-            "chown 700:700 -R /data/*"
-        ]
-    }, {
-        "if (/Magento-CE-1.9/.test(\"${settings.magento_version}\"))": {
-            "cmd[${nodes.cp.first.id}]": [
-                "wget ${globals.PATH}/configs/magento/local.xml.template -O ${globals.MAGE_ROOT}/app/etc/local.xml.template",
-                "wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/varnish-probe.php",
-                "sed -ri 's|_RDPASS_|${globals.RD_PASS}|g' ${globals.MAGE_ROOT}/app/etc/local.xml.template",
-                "wget ${globals.PATH}/scripts/setupMG19.sh -O /tmp/setupMG19.sh && bash -x /tmp/setupMG19.sh ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD} ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log"
-            ]
-        }
-    }, {
-        "if (/Magento-CE-2/.test(\"${settings.magento_version}\"))": {
-            "cmd[${nodes.cp.first.id}]": [
-                "wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/pub/varnish-probe.php",
-                "wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD} ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log",
-                "wget ${globals.PATH}/configs/magento/env.php -O ${globals.MAGE_ROOT}/app/etc/env.php",
-                "sed -ri 's|_DBNAME_|${globals.DB_NAME}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
-                "sed -ri 's|_DBUSER_|${globals.DB_USER}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
-                "sed -ri 's|_DBPASS_|${globals.DB_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php",
-                "sed -ri 's|_RDPASS_|${globals.RD_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php"
-            ]
-        }
-    }],
-    "actions": {
-        "setEnvs": [{
-            "forEach(i:nodes.sqldb)": {
-                "if (${@i.ismaster})": {
-                    "cmd [${this.filter}]": "echo ${@i.intIP} DB_MASTER >> /etc/hosts",
-                    "user": "root"
-                },
-                "if (!${@i.ismaster})": {
-                    "cmd [${this.filter}]": "echo ${@i.intIP} DB_SLAVE >> /etc/hosts",
-                    "user": "root"
-                }
-            }
-        }, {
-            "forEach(k:nodes.nosqldb)": {
-                "if (${@k.ismaster})": {
-                    "cmd [${this.filter}]": "echo ${@k.intIP} RDS >> /etc/hosts",
-                    "user": "root"
-                },
-                "if (!${@k.ismaster})": {
-                    "cmd [${this.filter}]": "echo ${@k.intIP} RDC >> /etc/hosts",
-                    "user": "root"
-                }
-            }
-        }],
-        "setupBLNode": [{
-            "forEach(nodes.cp)": {
-                "cmd[${this.filter}]": [
-                    "jem balancer addCommonHost -h ${@i.intIP} ",
-                    "sudo service varnish reload"
-                ],
-                "user": "root"
-            }
-        }]
-    }
-}
+---
+jpsType: install
+jpsVersion: '1.4'
+homepage: https://github.com/jelastic-jps/magento-cluster/tree/master
+description:
+  text: Auto-scalable and highly-available Magento eCommerce cluster with out-of-box
+    auto-scaling, even load and traffic distribution, master-master data replication,
+    page caching and user session storage on certified Jelastic dockerized stack templates.
+  short: Auto-scalable and highly-available Magento cluster with load balancing, data
+    replication, content caching and user session storage.
+categories:
+- apps/clustered-dbs
+- apps/popular
+- apps/clusters
+- apps/dev-and-admin-tools
+logo: https://raw.githubusercontent.com/jelastic-jps/magento/master/magento21-php7-varnish-memcache-storage/images/magento.png
+name: Auto-Scalable Magento Cluster
+settings:
+  fields:
+    name: magento_version
+    caption: Magento version
+    type: list
+    values:
+      https://www.dropbox.com/s/b353spuqstr86sw/Magento-CE-2.2.3.tar.gz?dl=0: Magento CE 2.2.x
+      https://www.dropbox.com/s/1fxp075d5yeez9f/Magento-CE-2.1.12.tar.gz?dl=0: Magento CE 2.1.x
+      https://www.dropbox.com/s/g7024okd90op0cw/Magento-CE-2.0.18.tar.gz?dl=0: Magento CE 2.0.x
+      https://www.dropbox.com/s/upf611iqdrbylai/Magento-CE-1.9.3.8.tar.gz?dl=0: Magento CE 1.9.3.x
+    default: https://www.dropbox.com/s/b353spuqstr86sw/Magento-CE-2.2.3.tar.gz?dl=0
+globals:
+  PATH: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master
+  MAGE_ROOT: "/var/www/webroot/ROOT"
+  DB_USER: jelastic-${fn.random}
+  DB_PASS: "${fn.password(20)}"
+  DB_NAME: magento
+  RD_PASS: "${fn.password(10)}"
+  ADMIN_PASSWD: "${fn.password(10)}"
+success: 'Below you will find your admin panel URL, username and password.</br></br>
+  <table style=''font-size:13px; border: none;''><tr><td>Admin panel URL:</td><td
+  style=''padding-left: 10px;''><a href=''${env.protocol}://${env.domain}/admin/''
+  target=''_blank''>${env.protocol}://${env.domain}/admin/</a></td></tr>  <tr><td>Admin
+  name:</td><td style=''padding-left: 10px;''>admin</td></tr><tr><td>Password:</td><td
+  style=''padding-left: 10px;''>${globals.ADMIN_PASSWD}</td></tr></table></br>To add
+  a custom domain name for your Magento Cluster installation, follow the steps described
+  in our <a href=''http://docs.jelastic.com/custom-domains'' target=''_blank''>documentation</a>'
+ssl: false
+nodes:
+- nodeType: nginxphp-dockerized
+  tag: 1.12.2-php-7.0.27
+  count: 2
+  cloudlets: 8
+  nodeGroup: cp
+  volumeMounts:
+    "/var/www/webroot/ROOT":
+      readOnly: false
+      sourcePath: "/data"
+      sourceNodeGroup: storage
+  displayName: AppServer
+- nodeType: mysql5
+  count: 2
+  cloudlets: 8
+  nodeGroup: sqldb
+  displayName: Database
+- nodeType: storage
+  cloudlets: 8
+  nodeGroup: storage
+  displayName: Storage
+- nodeType: varnish
+  cloudlets: 8
+  nodeGroup: bl
+  displayName: Balancer
+- nodeType: redis
+  count: 2
+  cloudlets: 8
+  nodeGroup: nosqldb
+onAfterScaleOut[nodeGroup:cp]:
+  forEach(event.response.nodes):
+    cmd [${@i.id}]: sudo service nginx reload
+    setNodeDisplayName [${@i.id}]: AppServer
+onAfterScaleOut[nodeGroup:bl]:
+  forEach(event.response.nodes):
+    setNodeDisplayName [${@i.id}]: Load balancer
+onInstall:
+- log: Auto Scaling Triggers
+- script: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/scripts/addTriggers.js
+- log: Set Display Name
+- setNodeDisplayName [cp]: AppServer
+  setNodeDisplayName [bl]: Load balancer
+- log: Load balancer Setup
+- cmd[bl]:
+  - wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib
+  - wget ${globals.PATH}/configs/varnish/default.vcl -O /etc/varnish/default.vcl
+  user: root
+- log: App Servers Setup
+- if (/Magento-CE-1.9/.test("${settings.magento_version}")):
+    cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg19.conf -O /etc/nginx/conf.d/site-default.conf
+- if (/Magento-CE-2/.test("${settings.magento_version}")):
+    cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf
+- cmd[cp]:
+  - wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf
+  - wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini
+  - sudo /etc/init.d/nginx restart
+- log: DB Cluster Setup
+- installJps:
+    jps: https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/cluster-configuration.jps
+    settings:
+      db_user: "${globals.DB_USER}"
+      db_pass: "${globals.DB_PASS}"
+      custom_conf: "${globals.PATH}/configs/mysql/db.cnf"
+- setupBLNode:
+    filter: bl
+- setEnvs:
+    filter: cp
+- log: Downloading, Unpacking, Installation and Patching Magento
+- cmd[storage]:
+  - rm -rf /data/* && wget -qO- '${settings.magento_version}' | tar xz -C /data/
+  - chown 700:700 -R /data/*
+- if (/Magento-CE-1.9/.test("${settings.magento_version}")):
+    cmd[storage]:
+    - wget ${globals.PATH}/configs/magento/local.xml.template -O /data/app/etc/local.xml.template
+    setupRDConnect:
+      config: ${globals.MAGE_ROOT}/app/etc/local.xml.template
+    cmd[${nodes.cp.first.id}]:
+    - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/varnish-probe.php
+    - wget ${globals.PATH}/scripts/setupMG19.sh -O /tmp/setupMG19.sh && bash -x /tmp/setupMG19.sh
+      ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
+      ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
+- if (/Magento-CE-2/.test("${settings.magento_version}")):
+    cmd[${nodes.cp.first.id}]:
+    - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/pub/varnish-probe.php
+    - wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh
+      ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
+      ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
+    - wget ${globals.PATH}/configs/magento/env.php -O ${globals.MAGE_ROOT}/app/etc/env.php
+    - sed -ri 's|_DBNAME_|${globals.DB_NAME}|g' ${globals.MAGE_ROOT}/app/etc/env.php
+    - sed -ri 's|_DBUSER_|${globals.DB_USER}|g' ${globals.MAGE_ROOT}/app/etc/env.php
+    - sed -ri 's|_DBPASS_|${globals.DB_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php
+    setupRDConnect:
+      config: ${globals.MAGE_ROOT}/app/etc/env.php
+actions:
+  setEnvs:
+  - forEach(i:nodes.sqldb):
+      if (${@i.ismaster}):
+        cmd [${this.filter}]: echo ${@i.intIP} DB_MASTER >> /etc/hosts
+        user: root
+      if (!${@i.ismaster}):
+        cmd [${this.filter}]: echo ${@i.intIP} DB_SLAVE >> /etc/hosts
+        user: root
+  - forEach(k:nodes.nosqldb):
+      if (${@k.ismaster}):
+        cmd [${this.filter}]: echo ${@k.intIP} RDS >> /etc/hosts
+        user: root
+      if (!${@k.ismaster}):
+        cmd [${this.filter}]: echo ${@k.intIP} RDC >> /etc/hosts
+        user: root
+  setupBLNode:
+  - forEach(nodes.cp):
+      cmd[${this.filter}]:
+      - 'jem balancer addCommonHost -h ${@i.intIP} '
+      - sudo service varnish reload
+      user: root
+  setupRDConnect:
+  - forEach(nodes.nosqldb):
+    if (${@i.ismaster}):
+      setupRDconfig:
+        id: ${@i.id}
+        passtype: RD_SESSION_PASS
+        config: ${this.config}
+      setNodeDisplayName[${@i.id}]: Session Storage
+    if (!${@i.ismaster}):
+      setupRDconfig:
+        id: ${@i.id}
+        passtype: RD_CACHE_PASS
+        config: ${this.config}
+      setNodeDisplayName[${@i.id}]: Cache Storage
+  setupRDconfig:
+    script: |
+      var resp = jelastic.env.control.ExecCmdById(getParam('TARGET_APPID'), session, nodeid, toJSON([{"command": "cat /etc/redis.conf | tail -1 | awk '{print $2}'"}])), obj = {};
+      var passwd = resp.responses[0].out;
+      resp = {result: 0, onAfterReturn: []};
+      resp = jelastic.env.control.ExecCmdByGroup('${env.envName}', session, "storage", toJSON([{ "command": 'sed -ri \"s/${this.passtype}/' + passwd + '/g\" ${this.config}' }]), false, false, "root");
+      return resp;
+    nodeid: ${this.id}

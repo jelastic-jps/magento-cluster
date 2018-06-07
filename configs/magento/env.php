@@ -16,7 +16,7 @@ array (
   array (
     'host' => 'RDS',
     'port' => '6379',
-    'password' => '_RDPASS_',
+    'password' => 'RD_SESSION_PASS',
     'timeout' => '2.5',
     'persistent_identifier' => '',
     'database' => '2',
@@ -44,7 +44,7 @@ array(
          'backend_options' =>
          array(
             'server' => 'RDC',
-            'password' => '_RDPASS_',
+            'password' => 'RD_CACHE_PASS',
             'database' => '0',
             'port' => '6379'
             ),
@@ -56,7 +56,7 @@ array(
        array(
          'server' => 'RDC',
          'port' => '6379',
-         'password' => '_RDPASS_',
+         'password' => 'RD_CACHE_PASS',
          'database' => '1',
          'compress_data' => '0'
        )

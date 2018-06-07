@@ -58,7 +58,7 @@
                 <server>RDC</server>
                 <port>6379</port>
                 <database>1</database>
-                <password>_RDPASS_</password>
+                <password>RD_CACHE_PASS</password>
 		<force_standalone>1</force_standalone>
                 <connect_retries>1</connect_retries>
 		<persistent>0</persistent>
@@ -74,7 +74,7 @@
         <redis_session>
             <host>RDS</host>
             <port>6379</port>
-            <password>_RDPASS_</password>
+            <password>RD_SESSION_PASS</password>
             <timeout>10</timeout>
             <db>1</db>
             <compression_threshold>1024</compression_threshold>

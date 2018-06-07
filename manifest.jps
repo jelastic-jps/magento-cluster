@@ -174,7 +174,7 @@ actions:
           config: ${this.config}
   setupRDconfig:
     script: |
-      var resp = jelastic.env.control.ExecCmdById(getParam('TARGET_APPID'), session, nodeid, toJSON([{"command": "cat /etc/redis.conf | tail -1 | awk '{print $2}'"}])), obj = {};
+      var resp = jelastic.env.control.ExecCmdById(getParam('TARGET_APPID'), session, nodeid, toJSON([{ "command": "cat /etc/redis.conf | tail -1 | awk '{print $2}'"}]), false, "root");
       var passwd = resp.responses[0].out;
       resp = {result: 0, onAfterReturn: []};
       resp = jelastic.env.control.ExecCmdByGroup('${env.envName}', session, "storage", toJSON([{ "command": 'sed -ri \"s/${this.passtype}/' + passwd + '/g\" ${this.config}' }]), false, false, "root");

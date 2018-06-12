@@ -31,5 +31,5 @@ Once the deployment is finished, you’ll see the appropriate success pop-up wit
 
 So now you can just click on the **Open in browser** button within the shown frame and start filling your highly available and reliable Magento installation with the required content, being ready to handle as much users as your service requires.
 
-##Magento Managed Hosting Business
+## Magento Managed Hosting Business
 To start offering this solution to your customers please follow to [Auto-Scalable Clusters for Managed Cloud Business](https://jelastic.com/apaas/)

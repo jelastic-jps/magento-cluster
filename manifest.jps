@@ -60,6 +60,8 @@ nodes:
   cloudlets: 8
   nodeGroup: sqldb
   displayName: Database
+  env:
+    ON_ENV_INSTALL: ""
 - nodeType: storage
   cloudlets: 8
   nodeGroup: storage

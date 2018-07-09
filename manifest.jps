@@ -118,6 +118,7 @@ onInstall:
   - wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf
   - wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini
   - sudo /etc/init.d/nginx restart
+
 - log: DB Cluster Setup
 - installJps:
     jps: https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/cluster-configuration.jps
@@ -133,16 +134,18 @@ onInstall:
 - cmd[storage]:
   - rm -rf /data/* && wget -qO- '${settings.magento_version}' | tar xz -C /data/
   - chown 700:700 -R /data/*
+
 - if (/Magento-CE-1.9/.test("${settings.magento_version}")):
-    cmd[storage]:
-    - wget ${globals.PATH}/configs/magento/local.xml.template -O /data/app/etc/local.xml.template
-    setupRDConnect:
-      config: /data/app/etc/local.xml.template
-    cmd[${nodes.cp.first.id}]:
-    - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/varnish-probe.php
-    - wget ${globals.PATH}/scripts/setupMG19.sh -O /tmp/setupMG19.sh && bash -x /tmp/setupMG19.sh
-      ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
-      ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
+    - cmd[storage]:
+        wget ${globals.PATH}/configs/magento/local.xml.template -O /data/app/etc/local.xml.template
+    - setupRDConnect:
+        config: /data/app/etc/local.xml.template
+    - cmd[${nodes.cp.first.id}]:
+      - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/varnish-probe.php
+      - wget ${globals.PATH}/scripts/setupMG19.sh -O /tmp/setupMG19.sh && bash -x /tmp/setupMG19.sh
+        ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
+        ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
+
 - if (/Magento-CE-2/.test("${settings.magento_version}")):
     cmd[${nodes.cp.first.id}]:
     - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/pub/varnish-probe.php
@@ -200,3 +203,4 @@ actions:
       resp = jelastic.env.control.ExecCmdByGroup('${env.envName}', session, "storage", toJSON([{ "command": 'sed -ri \"s/${this.passtype}/' + passwd + '/g\" ${this.config}' }]), false, false, "root");
       return resp;
     nodeid: ${this.id}
+    

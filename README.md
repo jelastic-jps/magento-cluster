@@ -1,4 +1,4 @@
-# Auto-Scalable Magento Cluster.
+# Auto-Scalable Magento Cluster
 
 Magento, PHP based eCommerce platform, is packaged as an advanced highly reliable and auto-scalable cluster on top of certified Jelastic dockerized stack templates with the following topology:
 

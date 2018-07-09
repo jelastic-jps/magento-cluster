@@ -25,11 +25,15 @@ Click the **Deploy** button below, specify your email address within the widget,
 ## Installation Process
 In the opened confirmation window at Jelastic dashboard, type the *Environment* name, optionally, customize its [Display Name](https://docs.jelastic.com/environment-aliases). Then, select the preferable [region](https://docs.jelastic.com/environment-regions) (if several are available) and click on **Install**.
 
-![magento-installation](images/magento-installation.png)
+<p align="center"> 
+<img src="https://github.com/jelastic-jps/magento-cluster/blob/master/images/magento-installation.png" width="400">
+</p>
 
 Once the deployment is finished, you’ll see the appropriate success pop-up with access credentials to your administration Magento panel, whilst the same information will be duplicated to your email box.
 
-![magento-successful-install](images/magento-successful-install.png)
+<p align="center"> 
+<img src="https://github.com/jelastic-jps/magento-cluster/blob/master/images/magento-successful-install.png" width="400">
+</p>
 
 So now you can just click on the **Open in browser** button within the shown frame and start filling your highly available and reliable Magento installation with the required content, being ready to handle as much users as your service requires.
 

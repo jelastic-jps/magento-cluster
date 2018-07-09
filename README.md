@@ -9,7 +9,9 @@ Magento, PHP based eCommerce platform, is packaged as an advanced highly reliabl
 * **Redis** node for the Magento content cache storing
 * Dedicated [**Data Storage**](https://docs.jelastic.com/data-storage-container) node
 
-![magento-topology](images/magento-topology.png)
+<p align="center"> 
+<img src="https://github.com/jelastic-jps/magento-cluster/blob/master/images/magento-topology.png" width="400">
+</p>
 
 More details can be found at the article [Running Auto-Scalable Magento Platform in Containers](https://jelastic.com/blog/auto-scalable-magento-cluster-in-containers/).
 

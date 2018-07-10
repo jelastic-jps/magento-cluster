@@ -22,11 +22,11 @@ settings:
     caption: Magento version
     type: list
     values:
-      https://www.dropbox.com/s/21jtfbolz1lrvga/Magento-CE-2.2.5.tar.gz?dl=0: Magento CE 2.2.x
-      https://www.dropbox.com/s/acc8u3iwegpkxz8/Magento-CE-2.1.14.tar.gz?dl=0: Magento CE 2.1.x
-      https://www.dropbox.com/s/g7024okd90op0cw/Magento-CE-2.0.18.tar.gz?dl=0: Magento CE 2.0.x
-      https://www.dropbox.com/s/s6h3r268jdk32b1/Magento-CE-1.9.3.9.tar.gz?dl=0: Magento CE 1.9.3.x
-    default: https://www.dropbox.com/s/21jtfbolz1lrvga/Magento-CE-2.2.5.tar.gz?dl=0
+      Magento-CE-2.2.tar.gz: Magento CE 2.2.x
+      Magento-CE-2.1.tar.gz: Magento CE 2.1.x
+      Magento-CE-2.0.tar.gz: Magento CE 2.0.x
+      Magento-CE-1.9.3.tar.gz: Magento CE 1.9.3.x
+    default: Magento-CE-2.2.tar.gz
 
 globals:
   PATH: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master
@@ -132,7 +132,7 @@ onInstall:
     filter: cp
 - log: Downloading, Unpacking, Installation and Patching Magento
 - cmd[storage]:
-  - rm -rf /data/* && wget -qO- '${settings.magento_version}' | tar xz -C /data/
+  - rm -rf /data/* && wget -qO- '${globals.PATH}/releases/${settings.magento_version}' | tar xz -C /data/
   - chown 700:700 -R /data/*
 
 - if (/Magento-CE-1.9/.test("${settings.magento_version}")):

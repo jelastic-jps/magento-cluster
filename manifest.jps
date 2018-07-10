@@ -26,7 +26,7 @@ settings:
       https://www.dropbox.com/s/acc8u3iwegpkxz8/Magento-CE-2.1.14.tar.gz?dl=0: Magento CE 2.1.x
       https://www.dropbox.com/s/g7024okd90op0cw/Magento-CE-2.0.18.tar.gz?dl=0: Magento CE 2.0.x
       https://www.dropbox.com/s/s6h3r268jdk32b1/Magento-CE-1.9.3.9.tar.gz?dl=0: Magento CE 1.9.3.x
-    default: https://www.dropbox.com/s/b353spuqstr86sw/Magento-CE-2.2.3.tar.gz?dl=0
+    default: https://www.dropbox.com/s/21jtfbolz1lrvga/Magento-CE-2.2.5.tar.gz?dl=0
 
 globals:
   PATH: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master

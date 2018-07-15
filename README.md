@@ -36,5 +36,8 @@ Once the deployment is finished, you’ll see the appropriate success pop-up wit
 
 So now you can just click on the **Open in browser** button within the shown frame and start filling your highly available and reliable Magento installation with the required content, being ready to handle as much users as your service requires.
 
+## Customization  
+Fine tuning and customization: multi-cloud HA and DR, geo distributed load balancing, performance optimization, WAF, CDN and other required addons can be installed afterward [on demand](https://jelastic.com/managed-auto-scalable-clusters-for-business/).
+
 ## Magento Managed Hosting Business
 To start offering this solution to your customers please follow to [Auto-Scalable Clusters for Managed Cloud Business](https://jelastic.com/apaas/)

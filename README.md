@@ -2,12 +2,12 @@
 
 Magento, PHP based eCommerce platform, is packaged as an advanced highly reliable and auto-scalable cluster on top of certified Jelastic dockerized stack templates with the following topology:
 
-* **Varnish** load balancer is supplemented with NGINX server as HTTPS proxy
-* Scalable **NGINX PHP** application servers with preconfigured [automatic horizontal scaling](https://docs.jelastic.com/automatic-horizontal-scaling) to handle load spikes
-* [**MySQL DB Cluster**](https://github.com/jelastic-jps/mysql-cluster) with asynchronous master-slave replication to ensure high availability, fault tolerance and data security
-* **Redis** storage system to retain user session parameters  
-* **Redis** node for the Magento content cache storing
-* Dedicated [**Data Storage**](https://docs.jelastic.com/data-storage-container) node
+- **Varnish** load balancer is supplemented with **NGINX** server as HTTPS proxy
+- **Auto-Scalable NGINX PHP** application servers with preconfigured [automatic horizontal scaling](https://docs.jelastic.com/automatic-horizontal-scaling) to handle load spikes
+- [**MySQL DB Cluster**](https://github.com/jelastic-jps/mysql-cluster) with asynchronous master-slave replication to ensure high availability, fault tolerance and data security
+- **Redis Sessions** node to retain user session parameters
+- **Redis Cache** node for the Magento content cache storing
+- [**Elastic Data Storage**](https://docs.jelastic.com/data-storage-container) node
 
 <p align="center"> 
 <img src="https://github.com/jelastic-jps/magento-cluster/blob/master/images/magento-topology.png" width="400">

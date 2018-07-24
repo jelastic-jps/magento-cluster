@@ -133,7 +133,7 @@ onInstall:
 - log: Downloading, Unpacking, Installation and Patching Magento
 - cmd[storage]:
   - rm -rf /data/* && wget -qO- '${globals.PATH}/releases/${settings.magento_version}' | tar xz -C /data/
-  - chown 700:700 -R /data/*
+  - chown 700:700 -Rh /data/*
 
 - if (/Magento-CE-1.9/.test("${settings.magento_version}")):
     - cmd[storage]:
@@ -147,7 +147,7 @@ onInstall:
         ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
 
 - if (/Magento-CE-2/.test("${settings.magento_version}")):
-    cmd[${nodes.cp.first.id}]:
+  - cmd[${nodes.cp.first.id}]:
     - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/pub/varnish-probe.php
     - wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh
       ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
@@ -156,7 +156,7 @@ onInstall:
     - sed -ri 's|_DBNAME_|${globals.DB_NAME}|g' ${globals.MAGE_ROOT}/app/etc/env.php
     - sed -ri 's|_DBUSER_|${globals.DB_USER}|g' ${globals.MAGE_ROOT}/app/etc/env.php
     - sed -ri 's|_DBPASS_|${globals.DB_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php
-    setupRDConnect:
+  - setupRDConnect:
       config: /data/app/etc/env.php
 
 actions:

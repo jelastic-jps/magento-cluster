@@ -133,7 +133,7 @@ onInstall:
 - log: Downloading, Unpacking, Installation and Patching Magento
 - cmd[storage]:
   - rm -rf /data/* && wget -qO- '${globals.PATH}/releases/${settings.magento_version}' | tar xz -C /data/
-  - chown 700:700 -Rh /data/*
+  - chown 700:700 -Rh /data/
 
 - if (/Magento-CE-1.9/.test("${settings.magento_version}")):
     - cmd[storage]:

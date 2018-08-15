@@ -178,7 +178,7 @@ actions:
   setupBLNode:
   - forEach(nodes.cp):
       cmd[${this.filter}]:
-      - 'jem balancer addCommonHost -h ${@i.intIP} '
+      - jem balancer addCommonHost -h ${@i.intIP}
       - sudo service varnish reload
       user: root
   setupRDConnect:

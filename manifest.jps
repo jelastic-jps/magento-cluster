@@ -101,23 +101,20 @@ onInstall:
     scaleDownLimit: 2
     scaleDownLoadPeriod: 10
     cleanOldTriggers: true
+
 - log: Set Display Name
-- setNodeDisplayName [cp]: AppServer
+  setNodeDisplayName [cp]: AppServer
   setNodeDisplayName [bl]: Load balancer
+  setNodeDisplayName[${nodes.nosqldb.first.id}]: Session Storage
+  setNodeDisplayName[${nodes.nosqldb.last.id}]: Cache Storage
+
 - log: Load balancer Setup
-- cmd[bl]:
-  - wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib
-  - wget ${globals.PATH}/configs/varnish/default.vcl -O /etc/varnish/default.vcl
-  user: root
-- log: App Servers Setup
-- if (/Magento-CE-1.9/.test("${settings.magento_version}")):
-    cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg19.conf -O /etc/nginx/conf.d/site-default.conf
-- if (/Magento-CE-2/.test("${settings.magento_version}")):
-    cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf
-- cmd[cp]:
-  - wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf
-  - wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini
-  - sudo /etc/init.d/nginx restart
+- setupBL:
+    filter: bl
+
+- log: Envs Setup for CP layer
+- setEnvs:
+    filter: cp
 
 - log: DB Cluster Setup
 - installJps:
@@ -126,75 +123,82 @@ onInstall:
       db_user: "${globals.DB_USER}"
       db_pass: "${globals.DB_PASS}"
       custom_conf: "${globals.PATH}/configs/mysql/db.cnf"
-- setupBLNode:
-    filter: bl
-- setEnvs:
-    filter: cp
+
 - log: Downloading, Unpacking, Installation and Patching Magento
 - cmd[storage]:
   - rm -rf /data/* && wget -qO- '${globals.PATH}/releases/${settings.magento_version}' | tar xz -C /data/
+  - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O /data/pub/varnish-probe.php
   - chown 700:700 -Rh /data/
 
 - if (/Magento-CE-1.9/.test("${settings.magento_version}")):
-    - cmd[storage]:
-        wget ${globals.PATH}/configs/magento/local.xml.template -O /data/app/etc/local.xml.template
+    - cmd[storage]: wget ${globals.PATH}/configs/magento/local.xml.template -O /data/app/etc/local.xml.template
     - setupRDConnect:
         config: /data/app/etc/local.xml.template
+    - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg19.conf -O /etc/nginx/conf.d/site-default.conf
+    - setupCP
     - cmd[${nodes.cp.first.id}]:
-      - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/varnish-probe.php
-      - wget ${globals.PATH}/scripts/setupMG19.sh -O /tmp/setupMG19.sh && bash -x /tmp/setupMG19.sh
+        wget ${globals.PATH}/scripts/setupMG19.sh -O /tmp/setupMG19.sh && bash -x /tmp/setupMG19.sh
         ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
         ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
 
 - if (/Magento-CE-2/.test("${settings.magento_version}")):
-  - cmd[${nodes.cp.first.id}]:
-    - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/pub/varnish-probe.php
-    - wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh
-      ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
-      ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
-    - wget ${globals.PATH}/configs/magento/env.php -O ${globals.MAGE_ROOT}/app/etc/env.php
-    - sed -ri 's|_DBNAME_|${globals.DB_NAME}|g' ${globals.MAGE_ROOT}/app/etc/env.php
-    - sed -ri 's|_DBUSER_|${globals.DB_USER}|g' ${globals.MAGE_ROOT}/app/etc/env.php
-    - sed -ri 's|_DBPASS_|${globals.DB_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php
-  - setupRDConnect:
-      config: /data/app/etc/env.php
+    - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf
+    - setupCP
+    - cmd[${nodes.cp.first.id}]:
+        - wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh
+          ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
+          ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
+        - wget ${globals.PATH}/configs/magento/env.php -O ${globals.MAGE_ROOT}/app/etc/env.php
+        - sed -ri 's|_DBNAME_|${globals.DB_NAME}|g' ${globals.MAGE_ROOT}/app/etc/env.php
+        - sed -ri 's|_DBUSER_|${globals.DB_USER}|g' ${globals.MAGE_ROOT}/app/etc/env.php
+        - sed -ri 's|_DBPASS_|${globals.DB_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php
+    - setupRDConnect:
+        config: /data/app/etc/env.php
 
 actions:
+  setupCP:
+  - log: App Servers Setup
+  - cmd[cp]: |-
+      wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf
+      wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini
+      sudo /etc/init.d/nginx restart
+
   setEnvs:
   - forEach(i:nodes.sqldb):
-      if (${@i.ismaster}):
-        cmd [${this.filter}]: echo ${@i.intIP} DB_MASTER >> /etc/hosts
+    - if (${@i.ismaster}):
+        cmd [${this.filter}]: 
+          echo ${@i.intIP} DB_MASTER >> /etc/hosts
         user: root
-      if (!${@i.ismaster}):
-        cmd [${this.filter}]: echo ${@i.intIP} DB_SLAVE >> /etc/hosts
+    - if (!${@i.ismaster}):
+        cmd [${this.filter}]: 
+          echo ${@i.intIP} DB_SLAVE >> /etc/hosts
         user: root
-  - forEach(k:nodes.nosqldb):
-      if (${@k.ismaster}):
-        cmd [${this.filter}]: echo ${@k.intIP} RDS >> /etc/hosts
-        user: root
-      if (!${@k.ismaster}):
-        cmd [${this.filter}]: echo ${@k.intIP} RDC >> /etc/hosts
-        user: root
-  setupBLNode:
+  - cmd [${this.filter}]: 
+      - echo ${nodes.nosqldb.first.intIP} RDS >> /etc/hosts
+      - echo ${nodes.nosqldb.last.intIP} RDC >> /etc/hosts
+    user: root
+
+  setupBL:
+  - cmd[bl]:
+      - wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib
+      - wget ${globals.PATH}/configs/varnish/default.vcl -O /etc/varnish/default.vcl
+    user: root
   - forEach(nodes.cp):
       cmd[${this.filter}]:
-      - jem balancer addCommonHost -h ${@i.intIP}
-      - sudo service varnish reload
+        - jem balancer addCommonHost -h ${@i.intIP}
+        - sudo service varnish reload
       user: root
+
   setupRDConnect:
-  - forEach(i:nodes.nosqldb):
-      if (${@i.ismaster}):
-        setNodeDisplayName[${@i.id}]: Session Storage
-        setupRDconfig:
-          id: ${@i.id}
-          passtype: RD_SESSION_PASS
-          config: ${this.config}
-      if (!${@i.ismaster}):
-        setNodeDisplayName[${@i.id}]: Cache Storage
-        setupRDconfig:
-          id: ${@i.id}
-          passtype: RD_CACHE_PASS
-          config: ${this.config}
+    - setupRDconfig:
+        id: ${nodes.nosqldb.first.id}
+        passtype: RD_SESSION_PASS
+        config: ${this.config}
+    - setupRDconfig:
+        id: ${nodes.nosqldb.last.id}
+        passtype: RD_CACHE_PASS
+        config: ${this.config}
+
   setupRDconfig:
     script: |
       var resp = jelastic.env.control.ExecCmdById(getParam('TARGET_APPID'), session, nodeid, toJSON([{ "command": "cat /etc/redis.conf | tail -1 | awk '{print $2}'"}]), false, "root");
@@ -203,4 +207,3 @@ actions:
       resp = jelastic.env.control.ExecCmdByGroup('${env.envName}', session, "storage", toJSON([{ "command": 'sed -ri \"s/${this.passtype}/' + passwd + '/g\" ${this.config}' }]), false, false, "root");
       return resp;
     nodeid: ${this.id}
-    

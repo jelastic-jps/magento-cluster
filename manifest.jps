@@ -126,8 +126,7 @@ onInstall:
 
 - log: Downloading, Unpacking, Installation and Patching Magento
 - cmd[storage]:
-  - rm -rf /data/* && wget -qO- '${globals.PATH}/releases/${settings.magento_version}' | tar xz -C /data/
-  - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O /data/pub/varnish-probe.php
+  - rm -rf /data/* && wget -qO- '${globals.PATH}/releases/${settings.magento_version}' | tar xz -C /data/  
   - chown 700:700 -Rh /data/
 
 - if (/Magento-CE-1.9/.test("${settings.magento_version}")):
@@ -137,14 +136,16 @@ onInstall:
     - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg19.conf -O /etc/nginx/conf.d/site-default.conf
     - setupCP
     - cmd[${nodes.cp.first.id}]:
-        wget ${globals.PATH}/scripts/setupMG19.sh -O /tmp/setupMG19.sh && bash -x /tmp/setupMG19.sh
-        ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
-        ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
+        - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/varnish-probe.php
+        - wget ${globals.PATH}/scripts/setupMG19.sh -O /tmp/setupMG19.sh && bash -x /tmp/setupMG19.sh
+          ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
+          ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
 
 - if (/Magento-CE-2/.test("${settings.magento_version}")):
     - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf
     - setupCP
     - cmd[${nodes.cp.first.id}]:
+        - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/pub/varnish-probe.php
         - wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh
           ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
           ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
@@ -194,6 +195,7 @@ actions:
         id: ${nodes.nosqldb.first.id}
         passtype: RD_SESSION_PASS
         config: ${this.config}
+
     - setupRDconfig:
         id: ${nodes.nosqldb.last.id}
         passtype: RD_CACHE_PASS

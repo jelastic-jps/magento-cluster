@@ -59,7 +59,7 @@ nodes:
       sourcePath: "/data"
       sourceNodeGroup: storage
   displayName: AppServer
-- nodeType: mysql5
+- nodeType: mysql
   count: 2
   cloudlets: 8
   nodeGroup: sqldb

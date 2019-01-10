@@ -1,4 +1,3 @@
----
 jpsType: install
 jpsVersion: '1.4'
 homepage: https://github.com/jelastic-jps/magento-cluster/tree/master
@@ -9,10 +8,8 @@ description:
   short: Auto-scalable and highly-available Magento cluster with load balancing, data
     replication, content caching and user session storage.
 categories:
-- apps/clustered-dbs
-- apps/popular
 - apps/clusters
-- apps/dev-and-admin-tools
+- apps/e-commerce
 logo: https://raw.githubusercontent.com/jelastic-jps/magento/master/magento21-php7-varnish-memcache-storage/images/magento.png
 name: Auto-Scalable Magento Cluster
 

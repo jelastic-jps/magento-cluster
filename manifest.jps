@@ -54,6 +54,9 @@ nodes:
       sourcePath: "/data"
       sourceNodeGroup: storage
   displayName: AppServer
+  env:
+    PHPFPM_MAX_CHILDREN: 5
+
 - nodeType: mysql
   tag: 5.7.22
   count: 2

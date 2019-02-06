@@ -19,11 +19,9 @@ settings:
     caption: Magento version
     type: list
     values:
-      Magento-CE-2.2.tar.gz: Magento CE 2.2.x
-      Magento-CE-2.1.tar.gz: Magento CE 2.1.x
-      Magento-CE-2.0.tar.gz: Magento CE 2.0.x
-      Magento-CE-1.9.3.tar.gz: Magento CE 1.9.3.x
-    default: Magento-CE-2.2.tar.gz
+      Magento-CE-2.3.0.tar.bz2: Magento CE 2.3.x
+      Magento-CE-1.9.4.tar.bz2: Magento CE 1.9.4.x
+    default: Magento-CE-2.3.0.tar.bz2
 
 globals:
   PATH: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master
@@ -46,9 +44,9 @@ success: 'Below you will find your admin panel URL, username and password.</br><
 ssl: false
 nodes:
 - nodeType: nginxphp-dockerized
-  tag: 1.12.2-php-7.0.27
+  tag: 1.14.2-php-7.2.14
   count: 2
-  cloudlets: 8
+  cloudlets: 16
   nodeGroup: cp
   volumeMounts:
     "/var/www/webroot/ROOT":
@@ -56,6 +54,9 @@ nodes:
       sourcePath: "/data"
       sourceNodeGroup: storage
   displayName: AppServer
+  env:
+    PHPFPM_MAX_CHILDREN: 3
+
 - nodeType: mysql
   tag: 5.7.22
   count: 2
@@ -127,7 +128,7 @@ onInstall:
 
 - log: Downloading, Unpacking, Installation and Patching Magento
 - cmd[storage]:
-  - rm -rf /data/* && wget -qO- '${globals.PATH}/releases/${settings.magento_version}' | tar xz -C /data/  
+  - rm -rf /data/* && wget -qO- '${globals.PATH}/releases/${settings.magento_version}' | tar xj -C /data/  
   - chown 700:700 -Rh /data/
 
 - if (/Magento-CE-1.9/.test("${settings.magento_version}")):
@@ -137,7 +138,7 @@ onInstall:
     - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg19.conf -O /etc/nginx/conf.d/site-default.conf
     - setupCP
     - cmd[${nodes.cp.first.id}]:
-        - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/varnish-probe.php
+        - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/health_check.php
         - wget ${globals.PATH}/scripts/setupMG19.sh -O /tmp/setupMG19.sh && bash -x /tmp/setupMG19.sh
           ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
           ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
@@ -146,7 +147,7 @@ onInstall:
     - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf
     - setupCP
     - cmd[${nodes.cp.first.id}]:
-        - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/pub/varnish-probe.php
+        - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/pub/health_check.php
         - wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh
           ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
           ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log

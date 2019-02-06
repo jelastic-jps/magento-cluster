@@ -24,7 +24,7 @@ settings:
     default: Magento-CE-2.3.0.tar.bz2
 
 globals:
-  PATH: https://raw.githubusercontent.com/sych74/magento-cluster/master
+  PATH: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master
   MAGE_ROOT: "/var/www/webroot/ROOT"
   DB_USER: jelastic-${fn.random}
   DB_PASS: "${fn.password(20)}"
@@ -55,7 +55,7 @@ nodes:
       sourceNodeGroup: storage
   displayName: AppServer
   env:
-    PHPFPM_MAX_CHILDREN: 5
+    PHPFPM_MAX_CHILDREN: 3
 
 - nodeType: mysql
   tag: 5.7.22

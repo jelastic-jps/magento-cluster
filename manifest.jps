@@ -19,9 +19,9 @@ settings:
     caption: Magento version
     type: list
     values:
-      Magento-CE-2.3.0.tar.bz2: Magento CE 2.3.x
-      Magento-CE-1.9.4.tar.bz2: Magento CE 1.9.4.x
-    default: Magento-CE-2.3.0.tar.bz2
+      https://download.jelastic.com/public.php?service=files&t=cd1bdcd50edf11ceda77836881cd35e9&download: Magento CE 2.3.x
+      https://download.jelastic.com/public.php?service=files&t=61ae85fbcfc249b4e63bd38efbb8945f&download: Magento CE 1.9.4.x
+    default: https://download.jelastic.com/public.php?service=files&t=cd1bdcd50edf11ceda77836881cd35e9&download
 
 globals:
   PATH: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master
@@ -128,10 +128,10 @@ onInstall:
 
 - log: Downloading, Unpacking, Installation and Patching Magento
 - cmd[storage]:
-  - rm -rf /data/* && wget -qO- '${globals.PATH}/releases/${settings.magento_version}' | tar xj -C /data/  
+  - rm -rf /data/* && curl -fsSL "${settings.magento_version}" | tar xj -C /data/  
   - chown 700:700 -Rh /data/
 
-- if (/Magento-CE-1.9/.test("${settings.magento_version}")):
+- if (/61ae85fbcfc249b4e63bd38efbb8945f/.test("${settings.magento_version}")):
     - cmd[storage]: wget ${globals.PATH}/configs/magento/local.xml.template -O /data/app/etc/local.xml.template
     - setupRDConnect:
         config: /data/app/etc/local.xml.template
@@ -143,7 +143,7 @@ onInstall:
           ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
           ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
 
-- if (/Magento-CE-2/.test("${settings.magento_version}")):
+- if (/cd1bdcd50edf11ceda77836881cd35e9/.test("${settings.magento_version}")):
     - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf
     - setupCP
     - cmd[${nodes.cp.first.id}]:

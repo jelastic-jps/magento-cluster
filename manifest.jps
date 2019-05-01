@@ -164,7 +164,7 @@ actions:
   - cmd[cp]: |-
       wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf
       wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini
-      sudo /etc/init.d/nginx restart
+      sudo /etc/init.d/nginx restart &>> /var/log/run.log
 
   setEnvs:
   - forEach(i:nodes.sqldb):
@@ -189,7 +189,7 @@ actions:
   - forEach(nodes.cp):
       cmd[${this.filter}]:
         - jem balancer addCommonHost -h ${@i.intIP}
-        - sudo service varnish reload
+        - sudo service varnish reload &>> /var/log/run.log
       user: root
 
   setupRDConnect:

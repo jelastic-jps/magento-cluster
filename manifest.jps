@@ -70,6 +70,7 @@ nodes:
   nodeGroup: storage
   displayName: Storage
 - nodeType: varnish-dockerized
+  tag: 5.2.1
   cloudlets: 8
   nodeGroup: bl
   displayName: Balancer

@@ -58,7 +58,7 @@ nodes:
     PHPFPM_MAX_CHILDREN: 3
 
 - nodeType: mariadb-dockerized
-  tag: 10.2.15
+  tag: 10.3.16
   count: 2
   cloudlets: 8
   nodeGroup: sqldb

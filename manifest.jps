@@ -57,8 +57,8 @@ nodes:
   env:
     PHPFPM_MAX_CHILDREN: 3
 
-- nodeType: mysql
-  tag: 5.7.22
+- nodeType: mariadb-dockerized
+  tag: 10.2.15
   count: 2
   cloudlets: 8
   nodeGroup: sqldb

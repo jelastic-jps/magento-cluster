@@ -42,6 +42,7 @@ success: 'Below you will find your admin panel URL, username and password.</br><
   in our <a href=''http://docs.jelastic.com/custom-domains'' target=''_blank''>documentation</a>'
 
 ssl: false
+skipNodeEmails: true
 nodes:
 - nodeType: nginxphp-dockerized
   tag: 1.14.2-php-7.2.14

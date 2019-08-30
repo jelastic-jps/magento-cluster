@@ -42,6 +42,7 @@ success: 'Below you will find your admin panel URL, username and password.</br><
   in our <a href=''http://docs.jelastic.com/custom-domains'' target=''_blank''>documentation</a>'
 
 ssl: false
+skipNodeEmails: true
 nodes:
 - nodeType: nginxphp-dockerized
   tag: 1.14.2-php-7.2.14
@@ -57,8 +58,8 @@ nodes:
   env:
     PHPFPM_MAX_CHILDREN: 3
 
-- nodeType: mysql
-  tag: 5.7.22
+- nodeType: mariadb-dockerized
+  tag: 10.3.16
   count: 2
   cloudlets: 8
   nodeGroup: sqldb

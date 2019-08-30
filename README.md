@@ -4,7 +4,7 @@ Magento, PHP based eCommerce platform, is packaged as an advanced highly reliabl
 
 - **Varnish** load balancer is supplemented with **NGINX** server as HTTPS proxy
 - **Scalable NGINX PHP** application servers with preconfigured [automatic horizontal scaling](https://docs.jelastic.com/automatic-horizontal-scaling) to handle load spikes
-- [**MySQL DB Cluster**](https://github.com/jelastic-jps/mysql-cluster) with asynchronous master-slave replication to ensure high availability, fault tolerance and data security
+- [**MariaDB Cluster**](https://github.com/jelastic-jps/mysql-cluster) with asynchronous master-slave replication to ensure high availability, fault tolerance and data security
 - **Redis Sessions** node to retain user session parameters
 - **Redis Cache** node for content cache storing
 - [**Elastic Data Storage**](https://docs.jelastic.com/data-storage-container) node for media files

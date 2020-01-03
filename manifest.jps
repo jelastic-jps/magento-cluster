@@ -24,7 +24,7 @@ settings:
     default: https://download.jelastic.com/public.php?service=files&t=cd1bdcd50edf11ceda77836881cd35e9&download
 
 globals:
-  PATH: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master
+  PATH: https://raw.githubusercontent.com/sych74/magento-cluster/master
   MAGE_ROOT: "/var/www/webroot/ROOT"
   DB_USER: jelastic-${fn.random}
   DB_PASS: "${fn.password(20)}"
@@ -45,7 +45,7 @@ ssl: false
 skipNodeEmails: true
 nodes:
 - nodeType: nginxphp-dockerized
-  tag: 1.14.2-php-7.2.14
+  tag: 1.16.1-php-7.2.24
   count: 2
   cloudlets: 16
   nodeGroup: cp
@@ -59,7 +59,7 @@ nodes:
     PHPFPM_MAX_CHILDREN: 3
 
 - nodeType: mariadb-dockerized
-  tag: 10.3.16
+  tag: 10.3.20
   count: 2
   cloudlets: 8
   nodeGroup: sqldb

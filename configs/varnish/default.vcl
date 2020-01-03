@@ -10,6 +10,7 @@ acl purge {
 }
 
 sub vcl_recv {
+    set req.backend_hint = myclust.backend();
     if (req.method == "PURGE") {
         if (client.ip !~ purge) {
             return (synth(405, "Method not allowed"));

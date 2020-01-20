@@ -25,7 +25,7 @@ settings:
     default: https://download.jelastic.com/public.php?service=files&t=cd1bdcd50edf11ceda77836881cd35e9&download
 
 globals:
-  PATH: https://raw.githubusercontent.com/sych74/magento-cluster/master
+  PATH: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master
   MAGE_ROOT: "/var/www/webroot/ROOT"
   DB_USER: jelastic-${fn.random}
   DB_PASS: "${fn.password(20)}"

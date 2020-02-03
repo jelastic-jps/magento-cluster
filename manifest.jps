@@ -20,7 +20,7 @@ settings:
     caption: Magento version
     type: list
     values:
-      https://download.jelastic.com/public.php?service=files&t=cd1bdcd50edf11ceda77836881cd35e9&download: Magento CE 2.3.x
+      https://download.jelastic.com/public.php?service=files&t=9eb5418967ddb3bcf4b575e467d33ea0&download: Magento CE 2.3.x
       https://download.jelastic.com/public.php?service=files&t=61ae85fbcfc249b4e63bd38efbb8945f&download: Magento CE 1.9.4.x
     default: https://download.jelastic.com/public.php?service=files&t=cd1bdcd50edf11ceda77836881cd35e9&download
 
@@ -146,7 +146,7 @@ onInstall:
           ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
           ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
 
-- if (/cd1bdcd50edf11ceda77836881cd35e9/.test("${settings.magento_version}")):
+- if (/9eb5418967ddb3bcf4b575e467d33ea0/.test("${settings.magento_version}")):
     - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf
     - setupCP
     - cmd[${nodes.cp.first.id}]:

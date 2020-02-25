@@ -1,4 +1,3 @@
-var wpbfp = '${settings.wp_protect}' == 'true' ? "THROTTLE" : "OFF";
 
 var resp = {
   result: 0,
@@ -16,7 +15,7 @@ var resp = {
 if (${settings.galera:false}) {
   resp.nodes.push({
     nodeType: "mariadb-dockerized",
-    tag: "10.4.12",
+    tag: "10.3.22",
     count: 3,
     flexibleCloudlets: ${settings.db_flexibleCloudlets:8},
     fixedCloudlets: ${settings.db_fixedCloudlets:1},
@@ -35,7 +34,7 @@ if (${settings.galera:false}) {
 if (!${settings.galera:false}) {
   resp.nodes.push({
     nodeType: "mariadb-dockerized",
-    tag: "10.4.12",
+    tag: "10.3.22",
     count: 2,
     flexibleCloudlets: ${settings.db_flexibleCloudlets:8},
     fixedCloudlets: ${settings.db_fixedCloudlets:1},
@@ -58,12 +57,11 @@ if (${settings.ls-addon:false}) {
     scalingMode: "STATEFUL",
     displayName: "Load balancer",
     env: {
-      WP_PROTECT: wpbfp,
-      WP_PROTECT_LIMIT: 100
+      WP_PROTECT: OFF
     }
   }, {
     nodeType: "litespeedphp",
-    tag: "5.4.4-php-7.4.1",
+    engine: "php7.3",
     count: ${settings.cp_count:2},
     flexibleCloudlets: ${settings.cp_flexibleCloudlets:16},
     fixedCloudlets: ${settings.cp_fixedCloudlets:1},
@@ -103,7 +101,7 @@ if (!${settings.ls-addon:false}) {
     displayName: "Load balancer"
   }, {
     nodeType: "nginxphp-dockerized",
-    tag: "1.16.1-php-7.4.1",
+    engine: "php7.3",
     count: ${settings.cp_count:2},
     flexibleCloudlets: ${settings.cp_flexibleCloudlets:8},                  
     fixedCloudlets: ${settings.cp_fixedCloudlets:1},
@@ -116,24 +114,12 @@ if (!${settings.ls-addon:false}) {
       REDIS_ENABLED: "true"
     },
     volumes: [
-      "/var/www/webroot/ROOT",
-      "/var/www/webroot/.cache",
-      "/etc/nginx/conf.d/SITES_ENABLED"
+      "/var/www/webroot/ROOT"
     ],  
     volumeMounts: {
       "/var/www/webroot/ROOT": {
         readOnly: "false",
         sourcePath: "/data/ROOT",
-        sourceNodeGroup: "storage"
-      },
-      "/var/www/webroot/.cache": {
-        readOnly: "false",
-        sourcePath: "/data/.cache",
-        sourceNodeGroup: "storage"
-      },
-      "/etc/nginx/conf.d/SITES_ENABLED": {
-        readOnly: "false",
-        sourcePath: "/data/APP_CONFIGS",
         sourceNodeGroup: "storage"
       }
     }

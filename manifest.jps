@@ -13,7 +13,7 @@ categories:
 - apps/e-commerce
 name: Auto-Scalable Magento Cluster
 
-baseUrl: https://raw.githubusercontent.com/sych74/magento/litespeed
+baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/v2.0.0
 
 onBeforeInit: /scripts/settings.js?_r=${fn.random}
 onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}

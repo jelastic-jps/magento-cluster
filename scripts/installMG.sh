@@ -20,7 +20,8 @@ rm -rf ${MG_PATH}/*
 VERSION=$(curl --silent "https://api.github.com/repos/magento/magento2/releases" | grep tag_name | sed -E 's/.*"([^"]+)".*/\1/' | sort -r | head -n 1)
 $WGET https://github.com/magento/magento2/archive/${VERSION}.tar.gz -O /tmp/${VERSION}.tgz
 $TAR -C "/tmp" -xpzf "/tmp/${VERSION}.tgz";
-$RSYNC -au --remove-source-files /tmp/magento2-${VERSION}/ ${MG_PATH}/
+mv {/tmp/magento2-${VERSION}/*,/tmp/magento2-${VERSION}/.*} /var/www/webroot/ROOT/
+#$RSYNC -au --remove-source-files /tmp/magento2-${VERSION}/ ${MG_PATH}/
 $COMPOSER update --working-dir=${MG_PATH}
 $MYSQL -u${DB_USER} -p${DB_PASS} -h ${DB_HOST} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
 

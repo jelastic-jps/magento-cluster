@@ -57,7 +57,7 @@ if (${settings.ls-addon:false}) {
     scalingMode: "STATEFUL",
     displayName: "Load balancer",
     env: {
-      WP_PROTECT: OFF
+      WP_PROTECT: "OFF"
     }
   }, {
     nodeType: "litespeedphp",

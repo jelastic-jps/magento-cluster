@@ -1,16 +1,19 @@
 #!/bin/bash -e
 
 purge=false;
+litemage=false;
 pgcache=false;
 objectcache=false;
 edgeportCDN=false;
-wpmu=false;
 DOMAIN=false;
+perfomance=false;
 
 SERVER_WEBROOT=/var/www/webroot/ROOT
+GITHUB_LITEMAGE_SOURCE=litespeedtech/magento2-LiteSpeed_LiteMage
 
 ARGUMENT_LIST=(
     "purge"
+    "litemage"
     "pgcache"
     "objectcache"
     "edgeportCDN"
@@ -24,6 +27,11 @@ ARGUMENT_LIST=(
 )
 
 MG="php ${SERVER_WEBROOT}/bin/magento"
+WGET=`which wget`
+SED=`which sed`
+RSYNC=`which rsync`
+TAR=`which tar`
+COMPOSER=`which composer`
 
 # read arguments
 opts=$(getopt \
@@ -38,6 +46,11 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --purge)
             purge=$2
+            shift 2
+            ;;
+
+        --litemage)
+            litemage=$2
             shift 2
             ;;
 
@@ -113,6 +126,18 @@ chmod +x ~/bin/checkCdnStatus.sh
 PROTOCOL=$(${MG} config:show web/unsecure/base_url | cut -d':' -f1)
 crontab -l | { cat; echo "* * * * * /bin/bash ~/bin/checkCdnStatus.sh ${PROTOCOL}://${CDN_URL}/"; } | crontab
 }
+
+
+if [ $litemage == 'true' ] ; then
+  VERSION=$(curl --silent "https://api.github.com/repos/${GITHUB_LITEMAGE_SOURCE}/releases" | grep tag_name | sed -E 's/.*"([^"]+)".*/\1/' | sort -r | head -n 1)
+  SHORT_VERSION=$(echo ${VERSION} | sed 's/v//')
+  $WGET https://github.com/${GITHUB_LITEMAGE_SOURCE}/archive/${VERSION}.tar.gz -O /tmp/${VERSION}.tgz
+  $TAR -C "/tmp" -xpzf "/tmp/${VERSION}.tgz";
+  [ -d ${SERVER_WEBROOT}/app/code/Litespeed/Litemage ] && mkdir -p ${SERVER_WEBROOT}/app/code/Litespeed/Litemage
+  $RSYNC -au --remove-source-files /tmp/magento2-LiteSpeed_LiteMage-${SHORT_VERSION}/ ${SERVER_WEBROOT}/app/code/Litespeed/Litemage/
+  ${MG} module:enable Litespeed_Litemage &>> /var/log/run.log
+  ${MG} config:set system/full_page_cache/caching_application LITEMAGE &>> /var/log/run.log
+fi
 
 
 if [ $perfomance == 'true' ] ; then

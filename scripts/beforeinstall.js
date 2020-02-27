@@ -101,7 +101,7 @@ if (!${settings.ls-addon:false}) {
     displayName: "Load balancer"
   }, {
     nodeType: "nginxphp-dockerized",
-    engine: "php7.3",
+    tag: "1.16.1-php-7.3.14",
     count: ${settings.cp_count:2},
     flexibleCloudlets: ${settings.cp_flexibleCloudlets:8},                  
     fixedCloudlets: ${settings.cp_fixedCloudlets:1},

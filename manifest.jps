@@ -177,7 +177,10 @@ actions:
         targetGroup: bl
         targetNodes: ${this.nodeId}
         optimization: magento
-                
+    - cmd[bl]: |-
+        wget ${baseUrl}/scripts/LSADC.sh?_r=${fn.random} -O ~/LSADC.sh &>> /var/log/run.log
+        bash ~/LSADC.sh &>> /var/log/run.log
+                        
 success:
   email: success/email/success-${globals.STACK}-${globals.EMAIL}.md?_r=${fn.random}
   text: success/text/${globals.SUCCESS}.md?_r=${fn.random}

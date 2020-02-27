@@ -170,13 +170,7 @@ actions:
         optimization: magento
 
   setupLB:
-    - log: Load Balancer Optimization
-    - install: https://raw.githubusercontent.com/jelastic/templates/master/config.jps?_r=${fn.random}
-      settings:
-        targetGroup: bl
-        targetNodes: ${this.nodeId}
-        optimization: magento
-    - cmd[bl]: |-
+     - cmd[bl]: |-
         wget ${baseUrl}/scripts/LSADC.sh?_r=${fn.random} -O ~/LSADC.sh &>> /var/log/run.log
         bash ~/LSADC.sh &>> /var/log/run.log
                         

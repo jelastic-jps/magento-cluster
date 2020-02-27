@@ -160,7 +160,6 @@ actions:
         mg_admin_pass: ${globals.MG_ADMIN_PASS}
         mg_url: ${globals.PROTOCOL}://${globals.DOMAIN}/
         user_email: ${user.email}
-        targetNodeID: ${nodes.cp.master.id}
 
   setupCP:
     - log: App Server Optimization

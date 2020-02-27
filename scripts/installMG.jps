@@ -11,21 +11,25 @@ globals:
   DB_PASS: "${settings.db_pass}"
   USER_EMAIL: "${settings.user_email}"
   MG_URL: "${settings.mg_url}"
-  TARGET_NODE_ID: "${settings.targetNodeID}"
 
 onInstall:
   - installWP
+  - if ("${nodes.cp.master.nodeType}" == "litespeedphp"): setupMGForLS
+  - if ("${nodes.cp.master.nodeType}" == "nginxphp"): setupMGForNG
 
 actions:
   installWP:
-    - cmd[${globals.TARGET_NODE_ID}]: |-
+    - cmd[${nodes.cp.master.id}]: |-
         [ ! -d $HOME/bin ] && mkdir $HOME/bin
         echo "export PATH=$PATH:$HOME/bin/" >> $HOME/.bash_profile
         wget ${baseUrl}/installMG.sh?_r=${fn.random} -O ~/bin/installMG.sh &>> /var/log/run.log
         wget ${baseUrl}/setupMG.sh?_r=${fn.random} -O ~/bin/setupMG.sh &>> /var/log/run.log
         bash ~/bin/installMG.sh ${globals.DB_USER} ${globals.DB_PASS} ${globals.DB_HOST} ${globals.DB_NAME} ${globals.MG_ADMIN_PASS} ${globals.MG_URL} ${globals.USER_EMAIL} &>> /var/log/run.log
   
-  setupMG:
-    - cmd[${globals.TARGET_NODE_ID}]: |-
-        wget ${baseUrl}../scripts/setupWP.sh?_r=${fn.random} -O ~/bin/setupWP.sh &>> /var/log/run.log
-        bash ~/bin/setupWP.sh --pgcache true --objectcache true --REDIS_HOST 127.0.0.1
+  setupMGForLS:
+    - cmd[${nodes.cp.master.id}]: |-
+        bash ~/bin/setupWP.sh --litemage true &>> /var/log/run.log
+
+  setupMGForNG:
+    - cmd[${nodes.cp.master.id}]: |-
+        echo NGINX

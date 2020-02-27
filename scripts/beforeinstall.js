@@ -91,7 +91,7 @@ if (${settings.ls-addon:false}) {
 if (!${settings.ls-addon:false}) {
   resp.nodes.push({
     nodeType: "varnish",
-    tag: "6.3.2",
+    tag: "5.2.1",
     count: 1,
     flexibleCloudlets: ${settings.bl_flexibleCloudlets:8},
     fixedCloudlets: ${settings.bl_fixedCloudlets:1},

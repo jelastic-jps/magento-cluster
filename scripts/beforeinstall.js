@@ -90,8 +90,8 @@ if (${settings.ls-addon:false}) {
 
 if (!${settings.ls-addon:false}) {
   resp.nodes.push({
-    nodeType: "nginx-dockerized",
-    tag: "1.16.1",
+    nodeType: "varnish",
+    tag: "6.3.2",
     count: 1,
     flexibleCloudlets: ${settings.bl_flexibleCloudlets:8},
     fixedCloudlets: ${settings.bl_fixedCloudlets:1},

@@ -170,9 +170,10 @@ actions:
         optimization: magento
 
   setupLB:
-     - cmd[bl]: |-
-        wget ${baseUrl}/scripts/LSADC.sh?_r=${fn.random} -O ~/LSADC.sh &>> /var/log/run.log
-        bash ~/LSADC.sh &>> /var/log/run.log
+    - if ("${nodes.bl.master.nodeType}" == "litespeedadc"):
+      - cmd[bl]: |-
+          wget ${baseUrl}/scripts/LSADC.sh?_r=${fn.random} -O ~/LSADC.sh &>> /var/log/run.log
+          bash ~/LSADC.sh &>> /var/log/run.log
                         
 success:
   email: success/email/success-${globals.STACK}-${globals.EMAIL}.md?_r=${fn.random}

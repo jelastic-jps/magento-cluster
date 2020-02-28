@@ -51,16 +51,6 @@ onAfterInstallAddon [nodeGroup:cp, id:cdn]:
 onAfterBindSSL: setupDomain
 
 onInstall:
-
-  - script: |
-        return {
-          result:0,
-          ssl: jelastic.billing.account.GetQuotas('environment.jelasticssl.enabled').array[0].value
-        }
-
-  - if (${response.ssl}):
-      setGlobals:
-        PROTOCOL: https
         
   - script: ${baseUrl}/scripts/idna.js
   - setGlobals:

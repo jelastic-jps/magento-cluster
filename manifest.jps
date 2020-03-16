@@ -12,6 +12,7 @@ categories:
 - apps/clusters
 - apps/e-commerce
 name: Auto-Scalable Magento Cluster
+logo: https://raw.githubusercontent.com/jelastic-jps/magento/master/magento21-php7-varnish-memcache-storage/images/magento.png
 
 baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/v2.0.0
 

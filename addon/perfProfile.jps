@@ -1,0 +1,34 @@
+jpsType: update
+jpsVersion: '1.1'
+id: magento-perfomance-testing
+name: Generate data for performance testing
+description: Generate data for performance testing
+baseUrl: 
+
+settings:
+  fields:
+    - caption: Profile
+      type: list
+      name: profile
+      default: mysql
+      required: true
+      values:        
+        - value: small
+          caption: Small Profile
+          tooltip: "<h3>Small Profile</h3>Small Profile."
+
+        - value: medium
+          caption: Medium Profile
+          tooltip: "<h3>Medium Profile</h3>Medium Profile."
+          
+        - value: large
+          caption: Large Profile
+          tooltip: "<h3>Large Profile</h3>Large Profile."
+          
+        - value: extra_large
+          caption: Extra large Profile
+          tooltip: "<h3>Extra large Profile</h3>Extra large Profile."
+
+
+onInstall:
+  cmd[${nodes.cp.master.id}]: bash ~/bin/setupMG.sh --perfomance true --PERF_PROFILE ${settings.profile} &>> /var/log/run.log

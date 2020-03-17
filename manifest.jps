@@ -161,6 +161,19 @@ actions:
         optimization: magento
 
   setupLB:
+    - log: Load Balancer Optimization
+    - install: https://raw.githubusercontent.com/jelastic/templates/master/config.jps?_r=${fn.random}
+      settings:
+        targetGroup: bl
+        targetNodes: ${this.nodeId}
+        optimization: magento
+  
+    - if ("${nodes.bl.master.nodeType}" == "varnish"):
+      - forEach(nodes.cp):
+          cmd[${this.nodeId}]:
+            - sudo jem balancer addCommonHost -h ${@i.intIP}
+            - sudo service varnish reload &>> /var/log/run.log
+   
     - if ("${nodes.bl.master.nodeType}" == "litespeedadc"):
       - cmd[bl]: |-
           wget ${baseUrl}/scripts/LSADC.sh?_r=${fn.random} -O ~/LSADC.sh &>> /var/log/run.log;

@@ -10,7 +10,7 @@ settings:
     - caption: Profile
       type: list
       name: profile
-      default: mysql
+      default: small
       required: true
       values:        
         - value: small
@@ -31,4 +31,4 @@ settings:
 
 
 onInstall:
-  cmd[${nodes.cp.master.id}]: bash ~/bin/setupMG.sh --perfomance true --PERF_PROFILE ${settings.profile} &>> /var/log/run.log
+  cmd[${nodes.cp.master.id}]: bash ~/bin/setupMG.sh --perfomance true --PERF_PROFILE ${settings.profile}.xml &>> /var/log/run.log

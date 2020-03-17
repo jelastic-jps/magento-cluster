@@ -16,7 +16,9 @@ ARGUMENT_LIST=(
     "litemage"
     "pgcache"
     "objectcache"
+    "perfomance"
     "edgeportCDN"
+    "PERF_PROFILE"
     "REDIS_HOST"
     "REDIS_PASS"
     "CDN_URL"
@@ -127,7 +129,6 @@ PROTOCOL=$(${MG} config:show web/unsecure/base_url | cut -d':' -f1)
 crontab -l | { cat; echo "* * * * * /bin/bash ~/bin/checkCdnStatus.sh ${PROTOCOL}://${CDN_URL}/"; } | crontab
 }
 
-
 if [ $litemage == 'true' ] ; then
   VERSION=$(curl --silent "https://api.github.com/repos/${GITHUB_LITEMAGE_SOURCE}/releases" | grep tag_name | sed -E 's/.*"([^"]+)".*/\1/' | sort -r | head -n 1)
   SHORT_VERSION=$(echo ${VERSION} | sed 's/v//')
@@ -142,7 +143,6 @@ fi
 
 if [ $perfomance == 'true' ] ; then
    ${MG} setup:performance:generate-fixtures -s ${SERVER_WEBROOT}/setup/performance-toolkit/profiles/ce/${PERF_PROFILE} &>> /var/log/run.log
-   ${MG} indexer:reindex &>> /var/log/run.log
 fi
 
 if [ $edgeportCDN == 'true' ] ; then

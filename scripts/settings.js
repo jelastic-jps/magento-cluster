@@ -10,6 +10,7 @@ var cdnText = "Install Lightning-Fast Premium CDN with 130+ PoPs",
     lsText = "Install LiteSpeed High-Performance Web Server";
     dbText = "Install MariaDB Galera Cluster";
     wafText = "Web Application Firewall";
+    glusterText = "Distributed Shared Storage based on GlusterFS";
 var group = jelastic.billing.account.GetAccount(appid, session);
 var isCDN = jelastic.dev.apps.GetApp(cdnAppid);
 var isLS = jelastic.dev.apps.GetApp(lsAppid);
@@ -178,23 +179,6 @@ if (group.groupType == 'trial') {
         });
     }
 
-    settings.fields.push({
-        type: "checkbox",
-        name: "galera",
-        caption: dbText,
-        value: true,
-        tooltip: "<h3>Requirements for All Tables:</h3> * run on InnoDB storage engine <p>* have a primary key</p>Read more about <a href='https://mariadb.com/kb/en/library/mariadb-galera-cluster-known-limitations/'>limitations</a>"
-    });
-   
-    if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {
-        settings.fields.push({
-            type: "checkbox",
-            name: "cdn-addon",
-            caption: cdnText,
-            value: true
-        });
-    }
-
     var resp = jelastic.billing.account.GetQuotas('environment.externalip.enabled');
     if (resp.result == 0 && resp.array[0].value) {
         fields.push({
@@ -204,6 +188,30 @@ if (group.groupType == 'trial') {
             value: true
         });
     }
+    
+    if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {
+        settings.fields.push({
+            type: "checkbox",
+            name: "cdn-addon",
+            caption: cdnText,
+            value: true
+        });
+    }
+    
+    settings.fields.push({
+        type: "checkbox",
+        name: "galera",
+        caption: dbText,
+        value: true,
+        tooltip: "<h3>Requirements for All Tables:</h3> * run on InnoDB storage engine <p>* have a primary key</p>Read more about <a href='https://mariadb.com/kb/en/library/mariadb-galera-cluster-known-limitations/'>limitations</a>"
+    });
+    
+    settings.fields.push({
+        type: "checkbox",
+        name: "glusterfs",
+        caption: glusterText,
+        value: false
+    });       
 }
 
 if (quotaText) {

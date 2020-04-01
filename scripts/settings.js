@@ -47,6 +47,5 @@ if (quotaText) {
 
 return {
     result: 0,
-    settings: settings,
-    field: fields["le-addon"].disabled
+    settings: settings
 };

@@ -33,23 +33,10 @@ var fields = {};
 for (var i = 0, field; field = jps.settings.fields[i]; i++)
   fields[field.name] = field;
 
-if (group.groupType == 'trial') {
-
-} else {
-
-  if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) {
-      
-  }
-
-  var resp = jelastic.billing.account.GetQuotas('environment.externalip.enabled');
-  if (resp.result == 0 && resp.array[0].value) {
-    fields["le-addon"].hidden = true;
-    fields["le-addon"].disabled = true;
-  }
-    
-  if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {
-  }
-    
+var resp = jelastic.billing.account.GetQuotas('environment.externalip.enabled');
+if (resp.result == 0 && resp.array[0].value) {
+  fields["le-addon"].hidden = true;
+  fields["le-addon"].disabled = true;
 }
 
 

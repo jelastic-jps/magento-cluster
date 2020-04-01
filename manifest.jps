@@ -42,7 +42,7 @@ settings:
             value: true
             disabled: false
             tooltip: "Protect web sites with <a href='https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:waf'>LiteSpeed built-in WAF</a> based on Free ModSecurity Rules from Comodo"
-         false:
+        false:
           - caption: Web Application Firewall
             type: checkbox
             name: waf

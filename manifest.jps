@@ -21,6 +21,47 @@ onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}
 nodes: definedInOnBeforeInstall
 skipNodeEmails: true
 
+settings:
+  fields:
+    - caption: Advanced Features
+      type: displayfield
+      name: displayfield
+      markup:
+ 
+    - caption: Install LiteSpeed High-Performance Web Server
+      type: checkbox
+      name: ls-addon
+      value: true
+      disabled: false
+      tooltip: "If this option is disabled, the cluster will be installed using NGINX load balancer and application servers"
+      
+    - caption: Web Application Firewall
+      type: checkbox
+      name: waf
+      value: true
+      disabled: false
+      require: ls-addon
+      tooltip: "Protect web sites with <a href='https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:waf'>LiteSpeed built-in WAF</a> based on Free ModSecurity Rules from Comodo"
+      
+    - caption: Install MariaDB Galera Cluster
+      type: checkbox
+      name: galera
+      value: true
+      disabled: false
+      tooltip: "<h3>Requirements for All Tables:</h3> * run on InnoDB storage engine <p>* have a primary key</p>Read more about <a href='https://mariadb.com/kb/en/library/mariadb-galera-cluster-known-limitations/'>limitations</a>"
+      
+    - caption: Install Let's Encrypt SSL with Auto-Renewal
+      type: checkbox
+      name: le-addon
+      value: true
+      disabled: false
+
+    - caption: Install Lightning-Fast Premium CDN with 130+ PoPs
+      type: checkbox
+      name: cdn-addon
+      value: true
+      disabled: false
+
 globals:
   DB_USER: jelastic-${fn.random}
   DB_PASS: ${fn.password(10)}

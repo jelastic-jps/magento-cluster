@@ -86,6 +86,18 @@ onAfterRedeployContainer[cp]:
 onAfterRedeployContainer[bl]:
  - setupLB:
       nodeId: bl
+      
+onAfterClone: 
+  - install: ${baseUrl}/scripts/setupDomain.jps?_r=${fn.random}
+    envName: ${event.response.env.envName}
+    settings:
+      domain: ${globals.PROTOCOL}://${event.response.env.domain}
+
+onAfterMigrate: 
+  - install: ${baseUrl}/scripts/setupDomain.jps?_r=${fn.random}
+    envName: ${event.response.env.envName}
+    settings:
+      domain: ${globals.PROTOCOL}://${event.response.env.domain}
 
 onAfterScaleOut[nodeGroup:cp]:
   forEach(event.response.nodes):
@@ -167,11 +179,9 @@ actions:
       settings:
         customDomains: ${globals.DOMAIN}
 
-  setupDomain:
+  setup-LE-Domain:
     - cmd[cp]: source /opt/letsencrypt/settings && echo $domain
-    - set:
-        domain: ${response.out}
-    - cmd[${nodes.cp.master.id}]: bash ~/bin/setupMG.sh --DOMAIN https://${this.domain}
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/setupMG.sh --DOMAIN https://${response.out}
 
   install-edgeport-CDN:
     - install: https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}
@@ -182,16 +192,14 @@ actions:
     - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
     - setGlobals:
         CDN_URL: ${globals.PROTOCOL}://${env.envName}-${response.response.partnerCode}.cdn.edgeport.net/
-        CDN: ${env.envName}-${response.response.partnerCode}.cdn.edgeport.net
         SUCCESS: success-cdn
         EMAIL: cdn
     - cmd[${nodes.cp.master.id}]: |-
-        wget ${baseUrl}/scripts/setupMG.sh?_r=${fn.random} -O ~/bin/setupMG.sh &>> /var/log/run.log
         wget ${baseUrl}/scripts/checkCdnContent.txt?_r=${fn.random} -O ~/bin/checkCdnContent.txt &>> /var/log/run.log
-        bash ~/bin/setupMG.sh --edgeportCDN true --CDN_URL ${globals.CDN}
+        bash ~/bin/setupMG.sh --edgeportCDN true --CDN_URL ${globals.CDN_URL} &>> /var/log/run.log
 
   install-magento:
-    - install: ${baseUrl}/scripts/installMG.jps
+    - install: /scripts/installMG.jps
       settings:
         db_host: ${globals.DB_HOST}
         db_user: ${globals.DB_USER}

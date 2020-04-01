@@ -29,7 +29,10 @@ for (var i = 0, n = quota.length; i < n; i++) {
 }
 
 var settings = jps.settings;
-var fields = settings.fields;
+var fields = {};
+for (var i = 0, field; field = jps.settings.fields[i]; i++)
+  fields[field.name] = field;
+
 if (group.groupType == 'trial') {
 
 } else {
@@ -40,9 +43,8 @@ if (group.groupType == 'trial') {
 
   var resp = jelastic.billing.account.GetQuotas('environment.externalip.enabled');
   if (resp.result == 0 && resp.array[0].value) {
-    for (var i = 0; i < fields.length; i++) {
-      if (fields[i].name == "le-addon") { fields[i].hidden = true; fields[i].disabled = true; }
-    }
+    fields["le-addon"].hidden = true;
+    fields["le-addon"].disabled = true;
   }
     
   if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {

@@ -57,10 +57,8 @@ if (group.groupType == 'trial') {
   fields["displayfield"].hideLabel = true;
     
 } else {
-
+  
   if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) {  
-    fields["ls-addon"].disabled = false;
-    fields["ls-addon"].hidden = false;
     fields["ls-addon"].value = true;
   } else {
     fields["ls-addon"].hidden = true;
@@ -68,9 +66,7 @@ if (group.groupType == 'trial') {
   }
   
   if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {
-    fields["cdn-addon"].disabled = false;
-    fields["cdn-addon"].hidden = false;
-    fields["cdn-addon"].value = true;
+     fields["cdn-addon"].value = true;
   } else {
     fields["cdn-addon"].hidden = true;
     fields["cdn-addon"].value = false;

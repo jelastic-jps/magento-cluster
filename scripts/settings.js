@@ -33,8 +33,8 @@ var fields = {};
 for (var i = 0, field; field = jps.settings.fields[i]; i++)
   fields[field.name] = field;
 
-  fields["le-addon"].hidden = true;
-  fields["le-addon"].disabled = true;
+fields["le-addon"].hidden = true;
+fields["le-addon"].disabled = true;
 
 
 

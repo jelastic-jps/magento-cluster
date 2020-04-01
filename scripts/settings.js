@@ -77,5 +77,6 @@ if (quotaText) {
 
 return {
     result: 0,
-    settings: settings
+    settings: settings,
+    lsresult: isLS.result
 };

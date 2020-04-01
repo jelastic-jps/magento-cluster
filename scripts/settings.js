@@ -35,12 +35,14 @@ for (var i = 0, field; field = jps.settings.fields[i]; i++)
 
 if (group.groupType == 'trial') {
 
+  if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) fields["ls-addon"].hidden = true;
   fields["ls-addon"].value = false;
   fields["ls-addon"].disabled = true;
   
   fields["le-addon"].value = false;
   fields["le-addon"].disabled = true;
 
+  if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) fields["cdn-addon"].hidden = true;
   fields["cdn-addon"].value = false;
   fields["cdn-addon"].disabled = true;
   

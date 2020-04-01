@@ -88,6 +88,5 @@ if (quotaText) {
 
 return {
     result: 0,
-    settings: settings,
-    lsresult: isLS.result
+    settings: settings
 };

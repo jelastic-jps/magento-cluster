@@ -33,9 +33,23 @@ var fields = {};
 for (var i = 0, field; field = jps.settings.fields[i]; i++)
   fields[field.name] = field;
 
-fields["le-addon"].hidden = true;
-fields["le-addon"].disabled = true;
+if (group.groupType == 'trial') {
 
+  fields["ls-addon"].value = false;
+  fields["ls-addon"].disabled = true;
+  
+  fields["le-addon"].value = false;
+  fields["le-addon"].disabled = true;
+
+  fields["cdn-addon"].value = false;
+  fields["cdn-addon"].disabled = true;
+  
+  fields["displayfield"].markup = "Not available for " + group.groupType + " account. Please upgrade your account.";
+    
+} else {
+  
+  
+}
 
 
 if (quotaText) {

@@ -60,9 +60,7 @@ if (group.groupType == 'trial') {
 } else {
   if (isLS.result != 0)
     fields["ls-addon"].hidden = true;
-    fields["waf"].hidden = true;
     fields["ls-addon"].value = false;
-    fields["waf"].value = false;
 
   if (isCDN.result != 0)
     fields["cdn-addon"].hidden = true;

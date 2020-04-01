@@ -30,22 +30,25 @@ for (var i = 0, n = quota.length; i < n; i++) {
 
 var settings = jps.settings;
 var fields = settings.fields;
-
-if (group.groupType == 'trial') {
+for (var i = 0; i < fields.length; i++) {
+  if (group.groupType == 'trial') {
     
 
-} else {
+  } else {
 
-  if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) {
+    if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) {
       
-  }
+    }
 
-  var resp = jelastic.billing.account.GetQuotas('environment.externalip.enabled');
-  
+    var resp = jelastic.billing.account.GetQuotas('environment.externalip.enabled');
+    if (resp.result == 0 && resp.array[0].value) {
+      if (fields[i].name == "le-addon") { fields[i].hidden = false; fields[i].disabled = false; }
+    }
     
-  if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {
+    if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {
+    }
+    
   }
-    
 }
 
 if (quotaText) {

@@ -41,7 +41,7 @@ if (group.groupType == 'trial') {
   var resp = jelastic.billing.account.GetQuotas('environment.externalip.enabled');
   if (resp.result == 0 && resp.array[0].value) {
     for (var i = 0; i < fields.length; i++) {
-      if (fields[i].name == "le-addon") { fields[i].hidden = false; fields[i].disabled = false; }
+      if (fields[i].name == "le-addon") { fields[i].hidden = true; fields[i].disabled = true; }
     }
   }
     

@@ -44,7 +44,6 @@ if (group.groupType == 'trial') {
     fields["ls-addon"].disabled = true;
   } else {
     fields["ls-addon"].hidden = true;
-    fields["waf"].hidden = true;
   }
   
   if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {

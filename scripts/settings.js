@@ -68,7 +68,6 @@ if (group.groupType == 'trial') {
 
 }
 
-
 if (quotaText) {
     settings.fields.push(
         {"type": "displayfield", "cls": "warning", "height": 30, "hideLabel": true, "markup": quotaText},

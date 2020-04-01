@@ -45,6 +45,8 @@ if (group.groupType == 'trial') {
   fields["cdn-addon"].disabled = true;
   
   fields["displayfield"].markup = "Not available for " + group.groupType + " account. Please upgrade your account.";
+  fields["displayfield"].cls = "warning";
+  fields["displayfield"].hideLabel = true;
     
 } else {
   

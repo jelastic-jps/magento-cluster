@@ -58,11 +58,11 @@ if (group.groupType == 'trial') {
   fields["displayfield"].hideLabel = true;
     
 } else {
-  if (isLS.result != 0)
+  if (isLS.result != 0 || isLS.result != Response.PERMISSION_DENIED)
     fields["ls-addon"].hidden = true;
     fields["ls-addon"].value = false;
 
-  if (isCDN.result != 0)
+  if (isCDN.result != 0 || isLS.result != Response.PERMISSION_DENIED)
     fields["cdn-addon"].hidden = true;
     fields["cdn-addon"].value = false;
 

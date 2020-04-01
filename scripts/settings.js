@@ -33,11 +33,9 @@ var fields = {};
 for (var i = 0, field; field = jps.settings.fields[i]; i++)
   fields[field.name] = field;
 
-var resp = jelastic.billing.account.GetQuotas('environment.externalip.enabled');
-if (resp.result == 0 && resp.array[0].value) {
   fields["le-addon"].hidden = true;
   fields["le-addon"].disabled = true;
-}
+
 
 
 if (quotaText) {

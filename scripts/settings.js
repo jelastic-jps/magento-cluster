@@ -35,19 +35,19 @@ for (var i = 0, field; field = jps.settings.fields[i]; i++)
 
 if (group.groupType == 'trial') {
 
+  fields["ls-addon"].value = false;
+  fields["waf"].value = false;
+  fields["cdn-addon"].value = false;
+  fields["le-addon"].value = false;
+  
   if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) {  
-    fields["ls-addon"].value = false;
     fields["ls-addon"].disabled = true;
   } else {
     fields["ls-addon"].hidden = true;
     fields["waf"].hidden = true;
   }
   
-  fields["le-addon"].value = false;
-  fields["le-addon"].disabled = true;
-
   if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {
-    fields["cdn-addon"].value = false;
     fields["cdn-addon"].disabled = true;
   } else {
     fields["cdn-addon"].hidden = true;
@@ -58,8 +58,16 @@ if (group.groupType == 'trial') {
   fields["displayfield"].hideLabel = true;
     
 } else {
-  
-  
+  if (isLS.result != 0)
+    fields["ls-addon"].hidden = true;
+    fields["waf"].hidden = true;
+    fields["ls-addon"].value = false;
+    fields["waf"].value = false;
+
+  if (isCDN.result != 0)
+    fields["cdn-addon"].hidden = true;
+    fields["cdn-addon"].value = false;
+
 }
 
 

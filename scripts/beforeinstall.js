@@ -55,6 +55,7 @@ if (${settings.ls-addon:false}) {
     nodeGroup: "bl",
     scalingMode: "STATEFUL",
     displayName: "Load balancer",
+    addons: ["cache-purge"],
     env: {
       WP_PROTECT: "OFF"
     }
@@ -68,6 +69,7 @@ if (${settings.ls-addon:false}) {
     nodeGroup: "cp",
     scalingMode: "STATELESS",
     displayName: "AppServer",
+    addons: ["setup-site-url"],
     env: {
       SERVER_WEBROOT: "/var/www/webroot/ROOT",
       REDIS_ENABLED: "true",

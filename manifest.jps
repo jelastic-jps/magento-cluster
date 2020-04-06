@@ -203,7 +203,43 @@ onInstall:
   - if (${settings.ls-addon:false}):
       setGlobals:
         STACK: llsmp
-          
+        
+addons:
+  - id: setup-site-url
+    type: update
+    name: Magento Base URL
+    description: Magento Base URL Configuration.
+    logo: ${baseUrl}/images/magento.png
+    settings:
+      fields:
+        - type: string
+          name: baseURL
+          caption: Configuration Base URL for Magento
+          default: ''
+          required: true
+          regex: "^https?:\\/\\/.+$"
+          regexText: Incorrect Base URL.
+
+    buttons:
+      - caption: Base URL
+        settings: main
+        action: setup-domain
+        loadingText: Applying...
+        confirmText: Do you want to change Base URL?
+        successText:  Base URL for Magento has been successfully applyed!        
+
+  - id: cache-purge
+    type: update
+    name: Cache Purge for LiteSpeed ADC
+    description: Cache Purge for LiteSpeed ADC.
+    logo: ${baseUrl}/images/magento.png
+    buttons:
+      - caption: Cache Purge for LiteSpeed ADC
+        action: cache-purge
+        loadingText: Purging...
+        confirmText: Do you want to purge cache?
+        successText:  Cache for LiteSpeed ADC has been successfully purged!                
+        
 actions:
 
   install-LE-addon:
@@ -223,7 +259,10 @@ actions:
   setup-domain:
     - install: ${baseUrl}/scripts/setupDomain.jps
       settings:
-        domain: ${settings.siteURL}
+        domain: ${settings.baseURL}
+        
+  cache-purge:
+    cmd[bl]: rm -rf /tmp/lscache/vhosts/Jelastic/* &>> /var/log/run.log;
 
   install-edgeport-CDN:
     - install: https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}

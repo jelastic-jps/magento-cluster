@@ -196,7 +196,7 @@ onInstall:
 
   - if (${settings.le-addon:false}): 
       - install-LE-addon
-      - setupDomain
+      - setup-LE-domain
 
   - if (${settings.cdn-addon:false}): install-edgeport-CDN
   
@@ -208,29 +208,36 @@ actions:
 
   install-LE-addon:
     - install: https://github.com/jelastic-jps/lets-encrypt/blob/master/manifest.jps?_r=${fn.random}
-      nodeGroup: cp
+      nodeGroup: bl
       skipEmail: true
       settings:
         customDomains: ${globals.DOMAIN}
+        fallbackToX1: true
 
-  setup-LE-Domain:
-    - cmd[cp]: source /opt/letsencrypt/settings && echo $domain
-    - cmd[${nodes.cp.master.id}]: bash ~/bin/setupMG.sh --DOMAIN https://${response.out}
+  setup-LE-domain:
+    - cmd[bl]: source /opt/letsencrypt/settings && echo $domain
+    - install: ${baseUrl}/scripts/setupDomain.jps
+      settings:
+        domain: https://${response.out}
+
+  setup-domain:
+    - install: ${baseUrl}/scripts/setupDomain.jps
+      settings:
+        domain: ${settings.siteURL}
 
   install-edgeport-CDN:
     - install: https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}
-      nodeGroup: cp
+      nodeGroup: bl
       skipEmail: true
       settings:
         note: ${settings.noteCDN:}
     - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
     - setGlobals:
         CDN_URL: ${globals.PROTOCOL}://${env.envName}-${response.response.partnerCode}.cdn.edgeport.net/
+        CDN: ${env.envName}-${response.response.partnerCode}.cdn.edgeport.net
         SUCCESS: success-cdn
         EMAIL: cdn
-    - cmd[${nodes.cp.master.id}]: |-
-        wget ${baseUrl}/scripts/checkCdnContent.txt?_r=${fn.random} -O ~/bin/checkCdnContent.txt &>> /var/log/run.log
-        bash ~/bin/setupMG.sh --edgeportCDN true --CDN_URL ${globals.CDN_URL} &>> /var/log/run.log
+    - install: /scripts/setupCDN.jps
 
   install-magento:
     - install: /scripts/installMG.jps

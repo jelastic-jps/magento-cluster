@@ -1,216 +1,319 @@
 jpsType: install
-jpsVersion: '1.4'
+jpsVersion: '1.5.2'
 id: magento-cluster
 homepage: https://github.com/jelastic-jps/magento-cluster/tree/master
 description:
   text: Auto-scalable and highly-available Magento eCommerce cluster with out-of-box
-    auto-scaling, even load and traffic distribution, master-master data replication,
+    auto-scaling, even load and traffic distribution, Galera cluster,
     page caching and user session storage on certified Jelastic dockerized stack templates.
   short: Auto-scalable and highly-available Magento cluster with load balancing, data
     replication, content caching and user session storage.
 categories:
 - apps/clusters
 - apps/e-commerce
-logo: https://raw.githubusercontent.com/jelastic-jps/magento/master/magento21-php7-varnish-memcache-storage/images/magento.png
 name: Auto-Scalable Magento Cluster
+logo: /images/magento.png
+
+baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/v2.0.0
+
+onBeforeInit: /scripts/settings.js?_r=${fn.random}
+onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}
+nodes: definedInOnBeforeInstall
+skipNodeEmails: true
 
 settings:
   fields:
-    name: magento_version
-    caption: Magento version
-    type: list
-    values:
-      https://download.jelastic.com/public.php?service=files&t=9eb5418967ddb3bcf4b575e467d33ea0&download: Magento CE 2.3.x
-      https://download.jelastic.com/public.php?service=files&t=61ae85fbcfc249b4e63bd38efbb8945f&download: Magento CE 1.9.4.x
-    default: https://download.jelastic.com/public.php?service=files&t=9eb5418967ddb3bcf4b575e467d33ea0&download
+    - caption: Scaling Strategy
+      type: list
+      name: loadGrowth
+      default: slow
+      required: true
+      width: 225
+      tooltip: | 
+        Configure auto-scaling triggers, i.e. how fast the system responds to load spikes by adding or removing nodes.
+        <p>Read more about <a href="https://docs.jelastic.com/automatic-horizontal-scaling">Automatic Horizontal Scaling</a></p>
+      values:        
+        - value: slow
+          caption: Low Load
+          tooltip: <h2>Low load scaling strategy</h2>add 1 new node when CPU > 70% <p>remove when CPU < 20%</p>
+        - value: medium
+          caption: Medium Load
+          tooltip: <h3>Medium load scaling strategy</h3>add 1 new node when CPU > 50% <p>remove when CPU < 20%</p>
+        - value: fast
+          caption: High Load
+          tooltip: <h3>High load scaling strategy</h3>add 2 new nodes when CPU > 30% <p>remove when CPU < 10%</p>
+  
+    - caption: Advanced Features
+      type: displayfield
+      name: displayfield
+      markup:
+ 
+    - caption: Install LiteSpeed High-Performance Web Server
+      type: checkbox
+      name: ls-addon
+      value: true
+      disabled: false
+      tooltip: "If this option is disabled, the cluster will be installed using NGINX load balancer and application servers"
+      showIf:
+        true:
+          - caption: Web Application Firewall
+            type: checkbox
+            name: waf
+            value: true
+            disabled: false
+            tooltip: "Protect web sites with <a href='https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:waf'>LiteSpeed built-in WAF</a> based on Free ModSecurity Rules from Comodo"
+        false:
+          - caption: Web Application Firewall
+            type: checkbox
+            name: waf
+            value: false
+            disabled: true
+            tooltip: "Protect web sites with <a href='https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:waf'>LiteSpeed built-in WAF</a> based on Free ModSecurity Rules from Comodo"
+      
+    - caption: Install MariaDB Galera Cluster
+      type: checkbox
+      name: galera
+      value: true
+      disabled: false
+      tooltip: "<h3>Requirements for All Tables:</h3> * run on InnoDB storage engine <p>* have a primary key</p>Read more about <a href='https://mariadb.com/kb/en/library/mariadb-galera-cluster-known-limitations/'>limitations</a>"
+      
+    - caption: Install Let's Encrypt SSL with Auto-Renewal
+      type: checkbox
+      name: le-addon
+      value: true
+      disabled: false
+
+    - caption: Install Lightning-Fast Premium CDN with 130+ PoPs
+      type: checkbox
+      name: cdn-addon
+      value: true
+      disabled: false
 
 globals:
-  PATH: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master
-  MAGE_ROOT: "/var/www/webroot/ROOT"
   DB_USER: jelastic-${fn.random}
-  DB_PASS: "${fn.password(20)}"
-  DB_NAME: magento
-  RD_PASS: "${fn.password(10)}"
-  ADMIN_PASSWD: "${fn.password(10)}"
-
-success: 'Below you will find your admin panel URL, username and password.</br></br>
-  <table style=''font-size:13px; border: none;''><tr><td>Admin panel URL:</td><td
-  style=''padding-left: 10px;''><a href=''${env.protocol}://${env.domain}/admin/''
-  target=''_blank''>${env.protocol}://${env.domain}/admin/</a></td></tr>  <tr><td>Admin
-  name:</td><td style=''padding-left: 10px;''>admin</td></tr><tr><td>Password:</td><td
-  style=''padding-left: 10px;''>${globals.ADMIN_PASSWD}</td></tr></table></br>To add
-  a custom domain name for your Magento Cluster installation, follow the steps described
-  in our <a href=''http://docs.jelastic.com/custom-domains'' target=''_blank''>documentation</a>'
-
-ssl: false
-skipNodeEmails: true
-nodes:
-- nodeType: nginxphp-dockerized
-  tag: 1.16.1-php-7.2.24
-  count: 2
-  cloudlets: 16
-  nodeGroup: cp
-  volumeMounts:
-    "/var/www/webroot/ROOT":
-      readOnly: false
-      sourcePath: "/data"
-      sourceNodeGroup: storage
-  displayName: AppServer
-  env:
-    PHPFPM_MAX_CHILDREN: 3
-
-- nodeType: mariadb-dockerized
-  tag: 10.3.20
-  count: 2
-  cloudlets: 8
-  nodeGroup: sqldb
-  displayName: Database
-  env:
-    ON_ENV_INSTALL: ""
-- nodeType: storage
-  cloudlets: 8
-  nodeGroup: storage
-  displayName: Storage
-- nodeType: varnish-dockerized
-  tag: 5.2.1
-  cloudlets: 8
-  nodeGroup: bl
-  displayName: Balancer
-- nodeType: redis
-  count: 2
-  cloudlets: 8
-  nodeGroup: nosqldb
+  DB_PASS: ${fn.password(10)}
+  DB_HOST: sqldb
+  PROTOCOL: http
+  MG_ADMIN_PASS: ${fn.password(10)}
+  SUCCESS: success
+  EMAIL: default
+  STACK: nginx
 
 onAfterScaleOut[nodeGroup:cp]:
   forEach(event.response.nodes):
-    cmd [${@i.id}]: sudo service nginx reload
-    setNodeDisplayName [${@i.id}]: AppServer
+    - log: App Servers Setup
+    - setNodeDisplayName [${@i.id}]: AppServer
+    - setupCP:
+        nodeId: ${@i.id}
+        
+onAfterRedeployContainer[cp]:
+  - setupCP:
+      nodeId: cp
 
-onAfterScaleOut[nodeGroup:bl]:
-  forEach(event.response.nodes):
-    setNodeDisplayName [${@i.id}]: Load balancer
+onAfterRedeployContainer[bl]:
+ - setupLB:
+      nodeId: bl
+
+onAfterInstallAddon [nodeGroup:bl, id:cdn]:
+  - install: ${baseUrl}/scripts/setupCDN.jps
+ 
+onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]: setup-LE-domain
+
+onAfterClone: 
+  - script: |
+        var resp = {result:0}
+        if (${event.response.env.sslstate}) {
+          resp.onAfterReturn = {setGlobals: {PROTOCOL: "https"}}
+        }
+        return resp;
+ 
+  - install: ${baseUrl}/scripts/setupDomain.jps?_r=${fn.random}
+    envName: ${event.response.env.envName}
+    settings:
+      domain: ${globals.PROTOCOL}://${event.response.env.domain}
+
+onAfterMigrate:
+  - script: |
+        var resp = {result:0}
+        if (${event.response.env.sslstate}) {
+          resp.onAfterReturn = {setGlobals: {PROTOCOL: "https"}}
+        }
+        return resp;
+ 
+  - install: ${baseUrl}/scripts/setupDomain.jps?_r=${fn.random}
+    envName: ${event.response.env.envName}
+    settings:
+      domain: ${globals.PROTOCOL}://${event.response.env.domain}
 
 onInstall:
-- log: Auto Scaling Triggers
-- script: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/scripts/addTriggers.js
-  params: 
-    nodeGroup: cp
-    resourceType: CPU
-    scaleUpValue: 70
-    scaleUpLimit: 10
-    scaleUpLoadPeriod: 1
-    scaleDownValue: 20
-    scaleDownLimit: 2
-    scaleDownLoadPeriod: 10
-    cleanOldTriggers: true
+        
+  - script: ${baseUrl}/scripts/idna.js
+  - setGlobals:
+      DOMAIN: ${response.domain}         
+            
+  - if (${settings.is_trigger:true}):
+    - log: Auto Scaling Triggers
+    - script: "${baseUrl}/scripts/addTriggers.js"
+      nodeGroup: cp
+      resourceType: CPU
+      loadGrowth: ${settings.loadGrowth}
+      cleanOldTriggers: true
+      scaleDownLimit: ${nodes.cp.length}
+    
+  - log: Set Node Display Name
+  - setNodeDisplayName [bl]: Load balancer
+  - setNodeDisplayName [cp]: AppServer
+  - setNodeDisplayName [storage]: Storage  
 
-- log: Set Display Name
-  setNodeDisplayName [cp]: AppServer
-  setNodeDisplayName [bl]: Load balancer
-  setNodeDisplayName[${nodes.nosqldb.first.id}]: Session Storage
-  setNodeDisplayName[${nodes.nosqldb.last.id}]: Cache Storage
+  - if (${settings.galera:false}):
+    - log: DB Galera  Setup
+    - install: https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/galera.jps
+      settings:
+        db_user: "${globals.DB_USER}"
+        db_pass: "${globals.DB_PASS}"
+      nodeGroup: sqldb
+  - if (!${settings.galera:false}):
+    - log: Master-Master Replication Setup
+    - install: https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/ms-mm-configuration.jps
+      settings:        
+        path: https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/
+        scheme: master
+        db_user: "${globals.DB_USER}"
+        db_pass: "${globals.DB_PASS}"
+      nodeGroup: sqldb
 
-- log: Load balancer Setup
-- setupBL:
-    filter: bl
+  - setupLB:
+      nodeId: bl
+      
+  - setupCP:
+      nodeId: cp
 
-- log: Envs Setup for CP layer
-- setEnvs:
-    filter: cp
+  - if (${settings.le-addon:false}):
+      - setGlobals:
+          PROTOCOL: https
+          
+  - install-magento
 
-- log: DB Cluster Setup
-- installJps:
-    jps: https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/ms-mm-configuration.jps
+  - if (${settings.le-addon:false}): 
+      - install-LE-addon
+      - setup-LE-domain
+
+  - if (${settings.cdn-addon:false}): install-edgeport-CDN
+  
+  - if (${settings.ls-addon:false}):
+      setGlobals:
+        STACK: llsmp
+        
+addons:
+  - id: setup-site-url
+    type: update
+    name: Magento Base URL
+    description: Magento Base URL Configuration.
+    logo: ${baseUrl}/images/magento.png
     settings:
-      path: "https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master"
-      db_user: "${globals.DB_USER}"
-      db_pass: "${globals.DB_PASS}"
-      scheme: "slave"
-      custom_conf: "${globals.PATH}/configs/mysql/db.cnf"
-    nodeGroup: sqldb
+      fields:
+        - type: string
+          name: baseURL
+          caption: Configuration Base URL for Magento
+          default: ''
+          required: true
+          regex: "^https?:\\/\\/.+$"
+          regexText: Incorrect Base URL.
 
-- log: Downloading, Unpacking, Installation and Patching Magento
-- cmd[storage]:
-  - rm -rf /data/* && curl -fsSL "${settings.magento_version}" | tar xj -C /data/  
-  - chown 700:700 -Rh /data/
+    buttons:
+      - caption: Base URL
+        settings: main
+        action: setup-domain
+        loadingText: Applying...
+        confirmText: Do you want to change Base URL?
+        successText:  Base URL for Magento has been successfully applyed!        
 
-- if (/61ae85fbcfc249b4e63bd38efbb8945f/.test("${settings.magento_version}")):
-    - cmd[storage]: wget ${globals.PATH}/configs/magento/local.xml.template -O /data/app/etc/local.xml.template
-    - setupRDConnect:
-        config: /data/app/etc/local.xml.template
-    - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg19.conf -O /etc/nginx/conf.d/site-default.conf
-    - setupCP
-    - cmd[${nodes.cp.first.id}]:
-        - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/health_check.php
-        - wget ${globals.PATH}/scripts/setupMG19.sh -O /tmp/setupMG19.sh && bash -x /tmp/setupMG19.sh
-          ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
-          ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
-
-- if (/9eb5418967ddb3bcf4b575e467d33ea0/.test("${settings.magento_version}")):
-    - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf
-    - setupCP
-    - cmd[${nodes.cp.first.id}]:
-        - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/pub/health_check.php
-        - wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh
-          ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
-          ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
-        - wget ${globals.PATH}/configs/magento/env.php -O ${globals.MAGE_ROOT}/app/etc/env.php
-        - sed -ri 's|_DBNAME_|${globals.DB_NAME}|g' ${globals.MAGE_ROOT}/app/etc/env.php
-        - sed -ri 's|_DBUSER_|${globals.DB_USER}|g' ${globals.MAGE_ROOT}/app/etc/env.php
-        - sed -ri 's|_DBPASS_|${globals.DB_PASS}|g' ${globals.MAGE_ROOT}/app/etc/env.php
-    - setupRDConnect:
-        config: /data/app/etc/env.php
-
+  - id: cache-purge
+    type: update
+    name: Cache Purge for LiteSpeed ADC
+    description: Cache Purge for LiteSpeed ADC.
+    logo: ${baseUrl}/images/magento.png
+    buttons:
+      - caption: Cache Purge for LiteSpeed ADC
+        action: cache-purge
+        loadingText: Purging...
+        confirmText: Do you want to purge cache?
+        successText:  Cache for LiteSpeed ADC has been successfully purged!                
+        
 actions:
+
+  install-LE-addon:
+    - install: https://github.com/jelastic-jps/lets-encrypt/blob/master/manifest.jps?_r=${fn.random}
+      nodeGroup: bl
+      skipEmail: true
+      settings:
+        customDomains: ${globals.DOMAIN}
+        fallbackToX1: true
+
+  setup-LE-domain:
+    - cmd[bl]: source /opt/letsencrypt/settings && echo $domain
+    - install: ${baseUrl}/scripts/setupDomain.jps
+      settings:
+        domain: https://${response.out}
+
+  setup-domain:
+    - install: ${baseUrl}/scripts/setupDomain.jps
+      settings:
+        domain: ${settings.baseURL}
+        
+  cache-purge:
+    cmd[bl]: rm -rf /tmp/lscache/vhosts/Jelastic/* &>> /var/log/run.log;
+
+  install-edgeport-CDN:
+    - install: https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}
+      nodeGroup: bl
+      skipEmail: true
+      settings:
+        note: ${settings.noteCDN:}
+    - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
+    - setGlobals:
+        CDN_URL: ${globals.PROTOCOL}://${env.envName}-${response.response.partnerCode}.cdn.edgeport.net/
+        CDN: ${env.envName}-${response.response.partnerCode}.cdn.edgeport.net
+        SUCCESS: success-cdn
+        EMAIL: cdn
+    - install: /scripts/setupCDN.jps
+
+  install-magento:
+    - install: /scripts/installMG.jps
+      settings:
+        db_host: ${globals.DB_HOST}
+        db_user: ${globals.DB_USER}
+        db_pass: ${globals.DB_PASS}
+        mg_admin_pass: ${globals.MG_ADMIN_PASS}
+        mg_url: ${globals.PROTOCOL}://${globals.DOMAIN}/
+        user_email: ${user.email}
+
   setupCP:
-  - log: App Servers Setup
-  - cmd[cp]: |-
-      wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf
-      wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini
-      sudo /etc/init.d/nginx restart &>> /var/log/run.log
+    - log: App Server Optimization
+    - install: https://raw.githubusercontent.com/jelastic/templates/master/config.jps?_r=${fn.random}
+      settings:
+        targetGroup: cp
+        targetNodes: ${this.nodeId}
+        optimization: magento
+    - cmd[${this.nodeId}]: bash /usr/local/sbin/optimization.sh &>> /var/log/run.log;
 
-  setEnvs:
-  - forEach(i:nodes.sqldb):
-    - if (${@i.ismaster}):
-        cmd [${this.filter}]: 
-          echo ${@i.intIP} DB_MASTER >> /etc/hosts
-        user: root
-    - if (!${@i.ismaster}):
-        cmd [${this.filter}]: 
-          echo ${@i.intIP} DB_SLAVE >> /etc/hosts
-        user: root
-  - cmd [${this.filter}]: 
-      - echo ${nodes.nosqldb.first.intIP} RDS >> /etc/hosts
-      - echo ${nodes.nosqldb.last.intIP} RDC >> /etc/hosts
-    user: root
+  setupLB:
+    - log: Load Balancer Optimization
+    - install: https://raw.githubusercontent.com/jelastic/templates/master/config.jps?_r=${fn.random}
+      settings:
+        targetGroup: bl
+        targetNodes: ${this.nodeId}
+        optimization: magento
+    - cmd[${this.nodeId}]: bash /usr/local/sbin/optimization.sh &>> /var/log/run.log;
 
-  setupBL:
-  - cmd[bl]:
-      - wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib
-      - wget ${globals.PATH}/configs/varnish/default.vcl -O /etc/varnish/default.vcl
-    user: root
-  - forEach(nodes.cp):
-      cmd[${this.filter}]:
-        - jem balancer addCommonHost -h ${@i.intIP}
-        - sudo service varnish reload &>> /var/log/run.log
-      user: root
+    - if ("${nodes.bl.master.nodeType}" == "varnish"):
+      - forEach(nodes.cp):
+          cmd[${this.nodeId}]:
+            - jem balancer addCommonHost -h ${@i.intIP}
+            - sudo service varnish reload &>> /var/log/run.log
+   
+success:
+  email: success/email/success-${globals.STACK}-${globals.EMAIL}.md?_r=${fn.random}
+  text: success/text/${globals.SUCCESS}.md?_r=${fn.random}
 
-  setupRDConnect:
-    - setupRDconfig:
-        id: ${nodes.nosqldb.first.id}
-        passtype: RD_SESSION_PASS
-        config: ${this.config}
-
-    - setupRDconfig:
-        id: ${nodes.nosqldb.last.id}
-        passtype: RD_CACHE_PASS
-        config: ${this.config}
-
-  setupRDconfig:
-    script: |
-      var resp = jelastic.env.control.ExecCmdById(getParam('TARGET_APPID'), session, nodeid, toJSON([{ "command": "cat /etc/redis.conf | tail -1 | awk '{print $2}'"}]), false, "root");
-      var passwd = resp.responses[0].out;
-      resp = {result: 0, onAfterReturn: []};
-      resp = jelastic.env.control.ExecCmdByGroup('${env.envName}', session, "storage", toJSON([{ "command": 'sed -ri \"s/${this.passtype}/' + passwd + '/g\" ${this.config}' }]), false, false, "root");
-      return resp;
-    nodeid: ${this.id}
+startPage: ${globals.PROTOCOL}://${env.domain}/

@@ -1,0 +1,10 @@
+type: update
+id: setup-magento-domain
+name: Setup Magento Domain
+
+globals:
+  DOMAIN: ${settings.domain}
+
+onInstall:
+  - cmd[${nodes.cp.master.id}]: bash ~/setupMG.sh --DOMAIN ${globals.DOMAIN}
+

@@ -20,15 +20,13 @@ onInstall:
 actions:
   installWP:
     - cmd[${nodes.cp.master.id}]: |-
-        [ ! -d $HOME/bin ] && mkdir $HOME/bin
-        echo "export PATH=$PATH:$HOME/bin/" >> $HOME/.bash_profile
-        wget ${baseUrl}/installMG.sh?_r=${fn.random} -O ~/bin/installMG.sh &>> /var/log/run.log
-        wget ${baseUrl}/setupMG.sh?_r=${fn.random} -O ~/bin/setupMG.sh &>> /var/log/run.log
-        bash ~/bin/installMG.sh ${globals.DB_USER} ${globals.DB_PASS} ${globals.DB_HOST} ${globals.DB_NAME} ${globals.MG_ADMIN_PASS} ${globals.MG_URL} ${globals.USER_EMAIL} &>> /var/log/run.log
+        wget ${baseUrl}/installMG.sh?_r=${fn.random} -O ~/installMG.sh &>> /var/log/run.log
+        wget ${baseUrl}/setupMG.sh?_r=${fn.random} -O ~/setupMG.sh &>> /var/log/run.log
+        bash ~/installMG.sh ${globals.DB_USER} ${globals.DB_PASS} ${globals.DB_HOST} ${globals.DB_NAME} ${globals.MG_ADMIN_PASS} ${globals.MG_URL} ${globals.USER_EMAIL} &>> /var/log/run.log
   
   setupMGForLS:
     - cmd[${nodes.cp.master.id}]: |-
-        bash ~/bin/setupMG.sh --litemage true &>> /var/log/run.log
+        bash ~/setupMG.sh --litemage true &>> /var/log/run.log
 
   setupMGForNG:
     - cmd[${nodes.cp.master.id}]: |-

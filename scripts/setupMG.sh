@@ -109,7 +109,7 @@ COMPUTE_TYPE=$(grep "COMPUTE_TYPE=" /etc/jelastic/metainf.conf | cut -d"=" -f2)
 cd ${SERVER_WEBROOT};
 
 function checkCdnStatus () {
-cat > ~/bin/checkCdnStatus.sh <<EOF
+cat > ~/checkCdnStatus.sh <<EOF
 #!/bin/bash
 while read -ru 4 CONTENT; do
   status=\$(curl \$1\$CONTENT -k -s -f -o /dev/null && echo "SUCCESS" || echo "ERROR")
@@ -119,14 +119,14 @@ while read -ru 4 CONTENT; do
     else
       exit
     fi
-done 4< ~/bin/checkCdnContent.txt
+done 4< ~/checkCdnContent.txt
 cd ${SERVER_WEBROOT}
-${MG} cache:flush &>> /var/log/run.log &>> /var/log/run.log
+${MG} cache:flush &>> /var/log/run.log
 crontab -l | sed "/checkCdnStatus/d" | crontab -
 EOF
-chmod +x ~/bin/checkCdnStatus.sh
+chmod +x ~/checkCdnStatus.sh
 PROTOCOL=$(${MG} config:show web/unsecure/base_url | cut -d':' -f1)
-crontab -l | { cat; echo "* * * * * /bin/bash ~/bin/checkCdnStatus.sh ${PROTOCOL}://${CDN_URL}/"; } | crontab
+crontab -l | { cat; echo "* * * * * /bin/bash ~/checkCdnStatus.sh ${PROTOCOL}://${CDN_URL}/"; } | crontab
 }
 
 if [ $litemage == 'true' ] ; then

@@ -235,6 +235,7 @@ actions:
         targetGroup: cp
         targetNodes: ${this.nodeId}
         optimization: magento
+    - cmd[${this.nodeId}]: bash /usr/local/sbin/optimization.sh &>> /var/log/run.log;
 
   setupLB:
     - log: Load Balancer Optimization
@@ -243,18 +244,14 @@ actions:
         targetGroup: bl
         targetNodes: ${this.nodeId}
         optimization: magento
-  
+    - cmd[${this.nodeId}]: bash /usr/local/sbin/optimization.sh &>> /var/log/run.log;
+
     - if ("${nodes.bl.master.nodeType}" == "varnish"):
       - forEach(nodes.cp):
           cmd[${this.nodeId}]:
             - jem balancer addCommonHost -h ${@i.intIP}
             - sudo service varnish reload &>> /var/log/run.log
    
-    - if ("${nodes.bl.master.nodeType}" == "litespeedadc"):
-      - cmd[bl]: |-
-          wget ${baseUrl}/scripts/LSADC.sh?_r=${fn.random} -O ~/LSADC.sh &>> /var/log/run.log;
-          bash ~/LSADC.sh &>> /var/log/run.log;
-
 success:
   email: success/email/success-${globals.STACK}-${globals.EMAIL}.md?_r=${fn.random}
   text: success/text/${globals.SUCCESS}.md?_r=${fn.random}

@@ -47,7 +47,7 @@ if (!${settings.galera:false}) {
 if (${settings.ls-addon:false}) {
   resp.nodes.push({
     nodeType: "litespeedadc",
-    tag: "2.6",
+    tag: "2.7",
     count: 1,
     flexibleCloudlets: ${settings.bl_flexibleCloudlets:8},
     fixedCloudlets: ${settings.bl_fixedCloudlets:1},
@@ -60,7 +60,7 @@ if (${settings.ls-addon:false}) {
     }
   }, {
     nodeType: "litespeedphp",
-    tag: "5.4.4-php-7.3.13",
+    tag: "5.4.6-php-7.3.15",
     count: ${settings.cp_count:2},
     flexibleCloudlets: ${settings.cp_flexibleCloudlets:16},
     fixedCloudlets: ${settings.cp_fixedCloudlets:1},

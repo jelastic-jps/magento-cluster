@@ -10,4 +10,4 @@ onInstall:
   - cmd[${nodes.cp.master.id}]: |-
       wget ${baseUrl}/setupMG.sh?_r=${fn.random} -O ~/setupMG.sh &>> /var/log/run.log
       wget ${baseUrl}/checkCdnContent.txt?_r=${fn.random} -O ~/checkCdnContent.txt &>> /var/log/run.log
-      bash ~/bin/setupMG.sh --edgeportCDN true --CDN_URL ${this.CDN_URL}
+      bash ~/setupMG.sh --edgeportCDN true --CDN_URL ${this.CDN_URL}

@@ -119,19 +119,19 @@ COMPUTE_TYPE=$(grep "COMPUTE_TYPE=" /etc/jelastic/metainf.conf | cut -d"=" -f2)
 cd ${SERVER_WEBROOT};
 
 function generateCdnContent () {
-  [ -f ~/checkCdnContent.txt ] && rm -f ~/checkCdnContent.txt
-  base_url=$(${MG} config:show web/unsecure/base_url)
-  wget ${base_url} -O /tmp/index.html
+  [ -f ~/checkCdnContent.txt ] && rm -f ~/checkCdnContent.txt;
+  base_url=$(${MG} config:show web/unsecure/base_url);
+  wget ${base_url} -O /tmp/index.html;
   cat /tmp/index.html | \
     sed 's/href=/\nhref=/g' | \
     grep href=\" | sed 's/.*href="//g;s/".*//g' | \
     grep ${base_url} | \
-    grep 'pub/static\|pub/media' > /tmp/fullListUrls
+    grep 'pub/static\|pub/media' > /tmp/fullListUrls;
 
   while read -a CONTENT; do
     status=$(curl $CONTENT -k -s -f -o /dev/null && echo "SUCCESS" || echo "ERROR")
     [ $status = "SUCCESS" ] && echo $CONTENT | grep / | cut -d/ -f4- >> ~/checkCdnContent.txt
-  done < /tmp/fullListUrl
+  done < /tmp/fullListUrls
 }
 
 function checkCdnStatus () {

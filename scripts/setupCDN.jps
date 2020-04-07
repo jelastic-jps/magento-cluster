@@ -9,5 +9,4 @@ onInstall:
       CDN_URL: ${env.envName}-${response.response.partnerCode}.cdn.edgeport.net
   - cmd[${nodes.cp.master.id}]: |-
       wget ${baseUrl}/setupMG.sh?_r=${fn.random} -O ~/setupMG.sh &>> /var/log/run.log
-      wget ${baseUrl}/checkCdnContent.txt?_r=${fn.random} -O ~/checkCdnContent.txt &>> /var/log/run.log
       bash ~/setupMG.sh --edgeportCDN true --CDN_URL ${this.CDN_URL}

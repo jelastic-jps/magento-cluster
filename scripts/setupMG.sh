@@ -108,6 +108,22 @@ COMPUTE_TYPE=$(grep "COMPUTE_TYPE=" /etc/jelastic/metainf.conf | cut -d"=" -f2)
 
 cd ${SERVER_WEBROOT};
 
+function generateCdnContent () {
+  [ -f ~/checkCdnContent.txt ] && rm -f ~/checkCdnContent.txt
+  base_url==$(${MG} config:show web/unsecure/base_url)
+  wget ${base_url} -O /tmp/index.html
+  cat /tmp/index.html | \
+    sed 's/href=/\nhref=/g' | \
+    grep href=\" | sed 's/.*href="//g;s/".*//g' | \
+    grep ${base_url} | \
+    grep 'pub/static\|pub/media' > /tmp/fullListUrls
+
+  while read -a CONTENT; do
+    status=$(curl $CONTENT -k -s -f -o /dev/null && echo "SUCCESS" || echo "ERROR")
+    [ $status = "SUCCESS" ] && echo $CONTENT | grep / | cut -d/ -f4- >> ~/checkCdnContent.txt
+  done < /tmp/fullListUrl
+}
+
 function checkCdnStatus () {
 cat > ~/checkCdnStatus.sh <<EOF
 #!/bin/bash
@@ -146,6 +162,7 @@ if [ $perfomance == 'true' ] ; then
 fi
 
 if [ $edgeportCDN == 'true' ] ; then
+    generateCdnContent
     checkCdnStatus
     PROTOCOL=$(${MG} config:show web/unsecure/base_url | cut -d':' -f1)
     ${MG} config:set web/unsecure/base_static_url ${PROTOCOL}://${CDN_URL}/pub/static/ &>> /var/log/run.log

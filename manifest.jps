@@ -303,7 +303,7 @@ actions:
         targetGroup: cp
         targetNodes: ${this.nodeId}
         optimization: magento
-    - cmd[${this.nodeId}]: bash /usr/local/sbin/optimization.sh &>> /var/log/run.log;
+    - cmd[${this.nodeId}]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
 
   setupLB:
     - log: Load Balancer Optimization
@@ -312,7 +312,7 @@ actions:
         targetGroup: bl
         targetNodes: ${this.nodeId}
         optimization: magento
-    - cmd[${this.nodeId}]: bash /usr/local/sbin/optimization.sh &>> /var/log/run.log;
+    - cmd[${this.nodeId}]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
 
     - if ("${nodes.bl.master.nodeType}" == "varnish"):
       - forEach(nodes.cp):

@@ -37,6 +37,3 @@ php ${MG_PATH}/bin/magento setup:install -s \
 --admin-email=${USER_EMAIL} \
 --admin-user=admin \
 --admin-password=${MG_ADMIN};
-
-cd ${MG_PATH};
-php ${MG_PATH}/bin/magento setup:upgrade;

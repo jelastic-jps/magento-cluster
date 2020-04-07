@@ -132,6 +132,9 @@ onAfterClone:
     settings:
       domain: ${globals.PROTOCOL}://${event.response.env.domain}
 
+  - install: ${baseUrl}/scripts/cachePurge.jps      
+    envName: ${event.response.env.envName}
+      
 onAfterMigrate:
   - script: |
         var resp = {result:0}
@@ -145,6 +148,9 @@ onAfterMigrate:
     settings:
       domain: ${globals.PROTOCOL}://${event.response.env.domain}
 
+  - install: ${baseUrl}/scripts/cachePurge.jps      
+    envName: ${event.response.env.envName}
+      
 onInstall:
         
   - script: ${baseUrl}/scripts/idna.js
@@ -262,7 +268,7 @@ actions:
         domain: ${settings.baseURL}
         
   cache-purge:
-    cmd[bl]: rm -rf /tmp/lscache/vhosts/Jelastic/* &>> /var/log/run.log;
+    - install: ${baseUrl}/scripts/cachePurge.jps
 
   install-edgeport-CDN:
     - install: https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}

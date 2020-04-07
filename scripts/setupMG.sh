@@ -125,6 +125,7 @@ function generateCdnContent () {
 }
 
 function checkCdnStatus () {
+PROTOCOL=$(${MG} config:show web/unsecure/base_url | cut -d':' -f1)
 cat > ~/checkCdnStatus.sh <<EOF
 #!/bin/bash
 while read -ru 4 CONTENT; do
@@ -137,11 +138,14 @@ while read -ru 4 CONTENT; do
     fi
 done 4< ~/checkCdnContent.txt
 cd ${SERVER_WEBROOT}
+${MG} config:set web/unsecure/base_static_url ${PROTOCOL}://${CDN_URL}/pub/static/ &>> /var/log/run.log
+${MG} config:set web/unsecure/base_media_url ${PROTOCOL}://${CDN_URL}/pub/media/ &>> /var/log/run.log
+${MG} config:set web/secure/base_static_url ${PROTOCOL}://${CDN_URL}/pub/static/ &>> /var/log/run.log
+${MG} config:set web/secure/base_media_url ${PROTOCOL}://${CDN_URL}/pub/media/ &>> /var/log/run.log
 ${MG} cache:flush &>> /var/log/run.log
 crontab -l | sed "/checkCdnStatus/d" | crontab -
 EOF
 chmod +x ~/checkCdnStatus.sh
-PROTOCOL=$(${MG} config:show web/unsecure/base_url | cut -d':' -f1)
 crontab -l | { cat; echo "* * * * * /bin/bash ~/checkCdnStatus.sh ${PROTOCOL}://${CDN_URL}/"; } | crontab
 }
 
@@ -164,12 +168,6 @@ fi
 if [ $edgeportCDN == 'true' ] ; then
     generateCdnContent
     checkCdnStatus
-    PROTOCOL=$(${MG} config:show web/unsecure/base_url | cut -d':' -f1)
-    ${MG} config:set web/unsecure/base_static_url ${PROTOCOL}://${CDN_URL}/pub/static/ &>> /var/log/run.log
-    ${MG} config:set web/unsecure/base_media_url ${PROTOCOL}://${CDN_URL}/pub/media/ &>> /var/log/run.log
-    ${MG} config:set web/secure/base_static_url ${PROTOCOL}://${CDN_URL}/pub/static/ &>> /var/log/run.log
-    ${MG} config:set web/secure/base_media_url ${PROTOCOL}://${CDN_URL}/pub/media/ &>> /var/log/run.log
-
 fi
 
 if [ $DOMAIN != 'false' ] ; then

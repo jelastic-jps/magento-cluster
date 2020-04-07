@@ -110,7 +110,7 @@ cd ${SERVER_WEBROOT};
 
 function generateCdnContent () {
   [ -f ~/checkCdnContent.txt ] && rm -f ~/checkCdnContent.txt
-  base_url==$(${MG} config:show web/unsecure/base_url)
+  base_url=$(${MG} config:show web/unsecure/base_url)
   wget ${base_url} -O /tmp/index.html
   cat /tmp/index.html | \
     sed 's/href=/\nhref=/g' | \

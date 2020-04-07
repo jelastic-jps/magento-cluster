@@ -261,11 +261,13 @@ actions:
     - install: ${baseUrl}/scripts/setupDomain.jps
       settings:
         domain: https://${response.out}
+    - install: ${baseUrl}/scripts/cachePurge.jps
 
   setup-domain:
     - install: ${baseUrl}/scripts/setupDomain.jps
       settings:
         domain: ${settings.baseURL}
+    - install: ${baseUrl}/scripts/cachePurge.jps
         
   cache-purge:
     - install: ${baseUrl}/scripts/cachePurge.jps

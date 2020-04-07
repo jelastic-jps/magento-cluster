@@ -35,4 +35,5 @@ actions:
         echo NGINX
 
   setupMG:
-    bash ~/setupMG.sh --pgcache true &>> /var/log/run.log
+    - cmd[${nodes.cp.master.id}]: |-
+        bash ~/setupMG.sh --pgcache true &>> /var/log/run.log

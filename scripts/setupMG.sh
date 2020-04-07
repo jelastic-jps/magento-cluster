@@ -166,7 +166,7 @@ if [ $litemage == 'true' ] ; then
 fi
 
 if [ $pgcache == 'true' ] ; then
-   ${MG} bin/magento setup:config:set --cache-backend=redis --cache-backend-redis-server=127.0.0.1 --cache-backend-redis-db=0 &>> /var/log/run.log
+   ${MG} setup:config:set --cache-backend=redis --cache-backend-redis-server=127.0.0.1 --cache-backend-redis-db=0 &>> /var/log/run.log
 fi
 
 if [ $perfomance == 'true' ] ; then

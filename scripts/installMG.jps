@@ -32,7 +32,7 @@ actions:
 
   setupMGForNG:
     - cmd[${nodes.cp.master.id}]: |-
-        echo NGINX
+        bash ~/setupMG.sh --varnish true &>> /var/log/run.log
 
   setupMG:
     - cmd[${nodes.cp.master.id}]: |-

@@ -15,7 +15,7 @@ ARGUMENT_LIST=(
     "purge"
     "litemage"
     "pgcache"
-    "objectcache"
+    "varnish"
     "perfomance"
     "edgeportCDN"
     "PERF_PROFILE"
@@ -61,6 +61,11 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
 
+        --varnish)
+            varnish=$2
+            shift 2
+            ;;
+            
         --perfomance)
             perfomance=$2
             shift 2
@@ -165,12 +170,16 @@ if [ $litemage == 'true' ] ; then
   ${MG} config:set system/full_page_cache/caching_application LITEMAGE &>> /var/log/run.log;
 fi
 
+if [ $varnish == 'true' ] ; then
+   ${MG} config:set system/full_page_cache/caching_application 2 &>> /var/log/run.log;
+fi
+
 if [ $pgcache == 'true' ] ; then
-   ${MG} setup:config:set --cache-backend=redis --cache-backend-redis-server=127.0.0.1 --cache-backend-redis-db=0 &>> /var/log/run.log
+   ${MG} setup:config:set --cache-backend=redis --cache-backend-redis-server=127.0.0.1 --cache-backend-redis-db=0 &>> /var/log/run.log;
 fi
 
 if [ $perfomance == 'true' ] ; then
-   ${MG} setup:performance:generate-fixtures -s ${SERVER_WEBROOT}/setup/performance-toolkit/profiles/ce/${PERF_PROFILE} &>> /var/log/run.log
+   ${MG} setup:performance:generate-fixtures -s ${SERVER_WEBROOT}/setup/performance-toolkit/profiles/ce/${PERF_PROFILE} &>> /var/log/run.log;
 fi
 
 if [ $edgeportCDN == 'true' ] ; then
@@ -179,8 +188,8 @@ if [ $edgeportCDN == 'true' ] ; then
 fi
 
 if [ $DOMAIN != 'false' ] ; then
-    ${MG} config:set web/unsecure/base_url ${DOMAIN} &>> /var/log/run.log
-    ${MG} config:set web/secure/base_url ${DOMAIN} &>> /var/log/run.log
-    ${MG} config:set web/secure/use_in_adminhtml 1 &>> /var/log/run.log
-    ${MG} indexer:reindex &>> /var/log/run.log
+    ${MG} config:set web/unsecure/base_url ${DOMAIN} &>> /var/log/run.log;
+    ${MG} config:set web/secure/base_url ${DOMAIN} &>> /var/log/run.log;
+    ${MG} config:set web/secure/use_in_adminhtml 1 &>> /var/log/run.log;
+    ${MG} indexer:reindex &>> /var/log/run.log;
 fi

@@ -167,6 +167,7 @@ if [ $litemage == 'true' ] ; then
   [ -d ${SERVER_WEBROOT}/app/code/Litespeed/Litemage ] || mkdir -p ${SERVER_WEBROOT}/app/code/Litespeed/Litemage;
   $RSYNC -au --remove-source-files /tmp/magento2-LiteSpeed_LiteMage-${SHORT_VERSION}/ ${SERVER_WEBROOT}/app/code/Litespeed/Litemage/;
   ${MG} module:enable Litespeed_Litemage &>> /var/log/run.log;
+  ${MG} setup:upgrade &>> /var/log/run.log;
   ${MG} config:set system/full_page_cache/caching_application LITEMAGE &>> /var/log/run.log;
 fi
 

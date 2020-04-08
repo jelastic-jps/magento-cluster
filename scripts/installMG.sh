@@ -17,8 +17,14 @@ USER_EMAIL=$7
 MG_PATH=${SERVER_WEBROOT}
 rm -rf ${MG_PATH}/*
 
-VERSION=$(curl --silent "https://api.github.com/repos/magento/magento2/releases" | grep tag_name | sed -E 's/.*"([^"]+)".*/\1/' | sort -r | head -n 1)
-$WGET https://github.com/magento/magento2/archive/${VERSION}.tar.gz -O /tmp/${VERSION}.tgz
+LOOP_LIMIT=10
+for (( i=0 ; i<${LOOP_LIMIT} ; i++ )); do
+  VERSION=$(curl --silent "https://api.github.com/repos/magento/magento2/releases" | grep tag_name | sed -E 's/.*"([^"]+)".*/\1/' | sort -r | head -n 1);
+  $WGET https://github.com/magento/magento2/archive/${VERSION}.tar.gz -O /tmp/${VERSION}.tgz;
+  [ $? == 0 ] && break;
+  sleep 6
+done
+
 $TAR -C "/tmp" -xpzf "/tmp/${VERSION}.tgz";
 #mv {/tmp/magento2-${VERSION}/*,/tmp/magento2-${VERSION}/.*} /var/www/webroot/ROOT/
 $RSYNC -au --remove-source-files /tmp/magento2-${VERSION}/ ${MG_PATH}/

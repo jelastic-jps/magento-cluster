@@ -216,11 +216,11 @@ addons:
     type: update
     name: Magento Base URL
     description: Magento Base URL Configuration.
-    logo: ${baseUrl}/images/magento.png
+    logo: ${globals.baseURL}/images/magento.png
     settings:
       fields:
         - type: string
-          name: baseURL
+          name: magentoURL
           caption: Configuration Base URL for Magento
           default: ''
           required: true
@@ -239,7 +239,7 @@ addons:
     type: update
     name: Cache Purge
     description: Cache Purge.
-    logo: ${baseUrl}/images/magento.png
+    logo: ${globals.baseURL}/images/magento.png
     buttons:
       - caption: Cache Purge
         action: cache-purge
@@ -265,10 +265,10 @@ actions:
     - install: ${baseUrl}/scripts/cachePurge.jps
 
   setup-domain:
-    - install: ${baseUrl}/scripts/setupDomain.jps
+    - install: ${globals.baseURL}/scripts/setupDomain.jps
       settings:
-        domain: ${settings.baseURL}
-    - install: ${baseUrl}/scripts/cachePurge.jps
+        domain: ${settings.magentoURL}
+    - install: ${globals.baseURL}/scripts/cachePurge.jps
         
   cache-purge:
     - install: ${globals.baseURL}/scripts/cachePurge.jps

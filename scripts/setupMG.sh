@@ -2,6 +2,7 @@
 
 purge=false;
 litemage=false;
+varnish=false;
 pgcache=false;
 objectcache=false;
 edgeportCDN=false;

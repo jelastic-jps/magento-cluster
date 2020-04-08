@@ -101,7 +101,7 @@ if (!${settings.ls-addon:false}) {
     scalingMode: "STATEFUL",
     displayName: "Load balancer"
   }, {
-    nodeType: "nginxphp-dockerized",
+    nodeType: "nginxphp",
     tag: "1.16.1-php-7.3.14",
     count: ${settings.cp_count:2},
     flexibleCloudlets: ${settings.cp_flexibleCloudlets:8},                  

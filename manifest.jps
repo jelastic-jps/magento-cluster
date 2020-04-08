@@ -90,6 +90,7 @@ settings:
       disabled: false
 
 globals:
+  baseURL: ${baseUrl}
   DB_USER: jelastic-${fn.random}
   DB_PASS: ${fn.password(10)}
   DB_HOST: sqldb
@@ -270,7 +271,7 @@ actions:
     - install: ${baseUrl}/scripts/cachePurge.jps
         
   cache-purge:
-    - install: ${baseUrl}/scripts/cachePurge.jps
+    - install: ${globals.baseURL}/scripts/cachePurge.jps
 
   install-edgeport-CDN:
     - install: https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}

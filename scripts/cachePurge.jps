@@ -4,6 +4,13 @@ description: This script for cache purge
 id: magento-cache-purge
   
 onInstall:
-  - cmd[${nodes.cp.master.id}]: rm -rf /var/www/webroot/ROOT/var/cache/* &>> /var/log/run.log;
-  - cmd[bl]: rm -rf /tmp/lscache/vhosts/Jelastic/* &>> /var/log/run.log;
-  - cmd[cp]: cd /var/www/webroot/ROOT; php bin/magento cache:flush &>> /var/log/run.log
+  - cachePurge
+  - if ("${nodes.cp.master.nodeType}" == "litespeedphp"): cachePurgeForLS
+
+actions:
+  cachePurgeForLS:
+    - cmd[bl]: rm -rf /tmp/lscache/vhosts/Jelastic/* &>> /var/log/run.log;
+
+  cachePurge:
+    - cmd[${nodes.cp.master.id}]: rm -rf /var/www/webroot/ROOT/var/cache/* &>> /var/log/run.log;
+    - cmd[cp]: cd /var/www/webroot/ROOT; php bin/magento cache:flush &>> /var/log/run.log

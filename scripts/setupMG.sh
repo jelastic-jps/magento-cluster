@@ -127,7 +127,7 @@ function generateCdnContent () {
     sed 's/href=/\nhref=/g' | \
     grep href=\" | sed 's/.*href="//g;s/".*//g' | \
     grep ${base_url} | \
-    grep 'pub/static\|pub/media' > /tmp/fullListUrls;
+    grep '/static/\|/media/' > /tmp/fullListUrls;
 
   while read -a CONTENT; do
     status=$(curl $CONTENT -k -s -f -o /dev/null && echo "SUCCESS" || echo "ERROR")

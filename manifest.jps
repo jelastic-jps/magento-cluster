@@ -237,15 +237,15 @@ addons:
 
   - id: cache-purge
     type: update
-    name: Cache Purge for LiteSpeed ADC
-    description: Cache Purge for LiteSpeed ADC.
+    name: Cache Purge
+    description: Cache Purge.
     logo: ${baseUrl}/images/magento.png
     buttons:
-      - caption: Cache Purge for LiteSpeed ADC
+      - caption: Cache Purge
         action: cache-purge
         loadingText: Purging...
         confirmText: Do you want to purge cache?
-        successText:  Cache for LiteSpeed ADC has been successfully purged!                
+        successText:  Cache has been successfully purged!                
         
 actions:
 

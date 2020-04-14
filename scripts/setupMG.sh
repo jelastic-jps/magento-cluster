@@ -149,10 +149,10 @@ while read -ru 4 CONTENT; do
     fi
 done 4< ~/checkCdnContent.txt
 cd ${SERVER_WEBROOT}
-${MG} config:set web/unsecure/base_static_url ${PROTOCOL}://${CDN_URL}/pub/static/ &>> /var/log/run.log
-${MG} config:set web/unsecure/base_media_url ${PROTOCOL}://${CDN_URL}/pub/media/ &>> /var/log/run.log
-${MG} config:set web/secure/base_static_url ${PROTOCOL}://${CDN_URL}/pub/static/ &>> /var/log/run.log
-${MG} config:set web/secure/base_media_url ${PROTOCOL}://${CDN_URL}/pub/media/ &>> /var/log/run.log
+${MG} config:set web/unsecure/base_static_url ${PROTOCOL}://${CDN_URL}/static/ &>> /var/log/run.log
+${MG} config:set web/unsecure/base_media_url ${PROTOCOL}://${CDN_URL}/media/ &>> /var/log/run.log
+${MG} config:set web/secure/base_static_url ${PROTOCOL}://${CDN_URL}/static/ &>> /var/log/run.log
+${MG} config:set web/secure/base_media_url ${PROTOCOL}://${CDN_URL}/media/ &>> /var/log/run.log
 ${MG} cache:flush &>> /var/log/run.log
 crontab -l | sed "/checkCdnStatus/d" | crontab -
 EOF

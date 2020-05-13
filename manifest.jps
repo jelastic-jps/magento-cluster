@@ -46,7 +46,7 @@ ssl: false
 skipNodeEmails: true
 nodes:
 - nodeType: nginxphp-dockerized
-  tag: 1.16.1-php-7.2.24
+  tag: 1.16.1-php-7.2.29
   count: 2
   cloudlets: 16
   nodeGroup: cp
@@ -60,7 +60,7 @@ nodes:
     PHPFPM_MAX_CHILDREN: 3
 
 - nodeType: mariadb-dockerized
-  tag: 10.3.20
+  tag: 10.3.22
   count: 2
   cloudlets: 8
   nodeGroup: sqldb

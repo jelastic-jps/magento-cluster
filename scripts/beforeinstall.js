@@ -55,7 +55,7 @@ if (${settings.ls-addon:false}) {
     nodeGroup: "bl",
     scalingMode: "STATEFUL",
     displayName: "Load balancer",
-    addons: ["cache-purge"],
+    addons: ["setup-site-url","cache-purge"],
     env: {
       WP_PROTECT: "OFF"
     }
@@ -69,7 +69,7 @@ if (${settings.ls-addon:false}) {
     nodeGroup: "cp",
     scalingMode: "STATELESS",
     displayName: "AppServer",
-    addons: ["setup-site-url"],
+    addons: ["setup-site-url","cache-purge"],
     env: {
       SERVER_WEBROOT: "/var/www/webroot/ROOT",
       REDIS_ENABLED: "true",
@@ -99,9 +99,10 @@ if (!${settings.ls-addon:false}) {
     diskLimit: ${settings.bl_diskLimit:10},
     nodeGroup: "bl",
     scalingMode: "STATEFUL",
-    displayName: "Load balancer"
+    displayName: "Load balancer",
+    addons: ["setup-site-url","cache-purge"],
   }, {
-    nodeType: "nginxphp-dockerized",
+    nodeType: "nginxphp",
     tag: "1.16.1-php-7.3.14",
     count: ${settings.cp_count:2},
     flexibleCloudlets: ${settings.cp_flexibleCloudlets:8},                  
@@ -110,6 +111,7 @@ if (!${settings.ls-addon:false}) {
     nodeGroup: "cp",
     scalingMode: "STATELESS",
     displayName: "AppServer",
+    addons: ["setup-site-url","cache-purge"],
     env: {
       SERVER_WEBROOT: "/var/www/webroot/ROOT",
       REDIS_ENABLED: "true"

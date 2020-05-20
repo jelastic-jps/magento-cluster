@@ -90,6 +90,7 @@ settings:
       disabled: false
 
 globals:
+  baseURL: ${baseUrl}
   DB_USER: jelastic-${fn.random}
   DB_PASS: ${fn.password(10)}
   DB_HOST: sqldb
@@ -132,6 +133,9 @@ onAfterClone:
     settings:
       domain: ${globals.PROTOCOL}://${event.response.env.domain}
 
+  - install: ${baseUrl}/scripts/cachePurge.jps      
+    envName: ${event.response.env.envName}
+      
 onAfterMigrate:
   - script: |
         var resp = {result:0}
@@ -145,6 +149,9 @@ onAfterMigrate:
     settings:
       domain: ${globals.PROTOCOL}://${event.response.env.domain}
 
+  - install: ${baseUrl}/scripts/cachePurge.jps      
+    envName: ${event.response.env.envName}
+      
 onInstall:
         
   - script: ${baseUrl}/scripts/idna.js
@@ -209,11 +216,11 @@ addons:
     type: update
     name: Magento Base URL
     description: Magento Base URL Configuration.
-    logo: ${baseUrl}/images/magento.png
+    logo: ${globals.baseURL}/images/magento.png
     settings:
       fields:
         - type: string
-          name: baseURL
+          name: magentoURL
           caption: Configuration Base URL for Magento
           default: ''
           required: true
@@ -230,15 +237,15 @@ addons:
 
   - id: cache-purge
     type: update
-    name: Cache Purge for LiteSpeed ADC
-    description: Cache Purge for LiteSpeed ADC.
-    logo: ${baseUrl}/images/magento.png
+    name: Cache Purge
+    description: Cache Purge.
+    logo: ${globals.baseURL}/images/magento.png
     buttons:
-      - caption: Cache Purge for LiteSpeed ADC
+      - caption: Cache Purge
         action: cache-purge
         loadingText: Purging...
         confirmText: Do you want to purge cache?
-        successText:  Cache for LiteSpeed ADC has been successfully purged!                
+        successText:  Cache has been successfully purged!                
         
 actions:
 
@@ -255,14 +262,16 @@ actions:
     - install: ${baseUrl}/scripts/setupDomain.jps
       settings:
         domain: https://${response.out}
+    - install: ${baseUrl}/scripts/cachePurge.jps
 
   setup-domain:
-    - install: ${baseUrl}/scripts/setupDomain.jps
+    - install: ${globals.baseURL}/scripts/setupDomain.jps
       settings:
-        domain: ${settings.baseURL}
+        domain: ${settings.magentoURL}
+    - install: ${globals.baseURL}/scripts/cachePurge.jps
         
   cache-purge:
-    cmd[bl]: rm -rf /tmp/lscache/vhosts/Jelastic/* &>> /var/log/run.log;
+    - install: ${globals.baseURL}/scripts/cachePurge.jps
 
   install-edgeport-CDN:
     - install: https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}
@@ -295,7 +304,7 @@ actions:
         targetGroup: cp
         targetNodes: ${this.nodeId}
         optimization: magento
-    - cmd[${this.nodeId}]: bash /usr/local/sbin/optimization.sh &>> /var/log/run.log;
+    - cmd[${this.nodeId}]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
 
   setupLB:
     - log: Load Balancer Optimization
@@ -304,7 +313,7 @@ actions:
         targetGroup: bl
         targetNodes: ${this.nodeId}
         optimization: magento
-    - cmd[${this.nodeId}]: bash /usr/local/sbin/optimization.sh &>> /var/log/run.log;
+    - cmd[${this.nodeId}]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
 
     - if ("${nodes.bl.master.nodeType}" == "varnish"):
       - forEach(nodes.cp):

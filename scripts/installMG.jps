@@ -13,12 +13,14 @@ globals:
   MG_URL: "${settings.mg_url}"
 
 onInstall:
-  - installWP
+  - installMG
+  - setupMG
   - if ("${nodes.cp.master.nodeType}" == "litespeedphp"): setupMGForLS
   - if ("${nodes.cp.master.nodeType}" == "nginxphp"): setupMGForNG
+  - install: ${baseUrl}/cachePurge.jps
 
 actions:
-  installWP:
+  installMG:
     - cmd[${nodes.cp.master.id}]: |-
         wget ${baseUrl}/installMG.sh?_r=${fn.random} -O ~/installMG.sh &>> /var/log/run.log
         wget ${baseUrl}/setupMG.sh?_r=${fn.random} -O ~/setupMG.sh &>> /var/log/run.log
@@ -30,4 +32,8 @@ actions:
 
   setupMGForNG:
     - cmd[${nodes.cp.master.id}]: |-
-        echo NGINX
+        bash ~/setupMG.sh --varnish true &>> /var/log/run.log
+
+  setupMG:
+    - cmd[${nodes.cp.master.id}]: |-
+        bash ~/setupMG.sh --pgcache true &>> /var/log/run.log

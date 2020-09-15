@@ -1,6 +1,27 @@
 tags:
   mariadb:
+    mariadb5:
+      digest: sha256:756014f61e0226fdfa32459c93c2aefabfae0dd47d4641cb82849cbc032cfa0f
+      version: 5.5.68
+    mariadb10:
+      digest: sha256:78227ca638d2341dd678f959edc660622bfb40cd174a7b7be08fe988c554193a
+      version: 10.3.24
+    mariadb104:
+      digest: sha256:ea2063b7a181d797143c974ad435e1f6d85a1844429bd9e4a4e1705c4d313175
+      version: 10.4.14
   nginxphp:
+    nginxphp:
+      digest: sha256:fe0cfae6ccdb9fa7f914a8f118e285d5eb89bf5a0b3f73367433dfe6de391d27
+      version: 1.18.0-php-7.4.9
   redis:
+    redis6:
+      digest: sha256:16b56df4c18b97219f4fb84c3743aade5fe5c35bc78ed2827b23227c44a6c0fe
+      version: 6.0.6
   storage:
+    storage:
+      digest: sha256:d5e483bb656fa2abe006391852ce472e8bf94b000dad3afd54bfc28e662526f6
+      version: 2.0-7.7
   varnish:
+    varnish:
+      digest: sha256:a973bbd9fb8c2bb84848d4b91b819ccbd872813b055875d9f2559cf44a446fe0
+      version: 6.4.0

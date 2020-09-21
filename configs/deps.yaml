@@ -11,8 +11,8 @@ tags:
       version: 10.4.14
   nginxphp:
     nginxphp:
-      digest: sha256:fe0cfae6ccdb9fa7f914a8f118e285d5eb89bf5a0b3f73367433dfe6de391d27
-      version: 1.18.0-php-7.4.9
+      digest: sha256:4ca99adac50551a5ac553061eed4a6e4ffac351eb81c77f309a88df0b0e50808
+      version: 1.18.0-php-7.4.10
   redis:
     redis6:
       digest: sha256:16b56df4c18b97219f4fb84c3743aade5fe5c35bc78ed2827b23227c44a6c0fe

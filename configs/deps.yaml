@@ -11,7 +11,7 @@ tags:
       version: 10.4.14
   nginxphp:
     nginxphp:
-      digest: sha256:6f0f7638d8afe89e073e03c3dd3c720c159ff65579d69827a68b222e96daf7b6
+      digest: sha256:18c1e317f2d94270adfc8e9c755069ddbb21967f22116b8b35991f6894647a41
       version: 1.18.0-php-7.4.10
   redis:
     redis6:
@@ -23,5 +23,5 @@ tags:
       version: 2.0-7.7
   varnish:
     varnish:
-      digest: sha256:fcabc3a4af8cb2b2ebefe1048c31579b246a6658dc2f84c407bba24fc5cfd2a8
+      digest: sha256:9a273e832a3b901c7b19ad1dd8f7ad3fcf8dbe96c96b01d416840531390b71e0
       version: 6.4.0

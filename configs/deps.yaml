@@ -23,5 +23,5 @@ tags:
       version: 2.0-7.8
   varnish:
     varnish:
-      digest: sha256:9a273e832a3b901c7b19ad1dd8f7ad3fcf8dbe96c96b01d416840531390b71e0
-      version: 6.4.0
+      digest: sha256:2bb994c7b979ba84cd57d775b823142eb4c08cdf1bf6e4d33b5a2669b55446f7
+      version: 6.5.1

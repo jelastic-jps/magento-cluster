@@ -15,8 +15,8 @@ tags:
       version: 1.18.0-php-7.4.10
   redis:
     redis6:
-      digest: sha256:16b56df4c18b97219f4fb84c3743aade5fe5c35bc78ed2827b23227c44a6c0fe
-      version: 6.0.6
+      digest: sha256:f45a95200bd84b639174b2abc510e00a4d47ebeffb6189fe8027d2e626185434
+      version: 6.0.8
   storage:
     storage:
       digest: sha256:843b00bca62bafc95c512977f683c6b32de72799f5314e5e37cf8853a360c5d7

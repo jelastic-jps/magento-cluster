@@ -45,7 +45,7 @@ success: 'Below you will find your admin panel URL, username and password.</br><
 ssl: false
 skipNodeEmails: true
 nodes:
-- nodeType: nginxphp-dockerized
+- nodeType: nginxphp
   engine: php7.3
   count: 2
   cloudlets: 16

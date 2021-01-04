@@ -1,0 +1,11 @@
+templates:
+  mariadb:
+    - ^mariadb10
+  nginxphp:
+    - ^nginxphp
+  redis:
+    - ^redis
+  storage:
+    - ^storage
+  varnish:
+    - ^varnish

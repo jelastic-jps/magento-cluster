@@ -182,6 +182,7 @@ actions:
   - cmd[bl]:
       - wget ${globals.PATH}/scripts/varnish/jem_overrides/varnish_balancer.lib -O /var/lib/jelastic/overrides/varnish_balancer.lib
       - wget ${globals.PATH}/configs/varnish/default.vcl -O /etc/varnish/default.vcl
+      - wget ${globals.PATH}/configs/varnish/nginx.conf -O /etc/nginx/nginx.conf
     user: root
   - forEach(nodes.cp):
       cmd[${this.filter}]:

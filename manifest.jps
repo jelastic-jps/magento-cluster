@@ -50,11 +50,6 @@ nodes:
   count: 2
   cloudlets: 16
   nodeGroup: cp
-  volumeMounts:
-    "/var/www/webroot/ROOT":
-      readOnly: false
-      sourcePath: "/data"
-      sourceNodeGroup: storage
 
 - nodeType: mariadb-dockerized
   count: 2
@@ -67,6 +62,9 @@ nodes:
   cloudlets: 8
   nodeGroup: storage
   displayName: Storage
+  count: 3
+  cluster: true
+
 - nodeType: varnish-dockerized
   tag: 5.2.1
   cloudlets: 8
@@ -103,6 +101,8 @@ onInstall:
 - log: Set Display Name
   setNodeDisplayName[${nodes.nosqldb.first.id}]: Session Storage
   setNodeDisplayName[${nodes.nosqldb.last.id}]: Cache Storage
+
+- mountStorage
 
 - log: Load balancer Setup
 - setupBL:
@@ -209,3 +209,15 @@ actions:
       resp = jelastic.env.control.ExecCmdByGroup('${env.envName}', session, "storage", toJSON([{ "command": 'sed -ri \"s/${this.passtype}/' + passwd + '/g\" ${this.config}' }]), false, false, "root");
       return resp;
     nodeid: ${this.id}
+    
+  mountStorage:
+    - log: Mount Storage
+    - api:
+      - method: jelastic.environment.file.AddMountPointByGroup
+        params:
+          nodeGroup: cp
+          sourceNodeId: ${nodes.storage.master.id}
+          sourcePath: /data
+          path: /var/www/webroot/ROOT
+          sourceAddressType: NODE_GROUP
+          protocol: NFS4

@@ -124,7 +124,7 @@ onInstall:
     nodeGroup: sqldb
 
 - log: Downloading, Unpacking, Installation and Patching Magento
-- cmd[storage]:
+- cmd[${nodes.storage.master.id}]:
   - rm -rf /data/* && curl -fsSL "${settings.magento_version}" | tar xj -C /data/  
   - chown 700:700 -Rh /data/
 

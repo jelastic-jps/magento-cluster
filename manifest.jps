@@ -129,7 +129,7 @@ onInstall:
   - chown 700:700 -Rh /data/
 
 - if (/61ae85fbcfc249b4e63bd38efbb8945f/.test("${settings.magento_version}")):
-    - cmd[storage]: wget ${globals.PATH}/configs/magento/local.xml.template -O /data/app/etc/local.xml.template
+    - cmd[${nodes.storage.master.id}]: wget ${globals.PATH}/configs/magento/local.xml.template -O /data/app/etc/local.xml.template
     - setupRDConnect:
         config: /data/app/etc/local.xml.template
     - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg19.conf -O /etc/nginx/conf.d/site-default.conf

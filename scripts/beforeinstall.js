@@ -75,7 +75,7 @@ if ('${settings.ls_addon:false}'== 'true') {
     scalingMode: "STATEFUL",
     addons: ["setup-site-url"],
     env: {
-      WP_PROTECT: wpbfp,
+      WP_PROTECT: "OFF",
       WP_PROTECT_LIMIT: 100
     }
   }, {

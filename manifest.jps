@@ -1,6 +1,6 @@
 jpsType: install
-jpsVersion: '1.5.2'
-id: magento-cluster
+jpsVersion: '1.7.2'
+id: magento-cluster-v200
 homepage: https://github.com/jelastic-jps/magento-cluster/tree/master
 description:
   text: Auto-scalable and highly-available Magento eCommerce cluster with out-of-box
@@ -14,9 +14,9 @@ categories:
 name: Auto-Scalable Magento Cluster
 logo: /images/magento.png
 
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.0.0
+baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/v2.0.0
 
-onBeforeInit: /scripts/settings.js?_r=${fn.random}
+onBeforeInit: /scripts/beforeinit.js?_r=${fn.random}
 onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}
 nodes: definedInOnBeforeInstall
 skipNodeEmails: true
@@ -50,7 +50,7 @@ settings:
  
     - caption: Install LiteSpeed High-Performance Web Server
       type: checkbox
-      name: ls-addon
+      name: ls_addon
       value: true
       disabled: false
       tooltip: "If this option is disabled, the cluster will be installed using NGINX load balancer and application servers"
@@ -62,6 +62,7 @@ settings:
             value: true
             disabled: false
             tooltip: "Protect web sites with <a href='https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:waf'>LiteSpeed built-in WAF</a> based on Free ModSecurity Rules from Comodo"
+
         false:
           - caption: Web Application Firewall
             type: checkbox
@@ -76,49 +77,105 @@ settings:
       value: true
       disabled: false
       tooltip: "<h3>Requirements for All Tables:</h3> * run on InnoDB storage engine <p>* have a primary key</p>Read more about <a href='https://mariadb.com/kb/en/library/mariadb-galera-cluster-known-limitations/'>limitations</a>"
-      
+             
     - caption: Install Let's Encrypt SSL with Auto-Renewal
       type: checkbox
-      name: le-addon
-      value: true
-      disabled: false
+      name: le_addon
+      value: false
+      disabled: true
+      tooltip: "Advanced integration with Let's Encrypt certificate authority that simplifies and automates the process of issuing, configuring and updating trusted custom SSL certificates."
 
-    - caption: Install Lightning-Fast Premium CDN with 130+ PoPs
+    - caption: Install Lightning-Fast Premium CDN
       type: checkbox
-      name: cdn-addon
+      name: cdn_addon
       value: true
       disabled: false
+      tooltip: "Jelastic CDN is an HTTP/3 premium content delivery network of 160+ Super PoPs (points of presence) with bandwidth capacity up to 115 Tbps, advanced caching and acceleration strategies based on best-in-class IP Anycast technology."
+
+    - caption: 'Install GlusterFS Cluster'
+      type: checkbox
+      name: glusterfs
+      value: false
+      disabled: false
+      tooltip: "Shared Storage auto-clustering is based on GlusterFS software that provides a fault-tolerant distributed file system with automatic data synchronization across the cluster nodes."
+
+    - type: displayfield
+      hideLabel: true
+      hidden: true
+      name: bl_count   
+      value: 2
+      markup:
+
+mixins:
+ - https://raw.githubusercontent.com/jelastic-jps/wordpress-cluster/master/configs/vers.yaml
 
 globals:
-  baseURL: ${baseUrl}
+  PATH: ${baseUrl}
   DB_USER: jelastic-${fn.random}
   DB_PASS: ${fn.password(10)}
   DB_HOST: sqldb
   PROTOCOL: http
   MG_ADMIN_PASS: ${fn.password(10)}
+  LS_ADMIN_PASS: ${fn.password(10)}
   SUCCESS: success
   EMAIL: default
-  STACK: nginx
 
+onAfterScaleIn[cp]: updateTriggers
+
+onAfterScaleOut[nodeGroup:bl]:
+  - forEach(event.response.nodes):
+      - setupBL:
+          nodeId: ${@i.id}
+  - forEach(nodes.bl): 
+      sudo jem service restart
+  
 onAfterScaleOut[nodeGroup:cp]:
-  forEach(event.response.nodes):
+  - updateTriggers
+  - forEach(event.response.nodes):
+    - log: Mount Storage
+    - api:
+      - method: jelastic.environment.file.AddMountPointById
+        params:
+          nodeId: ${@i.id}
+          sourceNodeId: ${nodes.storage.master.id}
+          sourcePath: /data
+          path: /var/www/webroot/ROOT
+          sourceAddressType: NODE_GROUP
+          protocol: NFS4
     - log: App Servers Setup
-    - setNodeDisplayName [${@i.id}]: AppServer
     - setupCP:
         nodeId: ${@i.id}
-        
-onAfterRedeployContainer[cp]:
-  - setupCP:
-      nodeId: cp
-
-onAfterRedeployContainer[bl]:
- - setupLB:
-      nodeId: bl
-
-onAfterInstallAddon [nodeGroup:bl, id:cdn]:
-  - install: ${baseUrl}/scripts/setupCDN.jps
  
-onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]: setup-LE-domain
+onBeforeAddNode[sqldb]:
+  stopEvent:
+    type: warning
+    message: Scaling is not supported for database cluster.
+
+onBeforeRemoveNode[sqldb]:
+  stopEvent:
+    type: warning
+    message: Scaling is not supported for database cluster.
+
+onBeforeAddNode[storage]:
+  stopEvent:
+    type: warning
+    message: Scaling is not supported for storage.
+
+onBeforeRemoveNode[storage]:
+  stopEvent:
+    type: warning
+    message: Scaling is not supported for storage.
+      
+onAfterStart: 
+  cmd[cp]: sudo jem service restart
+  
+onAfterInstallAddon [nodeGroup:bl, id:cdn]:
+  - install: ${globals.PATH}/scripts/setupCDN.jps
+ 
+onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]: 
+  - setup-LE-domain
+  - addHSTS:  
+      nodeId: cp
 
 onAfterClone: 
   - script: |
@@ -128,95 +185,132 @@ onAfterClone:
         }
         return resp;
  
-  - install: ${baseUrl}/scripts/setupDomain.jps?_r=${fn.random}
+  - install: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
     envName: ${event.response.env.envName}
     settings:
       domain: ${globals.PROTOCOL}://${event.response.env.domain}
 
-  - install: ${baseUrl}/scripts/cachePurge.jps      
-    envName: ${event.response.env.envName}
-      
+  - if (/litespeed/.test("${nodes.bl.nodeType}")):
+    - install: ${globals.PATH}/scripts/setupHA4LB.jps?_r=${fn.random}
+      envName: ${event.response.env.envName}
+    
+onBeforeMigrate:
+  - cmd[${nodes.cp.master.id}]: wp option get siteurl --path=${SERVER_WEBROOT} | cut -d'/' -f3;
+  - if (/${response.out}/.test(env.domain)):
+      cmd[${nodes.cp.master.id}]: echo true > ~/migrate
+  - else:
+      cmd[${nodes.cp.master.id}]: echo false > ~/migrate
+
 onAfterMigrate:
-  - script: |
+  - cmd[${nodes.cp.master.id}]: if test -f ~/migrate; then cat ~/migrate; fi
+  - if (/${response.out}/.test(true)):
+    - script: |
         var resp = {result:0}
-        if (${event.response.env.sslstate}) {
+        if (${env.sslstate}) {
           resp.onAfterReturn = {setGlobals: {PROTOCOL: "https"}}
         }
         return resp;
  
-  - install: ${baseUrl}/scripts/setupDomain.jps?_r=${fn.random}
-    envName: ${event.response.env.envName}
-    settings:
-      domain: ${globals.PROTOCOL}://${event.response.env.domain}
-
-  - install: ${baseUrl}/scripts/cachePurge.jps      
-    envName: ${event.response.env.envName}
+    - install: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
+      settings:
+        domain: ${globals.PROTOCOL}://${env.domain}
+      
+  - if (/litespeed/.test("${nodes.bl.nodeType}")):
+      - install: ${globals.PATH}/scripts/setupHA4LB.jps?_r=${fn.random}
+      
+  - cmd[cp]: sudo jem service restart
       
 onInstall:
-        
-  - script: ${baseUrl}/scripts/idna.js
+
+  - script: |
+        return {
+          result:0,
+          ssl: jelastic.billing.account.GetQuotas('environment.jelasticssl.enabled').array[0].value
+        }
+  - if (${response.ssl}):
+      setGlobals:
+        PROTOCOL: https
+
+  - script: /scripts/idna.js
   - setGlobals:
       DOMAIN: ${response.domain}         
-            
+
   - if (${settings.is_trigger:true}):
     - log: Auto Scaling Triggers
-    - script: "${baseUrl}/scripts/addTriggers.js"
+    - script: "/scripts/addTriggers.js"
       nodeGroup: cp
       resourceType: CPU
       loadGrowth: ${settings.loadGrowth}
       cleanOldTriggers: true
       scaleDownLimit: ${nodes.cp.length}
-    
-  - log: Set Node Display Name
-  - setNodeDisplayName [bl]: Load balancer
-  - setNodeDisplayName [cp]: AppServer
-  - setNodeDisplayName [storage]: Storage  
 
-  - if (${settings.galera:false}):
-    - log: DB Galera  Setup
-    - install: https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/galera.jps
-      settings:
-        db_user: "${globals.DB_USER}"
-        db_pass: "${globals.DB_PASS}"
-      nodeGroup: sqldb
-  - if (!${settings.galera:false}):
-    - log: Master-Master Replication Setup
-    - install: https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/scripts/ms-mm-configuration.jps
-      settings:        
-        path: https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/
-        scheme: master
-        db_user: "${globals.DB_USER}"
-        db_pass: "${globals.DB_PASS}"
-      nodeGroup: sqldb
+  - mountStorage
 
-  - setupLB:
-      nodeId: bl
-      
-  - setupCP:
-      nodeId: cp
-
-  - if (${settings.le-addon:false}):
+  - if ('${settings.le_addon:false}' == 'true'):
       - setGlobals:
           PROTOCOL: https
-          
+   
+  - log: Load Balancers and App servers optimization
+  - install:
+    - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+      settings:
+        targetGroup: bl
+        targetNodes: bl
+        optimization: magento
+    - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+      settings:
+        targetGroup: cp
+        targetNodes: cp
+        optimization: magento
+  - cmd[cp, bl]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
+  - if (/litespeed/.test("${nodes.cp.nodeType}")):
+    - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
+      user: root
+    - install: ${globals.PATH}/scripts/setupHA4LB.jps?_r=${fn.random}
+    - cmd[bl]: |-
+        jem balancer clear;
+        jem balancer rebuildCommon;
+      user: root
+
   - install-magento
-
-  - if (${settings.le-addon:false}): 
-      - install-LE-addon
+ 
+  - if (('${settings.le_addon:false}' == 'true') || ('${settings.cdn-addon:false}' == 'true')):
+    - script: |
+        var actions = [];
+        if ('${settings.le_addon:false}' == 'true')
+          actions.push({
+            jps: "https://github.com/jelastic-jps/lets-encrypt/blob/master/manifest.jps?_r=${fn.random}?_r=${fn.random}",
+            nodeGroup: "bl",
+            skipEmail: "true",
+            settings: {
+              customDomains: "${globals.DOMAIN}",
+              fallbackToX1: "true"
+            }
+          });
+        if ('${settings.cdn_addon:false}' == 'true')
+          actions.push({
+            jps: "https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}",
+            nodeGroup: "bl",
+            skipEmail: "true",
+            settings: {
+              note: "${settings.noteCDN:}"
+            }
+          });
+        return { result: 0, onAfterReturn: { install: actions } };
+   
+  - if ('${settings.le_addon:false}' == 'true'): 
       - setup-LE-domain
+      - addHSTS:  
+          nodeId: cp
 
-  - if (${settings.cdn-addon:false}): install-edgeport-CDN
-  
-  - if (${settings.ls-addon:false}):
-      setGlobals:
-        STACK: llsmp
+  - if ('${settings.cdn_addon:false}' == 'true'): setup-edgeport-CDN
         
 addons:
   - id: setup-site-url
     type: update
     name: Magento Base URL
     description: Magento Base URL Configuration.
-    logo: ${globals.baseURL}/images/magento.png
+    logo: ${globals.PATH}/images/magento.png
     settings:
       fields:
         - type: string
@@ -239,7 +333,7 @@ addons:
     type: update
     name: Cache Purge
     description: Cache Purge.
-    logo: ${globals.baseURL}/images/magento.png
+    logo: ${globals.PATH}/images/magento.png
     buttons:
       - caption: Cache Purge
         action: cache-purge
@@ -259,19 +353,19 @@ actions:
 
   setup-LE-domain:
     - cmd[bl]: source /opt/letsencrypt/settings && echo $domain
-    - install: ${baseUrl}/scripts/setupDomain.jps
+    - install: ${globals.PATH}/scripts/setupDomain.jps
       settings:
         domain: https://${response.out}
-    - install: ${baseUrl}/scripts/cachePurge.jps
+    - install: ${globals.PATH}/scripts/cachePurge.jps
 
   setup-domain:
-    - install: ${globals.baseURL}/scripts/setupDomain.jps
+    - install: ${globals.PATH}/scripts/setupDomain.jps
       settings:
         domain: ${settings.magentoURL}
-    - install: ${globals.baseURL}/scripts/cachePurge.jps
+    - install: ${globals.PATH}/scripts/cachePurge.jps
         
   cache-purge:
-    - install: ${globals.baseURL}/scripts/cachePurge.jps
+    - install: ${globals.PATH}/scripts/cachePurge.jps
 
   install-edgeport-CDN:
     - install: https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}

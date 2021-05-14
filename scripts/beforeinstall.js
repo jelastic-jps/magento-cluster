@@ -81,6 +81,7 @@ if ('${settings.ls_addon:false}'== 'true') {
   }, {
     nodeType: "litespeedphp",
     count: ${settings.cp_count:2},
+    engine: "php7.4",
     flexibleCloudlets: ${settings.cp_flexibleCloudlets:16},
     fixedCloudlets: ${settings.cp_fixedCloudlets:1},
     nodeGroup: "cp",
@@ -107,6 +108,7 @@ if ('${settings.ls_addon:false}'== 'true') {
   }, {
     nodeType: "nginxphp",
     count: ${settings.cp_count:2},
+    engine: "php7.4",
     flexibleCloudlets: ${settings.cp_flexibleCloudlets:8},                  
     fixedCloudlets: ${settings.cp_fixedCloudlets:1},
     nodeGroup: "cp",

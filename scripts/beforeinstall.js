@@ -133,7 +133,7 @@ resp.nodes.push({
   displayName: "Elasticsearch",
   env: {
     ES_JAVA_OPTS: "-Xms512m -Xmx512m",
-    ELASTIC_PASSWORD: "abcABC123"
+    ELASTIC_PASSWORD: "${globals.ES_PASS}"
   }
 })
 

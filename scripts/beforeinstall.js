@@ -130,7 +130,10 @@ resp.nodes.push({
   dockerName: "elasticsearch",
   dockerTag: "latest",
   displayName: "Elasticsearch",
-
+  env: {
+    ES_JAVA_OPTS: "-Xms512m -Xmx512m",
+    ELASTIC_PASSWORD: "abcABC123"
+  }
 })
 
 return resp;

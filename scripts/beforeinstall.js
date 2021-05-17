@@ -87,7 +87,7 @@ if ('${settings.ls_addon:false}'== 'true') {
     restartDelay: 10,
     scalingMode: "STATELESS",
     addons: ["setup-site-url"],
-    links: elasticsearch:elasticsearch,
+    links: "elasticsearch:elasticsearch",
     env: {
       SERVER_WEBROOT: "/var/www/webroot/ROOT",
       REDIS_ENABLED: "true",

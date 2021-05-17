@@ -129,7 +129,7 @@ resp.nodes.push({
   fixedCloudlets: ${settings.st_fixedCloudlets:1},
   nodeGroup: "elasticsearch",
   dockerName: "elasticsearch",
-  dockerTag: "latest",
+  dockerTag: "7.12.1",
   displayName: "Elasticsearch",
   env: {
     ES_JAVA_OPTS: "-Xms512m -Xmx512m",

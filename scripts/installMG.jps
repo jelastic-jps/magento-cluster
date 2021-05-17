@@ -9,17 +9,31 @@ globals:
   DB_NAME: magento_${fn.random}
   DB_USER: "${settings.db_user}"
   DB_PASS: "${settings.db_pass}"
+  ES_PASS: "${settings.es_pass}"
   USER_EMAIL: "${settings.user_email}"
   MG_URL: "${settings.mg_url}"
+  CLUSTER: "${settings.cluster:true}"
 
 onInstall:
   - log: test
 
 actions:
   installMG:
-    - cmd[${nodes.cp.master.id}]: |-
-        wget ${baseUrl}/installMG.sh?_r=${fn.random} -O ~/installMG.sh &>> /var/log/run.log
-        wget ${baseUrl}/setupMG.sh?_r=${fn.random} -O ~/setupMG.sh &>> /var/log/run.log
+    - if ('${globals.CLUSTER}' == 'true'):
+        cmd[${nodes.cp.master.id}]: |-
+          [ -d /tmp/magento ] && rm -rf /tmp/magento;
+          mkdir /tmp/magento;
+          rm -rf /var/www/webroot/ROOT/* && wget -qO- 'https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-2.4.2.tar.bz2' | tar xj -C /tmp/magento && mv /tmp/magento/* /var/www/webroot/ROOT;
+          
+    - else:
+        cmd[${nodes.cp.master.id}]: |-    
+          wget -qO- 'https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-2.4.2.tar.bz2' | tar xj -C /tmp/magento& & mv /tmp/magento/* /var/www/webroot/ROOT;
+          wget -qO- 'https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-${globals.VERSION_MAGENTO}.tar.bz2' | tar xf -C /tmp && mv /tmp/wordpress/* /var/www/webroot/ROOT;
+          wget -qO- 'https://wordpress.org/wordpress-${globals.VERSION_WORDPRESS}.tar.gz' | tar xz -C /tmp && mv /tmp/wordpress/* ${SERVER_WEBROOT}
+          mysql -u${globals.DB_USER} -p${globals.DB_PASS} -h ${globals.DB_HOST} -e "CREATE DATABASE IF NOT EXISTS ${globals.DB_NAME};"
+          cd /var/www/webroot/ROOT && wp core config --dbhost=${globals.DB_HOST} --dbname=${globals.DB_NAME} --dbuser=${globals.DB_USER} --dbpass=${globals.DB_PASS} --path=${SERVER_WEBROOT}
+          cd /var/www/webroot/ROOT && wp core install --title="${globals.WP_TITLE}" --admin_user=${user.email} --admin_password=${globals.WP_ADMIN_PASS} --url=${globals.WP_URL} --admin_email=${user.email} --skip-email --path=${SERVER_WEBROOT}
+          wget ${baseUrl}../images/favicon.ico -O ${SERVER_WEBROOT}/favicon.ico
   
   setupMGForLS:
     - cmd[${nodes.cp.master.id}]: |-

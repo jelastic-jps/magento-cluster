@@ -16,7 +16,6 @@ if ('${settings.glusterfs:false}' == 'true') {
     fixedCloudlets: ${settings.st_fixedCloudlets:1},
     nodeGroup: "storage",
     restartDelay: 10,
-    isRedeploySupport: false,
     validation: {
       minCount: 3,
       maxCount: 3
@@ -29,7 +28,6 @@ if ('${settings.glusterfs:false}' == 'true') {
     flexibleCloudlets: ${settings.st_flexibleCloudlets:8},
     fixedCloudlets: ${settings.st_fixedCloudlets:1},
     nodeGroup: "storage",
-    isRedeploySupport: false,
     validation: {
       minCount: 1,
       maxCount: 1
@@ -41,6 +39,7 @@ resp.nodes.push({
   nodeType: "mariadb-dockerized",
   flexibleCloudlets: ${settings.db_flexibleCloudlets:16},
   fixedCloudlets: ${settings.db_fixedCloudlets:1},
+  tag: "10.4.17",
   count: db_count,
   nodeGroup: "sqldb",
   restartDelay: 10,
@@ -82,7 +81,7 @@ if ('${settings.ls_addon:false}'== 'true') {
     nodeType: "litespeedphp",
     count: ${settings.cp_count:2},
     engine: "php7.4",
-    flexibleCloudlets: ${settings.cp_flexibleCloudlets:16},
+    flexibleCloudlets: ${settings.cp_flexibleCloudlets:32},
     fixedCloudlets: ${settings.cp_fixedCloudlets:1},
     nodeGroup: "cp",
     restartDelay: 10,
@@ -109,7 +108,7 @@ if ('${settings.ls_addon:false}'== 'true') {
     nodeType: "nginxphp",
     count: ${settings.cp_count:2},
     engine: "php7.4",
-    flexibleCloudlets: ${settings.cp_flexibleCloudlets:8},                  
+    flexibleCloudlets: ${settings.cp_flexibleCloudlets:32},                  
     fixedCloudlets: ${settings.cp_fixedCloudlets:1},
     nodeGroup: "cp",
     restartDelay: 10,
@@ -121,5 +120,17 @@ if ('${settings.ls_addon:false}'== 'true') {
     }
   })
 }
+
+resp.nodes.push({
+  nodeType: "docker",
+  count: 1,
+  flexibleCloudlets: ${settings.st_flexibleCloudlets:16},
+  fixedCloudlets: ${settings.st_fixedCloudlets:1},
+  nodeGroup: "elasticsearch",
+  dockerName: "elasticsearch",
+  dockerTag: "latest",
+  displayName: "Elasticsearch",
+
+})
 
 return resp;

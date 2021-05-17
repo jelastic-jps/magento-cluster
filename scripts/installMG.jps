@@ -13,18 +13,13 @@ globals:
   MG_URL: "${settings.mg_url}"
 
 onInstall:
-  - installMG
-  - setupMG
-  - if ("${nodes.cp.master.nodeType}" == "litespeedphp"): setupMGForLS
-  - if ("${nodes.cp.master.nodeType}" == "nginxphp"): setupMGForNG
-  - install: ${baseUrl}/cachePurge.jps
+  - log: test
 
 actions:
   installMG:
     - cmd[${nodes.cp.master.id}]: |-
         wget ${baseUrl}/installMG.sh?_r=${fn.random} -O ~/installMG.sh &>> /var/log/run.log
         wget ${baseUrl}/setupMG.sh?_r=${fn.random} -O ~/setupMG.sh &>> /var/log/run.log
-        bash ~/installMG.sh ${globals.DB_USER} ${globals.DB_PASS} ${globals.DB_HOST} ${globals.DB_NAME} ${globals.MG_ADMIN_PASS} ${globals.MG_URL} ${globals.USER_EMAIL} &>> /var/log/run.log
   
   setupMGForLS:
     - cmd[${nodes.cp.master.id}]: |-

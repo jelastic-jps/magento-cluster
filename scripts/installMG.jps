@@ -44,7 +44,7 @@ actions:
         cmd[${nodes.cp.master.id}]: |-    
           [ -d /tmp/magento ] && rm -rf /tmp/magento;
           mkdir /tmp/magento;
-          rm -rf /var/www/webroot/ROOT/* && wget -qO- 'https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-${globals.version}.tar.bz2' | tar xj -C /tmp/magento && mv /tmp/magento/* /var/www/webroot/ROOT;
+          rm -rf /var/www/webroot/ROOT/* && wget -qO- 'https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-${globals.VERSION}.tar.bz2' | tar xj -C /tmp/magento && mv /tmp/magento/* /var/www/webroot/ROOT;
 
   installScripts:
     - cmd[${nodes.cp.master.id}]: |- 

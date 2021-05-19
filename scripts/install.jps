@@ -38,7 +38,10 @@ actions:
             --admin-password ${globals.MG_ADMIN_PASS} \
             --elasticsearch-host ${globals.ES_HOST} \
             --elasticsearch-username elastic \
-            --elasticsearch-password ${globals.ES_PASS}
+            --elasticsearch-password ${globals.ES_PASS} \
+            --session-save redis \
+            --session-save-redis-host /var/run/redis/redis.sock \
+            --session-save-redis-port 0
           
     - else:
         cmd[${nodes.cp.master.id}]: |-    

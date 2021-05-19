@@ -18,6 +18,9 @@ install(){
         "elasticsearch-port"
         "elasticsearch-username"
         "elasticsearch-password"
+        "session-save"
+        "session-save-redis-host"
+        "session-save-redis-port"
     )
 
     opts=$(getopt \
@@ -74,6 +77,18 @@ install(){
                 elasticsearch_password=$2
                 shift 2
                 ;;
+            --session-save)
+                session_save=$2
+                shift 2
+                ;;
+            --session-save-redis-host)
+                session_save_redis_host=$2
+                shift 2
+                ;;
+            --session-save-redis-port)
+                session_save_redis_port=$2
+                shift 2
+                ;;                
         *)
             break
             ;;
@@ -92,6 +107,9 @@ install(){
         --elasticsearch-username=${elasticsearch_username} \
         --elasticsearch-password=${elasticsearch_password} \
         --elasticsearch-enable-auth=1 \
+        --session-save=${session_save} \
+        --session-save-redis-host=${session_save_redis_host} \
+        --session-save-redis-port=${session_save_redis_port} \        
         --base-url=${base_url} \
         --admin-firstname=Admin \
         --admin-lastname=AdminLast \

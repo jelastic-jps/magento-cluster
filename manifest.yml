@@ -1,6 +1,6 @@
 jpsType: install
 jpsVersion: '1.7.2'
-id: magento-cluster-v2
+id: magento-cluster-v200
 homepage: https://github.com/jelastic-jps/magento-cluster/tree/master
 description:
   text: Auto-scalable and highly-available Magento eCommerce cluster with out-of-box
@@ -243,7 +243,7 @@ actions:
     - install: /scripts/setupCDN.jps
 
   installMagento:
-    - install: /scripts/installMG.jps
+    - install: /scripts/install.jps
       settings:
         db_host: ${globals.DB_HOST}
         db_user: ${globals.DB_USER}

@@ -10,7 +10,6 @@ RSYNC=`which rsync`
 TAR=`which tar`
 COMPOSER=`which composer`
 
-
 install(){
     ARGUMENT_LIST=(
         "base-url"

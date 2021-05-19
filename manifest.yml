@@ -167,7 +167,7 @@ onInstall:
       echo "xpack.security.enabled: true" >> /usr/share/elasticsearch/config/elasticsearch.yml;
       systemctl stop firewalld;
       systemctl disable firewalld;
-  - restartNodes [elasticsearch]
+  - restartContainers [elasticsearch]
   - installMagento
  
 addons:

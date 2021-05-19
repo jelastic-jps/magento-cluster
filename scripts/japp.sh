@@ -18,9 +18,14 @@ install(){
         "elasticsearch-port"
         "elasticsearch-username"
         "elasticsearch-password"
+        "cache-backend"
+        "cache-backend-redis-server"
+        "cache-backend-redis-port"
+        "cache-backend-redis-db"
         "session-save"
         "session-save-redis-host"
         "session-save-redis-port"
+        "session-save-redis-db"
     )
 
     opts=$(getopt \
@@ -77,6 +82,22 @@ install(){
                 elasticsearch_password=$2
                 shift 2
                 ;;
+            --cache-backend)
+                cache_backend=$2
+                shift 2
+                ;;
+            --cache-backend-redis-server)
+                cache_backend_redis_server=$2
+                shift 2
+                ;;
+            --cache-backend-redis-port)
+                cache_backend_redis_port=$2
+                shift 2
+                ;;
+            --cache-backend-redis-db)
+                cache_backend_redis_db=$2
+                shift 2
+                ;;
             --session-save)
                 session_save=$2
                 shift 2
@@ -88,7 +109,11 @@ install(){
             --session-save-redis-port)
                 session_save_redis_port=$2
                 shift 2
-                ;;                
+                ;;
+            --session-save-redis-db)
+                session_save_redis_db=$2
+                shift 2
+                ;;
         *)
             break
             ;;
@@ -107,9 +132,14 @@ install(){
         --elasticsearch-username=${elasticsearch_username} \
         --elasticsearch-password=${elasticsearch_password} \
         --elasticsearch-enable-auth=1 \
+        --cache-backend=${cache_backend} \
+        --cache-backend-redis-server=${cache_backend_redis_server} \
+        --cache-backend-redis-db=${cache_backend_redis_db} \
+        --cache-backend-redis-port=${cache_backend_redis_port} \        
         --session-save=${session_save} \
         --session-save-redis-host=${session_save_redis_host} \
-        --session-save-redis-port=${session_save_redis_port} \        
+        --session-save-redis-port=${session_save_redis_port} \
+        --session-save-redis-db=${session_save_redis_db} \        
         --base-url=${base_url} \
         --admin-firstname=Admin \
         --admin-lastname=AdminLast \

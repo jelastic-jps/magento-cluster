@@ -135,11 +135,11 @@ install(){
         --cache-backend=${cache_backend} \
         --cache-backend-redis-server=${cache_backend_redis_server} \
         --cache-backend-redis-db=${cache_backend_redis_db} \
-        --cache-backend-redis-port=${cache_backend_redis_port} \        
+        --cache-backend-redis-port=${cache_backend_redis_port} \
         --session-save=${session_save} \
         --session-save-redis-host=${session_save_redis_host} \
         --session-save-redis-port=${session_save_redis_port} \
-        --session-save-redis-db=${session_save_redis_db} \        
+        --session-save-redis-db=${session_save_redis_db} \
         --base-url=${base_url} \
         --admin-firstname=Admin \
         --admin-lastname=AdminLast \

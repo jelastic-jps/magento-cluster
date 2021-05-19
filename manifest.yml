@@ -16,7 +16,6 @@ logo: /images/magento.png
 
 baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/v2.0.0
 
-onBeforeInit: /scripts/beforeinit.js?_r=${fn.random}
 onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}
 nodes: definedInOnBeforeInstall
 skipNodeEmails: true
@@ -81,8 +80,8 @@ settings:
     - caption: Install Let's Encrypt SSL with Auto-Renewal
       type: checkbox
       name: le_addon
-      value: false
-      disabled: true
+      value: true
+      disabled: false
       tooltip: "Advanced integration with Let's Encrypt certificate authority that simplifies and automates the process of issuing, configuring and updating trusted custom SSL certificates."
 
     - caption: Install Lightning-Fast Premium CDN
@@ -107,7 +106,7 @@ settings:
       markup:
 
 mixins:
- - https://raw.githubusercontent.com/jelastic-jps/wordpress-cluster/master/configs/vers.yaml
+ - https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/configs/vers.yaml
 
 globals:
   PATH: ${baseUrl}
@@ -120,106 +119,6 @@ globals:
   LS_ADMIN_PASS: ${fn.password(10)}
   SUCCESS: success
   EMAIL: default
-
-onAfterScaleIn[cp]: updateTriggers
-
-onAfterScaleOut[nodeGroup:bl]:
-  - forEach(event.response.nodes):
-      - setupBL:
-          nodeId: ${@i.id}
-  - forEach(nodes.bl): 
-      sudo jem service restart
-  
-onAfterScaleOut[nodeGroup:cp]:
-  - updateTriggers
-  - forEach(event.response.nodes):
-    - log: Mount Storage
-    - api:
-      - method: jelastic.environment.file.AddMountPointById
-        params:
-          nodeId: ${@i.id}
-          sourceNodeId: ${nodes.storage.master.id}
-          sourcePath: /data
-          path: /var/www/webroot/ROOT
-          sourceAddressType: NODE_GROUP
-          protocol: NFS4
-    - log: App Servers Setup
-    - setupCP:
-        nodeId: ${@i.id}
- 
-onBeforeAddNode[sqldb]:
-  stopEvent:
-    type: warning
-    message: Scaling is not supported for database cluster.
-
-onBeforeRemoveNode[sqldb]:
-  stopEvent:
-    type: warning
-    message: Scaling is not supported for database cluster.
-
-onBeforeAddNode[storage]:
-  stopEvent:
-    type: warning
-    message: Scaling is not supported for storage.
-
-onBeforeRemoveNode[storage]:
-  stopEvent:
-    type: warning
-    message: Scaling is not supported for storage.
-      
-onAfterStart: 
-  cmd[cp]: sudo jem service restart
-  
-onAfterInstallAddon [nodeGroup:bl, id:cdn]:
-  - install: ${globals.PATH}/scripts/setupCDN.jps
- 
-onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]: 
-  - setup-LE-domain
-  - addHSTS:  
-      nodeId: cp
-
-onAfterClone: 
-  - script: |
-        var resp = {result:0}
-        if (${event.response.env.sslstate}) {
-          resp.onAfterReturn = {setGlobals: {PROTOCOL: "https"}}
-        }
-        return resp;
- 
-  - install: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
-    envName: ${event.response.env.envName}
-    settings:
-      domain: ${globals.PROTOCOL}://${event.response.env.domain}
-
-  - if (/litespeed/.test("${nodes.bl.nodeType}")):
-    - install: ${globals.PATH}/scripts/setupHA4LB.jps?_r=${fn.random}
-      envName: ${event.response.env.envName}
-    
-onBeforeMigrate:
-  - cmd[${nodes.cp.master.id}]: wp option get siteurl --path=${SERVER_WEBROOT} | cut -d'/' -f3;
-  - if (/${response.out}/.test(env.domain)):
-      cmd[${nodes.cp.master.id}]: echo true > ~/migrate
-  - else:
-      cmd[${nodes.cp.master.id}]: echo false > ~/migrate
-
-onAfterMigrate:
-  - cmd[${nodes.cp.master.id}]: if test -f ~/migrate; then cat ~/migrate; fi
-  - if (/${response.out}/.test(true)):
-    - script: |
-        var resp = {result:0}
-        if (${env.sslstate}) {
-          resp.onAfterReturn = {setGlobals: {PROTOCOL: "https"}}
-        }
-        return resp;
- 
-    - install: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
-      settings:
-        domain: ${globals.PROTOCOL}://${env.domain}
-      
-  - if (/litespeed/.test("${nodes.bl.nodeType}")):
-      - install: ${globals.PATH}/scripts/setupHA4LB.jps?_r=${fn.random}
-      
-  - cmd[cp]: sudo jem service restart
       
 onInstall:
 
@@ -228,7 +127,7 @@ onInstall:
           result:0,
           ssl: jelastic.billing.account.GetQuotas('environment.jelasticssl.enabled').array[0].value
         }
-  - if (${response.ssl}):
+  - if (${response.ssl} || '${settings.le_addon:false}' == 'true'):
       setGlobals:
         PROTOCOL: https
 
@@ -238,7 +137,7 @@ onInstall:
 
   - if (${settings.is_trigger:true}):
     - log: Auto Scaling Triggers
-    - script: "/scripts/addTriggers.js"
+    - script: /scripts/addTriggers.js
       nodeGroup: cp
       resourceType: CPU
       loadGrowth: ${settings.loadGrowth}
@@ -246,12 +145,8 @@ onInstall:
       scaleDownLimit: ${nodes.cp.length}
 
   - mountStorage
-
-  - if ('${settings.le_addon:false}' == 'true'):
-      - setGlobals:
-          PROTOCOL: https
    
-  - log: Load Balancers and App servers optimization
+  - log: Layers configurations
   - install:
     - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
       settings:
@@ -382,14 +277,17 @@ actions:
         EMAIL: cdn
     - install: /scripts/setupCDN.jps
 
-  install-magento:
+  installMagento:
     - install: /scripts/installMG.jps
       settings:
         db_host: ${globals.DB_HOST}
         db_user: ${globals.DB_USER}
         db_pass: ${globals.DB_PASS}
+        es_host: elasticsearch
+        es_pass: ${globals.ES_PASS}
         mg_admin_pass: ${globals.MG_ADMIN_PASS}
         mg_url: ${globals.PROTOCOL}://${globals.DOMAIN}/
+        version: ${globals.version_magento}
         user_email: ${user.email}
 
   setupCP:

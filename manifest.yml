@@ -146,7 +146,7 @@ onInstall:
 
   - mountStorage
    
-  - log: Layers configurations
+  - log: Nodes configurations
   - install:
     - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
       settings:
@@ -162,44 +162,9 @@ onInstall:
   - if (/litespeed/.test("${nodes.cp.nodeType}")):
     - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
       user: root
-    - install: ${globals.PATH}/scripts/setupHA4LB.jps?_r=${fn.random}
-    - cmd[bl]: |-
-        jem balancer clear;
-        jem balancer rebuildCommon;
-      user: root
 
-  - install-magento
+  - installMagento
  
-  - if (('${settings.le_addon:false}' == 'true') || ('${settings.cdn-addon:false}' == 'true')):
-    - script: |
-        var actions = [];
-        if ('${settings.le_addon:false}' == 'true')
-          actions.push({
-            jps: "https://github.com/jelastic-jps/lets-encrypt/blob/master/manifest.jps?_r=${fn.random}?_r=${fn.random}",
-            nodeGroup: "bl",
-            skipEmail: "true",
-            settings: {
-              customDomains: "${globals.DOMAIN}",
-              fallbackToX1: "true"
-            }
-          });
-        if ('${settings.cdn_addon:false}' == 'true')
-          actions.push({
-            jps: "https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}",
-            nodeGroup: "bl",
-            skipEmail: "true",
-            settings: {
-              note: "${settings.noteCDN:}"
-            }
-          });
-        return { result: 0, onAfterReturn: { install: actions } };
-   
-  - if ('${settings.le_addon:false}' == 'true'): 
-      - setup-LE-domain
-      - addHSTS:  
-          nodeId: cp
-
-  - if ('${settings.cdn_addon:false}' == 'true'): setup-edgeport-CDN
         
 addons:
   - id: setup-site-url
@@ -308,12 +273,18 @@ actions:
         optimization: magento
     - cmd[${this.nodeId}]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
 
-    - if ("${nodes.bl.master.nodeType}" == "varnish"):
-      - forEach(nodes.cp):
-          cmd[${this.nodeId}]:
-            - jem balancer addCommonHost -h ${@i.intIP}
-            - sudo service varnish reload &>> /var/log/run.log
-   
+  mountStorage:
+    - log: Mount Storage
+    - api:
+      - method: jelastic.environment.file.AddMountPointByGroup
+        params:
+          nodeGroup: cp
+          sourceNodeId: ${nodes.storage.master.id}
+          sourcePath: /data
+          path: /var/www/webroot/ROOT
+          sourceAddressType: NODE_GROUP
+          protocol: NFS4
+
 success:
   email: success/email/success-${globals.STACK}-${globals.EMAIL}.md?_r=${fn.random}
   text: success/text/${globals.SUCCESS}.md?_r=${fn.random}

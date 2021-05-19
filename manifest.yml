@@ -162,10 +162,14 @@ onInstall:
   - if (/litespeed/.test("${nodes.cp.nodeType}")):
     - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
       user: root
-
+  - cmd[elasticsearch]: |-
+      echo "discovery.type: single-node" >> /usr/share/elasticsearch/config/elasticsearch.yml;
+      echo "xpack.security.enabled: true" >> /usr/share/elasticsearch/config/elasticsearch.yml;
+      systemctl stop firewalld;
+      systemctl disable firewalld;
+  - restartNodes [elasticsearch]
   - installMagento
  
-        
 addons:
   - id: setup-site-url
     type: update

@@ -39,9 +39,14 @@ actions:
             --elasticsearch-host ${globals.ES_HOST} \
             --elasticsearch-username elastic \
             --elasticsearch-password ${globals.ES_PASS} \
+            --cache-backend redis \
+            --cache-backend-redis-server /var/run/redis/redis.sock \
+            --cache-backend-redis-db 0 \
+            --cache-backend-redis-port 0 \
             --session-save redis \
             --session-save-redis-host /var/run/redis/redis.sock \
-            --session-save-redis-port 0
+            --session-save-redis-port 0 \
+            --session-save-redis-db 1
           
     - else:
         cmd[${nodes.cp.master.id}]: |-    

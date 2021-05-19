@@ -1,9 +1,15 @@
 #!/bin/bash -e
 
 MAGENTO_DIR=/var/www/webroot/ROOT
+MAGENTO_BIN="php ${MAGENTO_DIR}/bin/magento"
 LOG=/var/log/run.log
 MYSQL=`which mysql`
 SED=`which sed`
+WGET=`which wget`
+RSYNC=`which rsync`
+TAR=`which tar`
+COMPOSER=`which composer`
+
 
 install(){
     ARGUMENT_LIST=(
@@ -122,7 +128,7 @@ install(){
 
     $MYSQL -u${db_user} -p${db_password} -h ${db_host} -e "CREATE DATABASE IF NOT EXISTS ${db_name};"
 
-    php -f ${MAGENTO_DIR}/bin/magento setup:install -s \
+    ${MAGENTO_BIN} setup:install -s \
         --backend-frontname=admin \
         --db-host=${db_host} \
         --db-name=${db_name} \
@@ -148,8 +154,32 @@ install(){
         --admin-password=${admin_password};
 }
 
+litemage(){
+    if [ $2 == 'ON' ] ; then
+        loop_limit=10
+        for (( i=0 ; i<${loop_limit} ; i++ )); do
+            version=$(curl --silent "https://api.github.com/repos/litespeedtech/magento2-LiteSpeed_LiteMage/releases" | grep tag_name | sed -E 's/.*"([^"]+)".*/\1/' | sort -r | head -n 1);
+            short_version=$(echo ${version} | sed 's/v//');
+            $WGET https://github.com/litespeedtech/magento2-LiteSpeed_LiteMage/archive/${version}.tar.gz -O /tmp/${version}.tgz;
+            [ $? == 0 ] && break;
+            sleep 6
+        done
+
+        $TAR -C "/tmp" -xpzf "/tmp/${version}.tgz";
+        [ -d ${MAGENTO_DIR}/app/code/Litespeed/Litemage ] || mkdir -p ${MAGENTO_DIR}/app/code/Litespeed/Litemage;
+        $RSYNC -au --remove-source-files /tmp/magento2-LiteSpeed_LiteMage-${short_version}/ ${MAGENTO_DIR}/app/code/Litespeed/Litemage/;
+        ${MAGENTO_BIN} module:enable Litespeed_Litemage &>> $LOG;
+        ${MAGENTO_BIN} setup:upgrade &>>$LOG;
+        ${MAGENTO_BIN} config:set system/full_page_cache/caching_application LITEMAGE &>>$LOG;
+    fi
+}
+
 case ${1} in
     install)
         install "$@"
+        ;;
+
+    litemage)
+        litemage "$@"
         ;;
 esac

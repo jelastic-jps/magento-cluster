@@ -27,7 +27,7 @@ actions:
           [ -d /tmp/magento ] && rm -rf /tmp/magento;
           mkdir /tmp/magento;
           rm -rf /var/www/webroot/ROOT/* && wget -qO- 'https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-${globals.VERSION}.tar.bz2' | \
-            tar xj -C /tmp/magento && mv /tmp/magento/* /var/www/webroot/ROOT;
+            tar xj -C /tmp/magento && cp -r /tmp/magento/* /var/www/webroot/ROOT;
           bash ~/bin/japp.sh install \
             --db-host ${globals.DB_HOST} \
             --db-password ${globals.DB_PASS} \

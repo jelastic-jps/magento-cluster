@@ -19,6 +19,7 @@ globals:
 onInstall:
   - installScripts
   - installMG
+  - setupForLS
 
 actions:
   installMG:
@@ -64,13 +65,13 @@ actions:
       user: root
 
 
-  setupMGForLS:
+  setupForLS:
     - cmd[${nodes.cp.master.id}]: |-
-        bash ~/setupMG.sh --litemage true &>> /var/log/run.log
+        bash ~/bin/japp.sh litemage on
 
-  setupMGForNG:
+  setupForNG:
     - cmd[${nodes.cp.master.id}]: |-
-        bash ~/setupMG.sh --varnish true &>> /var/log/run.log
+        bash ~/bin/japp.sh varnish on
 
   setupMG:
     - cmd[${nodes.cp.master.id}]: |-

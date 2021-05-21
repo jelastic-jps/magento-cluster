@@ -151,7 +151,9 @@ install(){
         --admin-email=${admin_email} \
         --admin-user=admin \
         --admin-password=${admin_password} \
-        --disable-modules Magento_TwoFactorAuth
+        --disable-modules Magento_TwoFactorAuth;
+
+    ${MAGENTO_BIN} index:reindex;
 }
 
 litemage(){

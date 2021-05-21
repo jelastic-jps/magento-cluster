@@ -157,7 +157,7 @@ install(){
 }
 
 litemage(){
-    if [ $2 == 'ON' ] ; then
+    if [ $2 == 'on' ] ; then
         loop_limit=10
         for (( i=0 ; i<${loop_limit} ; i++ )); do
             version=$(curl --silent "https://api.github.com/repos/litespeedtech/magento2-LiteSpeed_LiteMage/releases" | grep tag_name | sed -E 's/.*"([^"]+)".*/\1/' | sort -r | head -n 1);

@@ -150,7 +150,7 @@ install(){
         --admin-lastname=AdminLast \
         --admin-email=${admin_email} \
         --admin-user=admin \
-        --admin-password=${admin_password} &>>$LOG;;
+        --admin-password=${admin_password}
 }
 
 litemage(){

@@ -176,6 +176,71 @@ litemage(){
     fi
 }
 
+
+edgeportCDN(){
+
+    ARGUMENT_LIST=(
+        "cdn-url"
+    )
+
+    opts=$(getopt \
+        --longoptions "$(printf "%s:," "${ARGUMENT_LIST[@]}")" \
+        --name "$(basename "$0")" \
+        --options "" \
+        -- "$@"
+    )
+    eval set --$opts
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --cdn-url)
+                cdn_url=$2
+                shift 2
+                ;;
+        *)
+            break
+            ;;
+        esac
+    done
+
+    [ -f ~/checkCdnContent.txt ] && rm -f ~/checkCdnContent.txt;
+    base_url=$(${MAGENTO_BIN} config:show web/unsecure/base_url);
+    wget ${base_url} -O /tmp/index.html;
+    cat /tmp/index.html | \
+        sed 's/href=/\nhref=/g' | \
+        grep href=\" | sed 's/.*href="//g;s/".*//g' | \
+        grep ${base_url} | \
+        grep '/static/\|/media/' > /tmp/staticURLs;
+
+    while read -a CONTENT; do
+        status=$(curl $CONTENT -k -s -f -o /dev/null && echo "SUCCESS" || echo "ERROR")
+        [ $status = "SUCCESS" ] && echo $CONTENT | grep / | cut -d/ -f4- >> ~/checkCdnContent.txt
+    done < /tmp/staticURLs
+
+    protocol=$(${MAGENTO_BIN} config:show web/unsecure/base_url | cut -d':' -f1)
+    cat > ~/checkCdnStatus.sh <<EOF
+#!/bin/bash
+while read -ru 4 CONTENT; do
+    status=\$(curl \$1\$CONTENT -k -s -f -o /dev/null && echo "SUCCESS" || echo "ERROR")
+    if [ \$status = "SUCCESS" ]
+    then
+        continue
+    else
+        exit
+    fi
+    done 4< ~/checkCdnContent.txt
+    ${MAGENTO_BIN} config:set web/unsecure/base_static_url ${protocol}://${cdn_url}/static/ &>> /var/log/run.log
+    ${MAGENTO_BIN} config:set web/unsecure/base_media_url ${protocol}://${cdn_url}/media/ &>> /var/log/run.log
+    ${MAGENTO_BIN} config:set web/secure/base_static_url ${protocol}://${cdn_url}/static/ &>> /var/log/run.log
+    ${MAGENTO_BIN} config:set web/secure/base_media_url ${protocol}://${cdn_url}/media/ &>> /var/log/run.log
+    ${MAGENTO_BIN} cache:flush &>> /var/log/run.log
+    crontab -l | sed "/checkCdnStatus/d" | crontab -
+EOF
+    chmod +x ~/checkCdnStatus.sh
+    crontab -l | { cat; echo "* * * * * /bin/bash ~/checkCdnStatus.sh ${protocol}://${cdn_url}/"; } | crontab
+
+}
+
 case ${1} in
     install)
         install "$@"
@@ -183,5 +248,8 @@ case ${1} in
 
     litemage)
         litemage "$@"
+        ;;
+    edgeportCDN)
+        edgeportCDN "$@"
         ;;
 esac

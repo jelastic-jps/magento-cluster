@@ -1,12 +1,12 @@
-**Magento environment**: [${globals.PROTOCOL}://${env.domain}/](${globals.PROTOCOL}://${env.domain}/)   
+**WordPress environment**: [${globals.PROTOCOL}://${env.domain}/](${globals.PROTOCOL}://${env.domain}/)   
 
 **CDN Endpoint URL**:  [${globals.CDN_URL}](${globals.CDN_URL})   
 
 Use the following credentials to access the admin panel:   
 
-**Admin Panel**: [${globals.PROTOCOL}://${env.domain}/admin/](${globals.PROTOCOL}://${env.domain}/admin/)  
+**Admin Panel**: [${globals.PROTOCOL}://${env.domain}/wp-admin/](${globals.PROTOCOL}://${env.domain}/wp-admin/)  
 **Login**: ${user.email}  
-**Password**: ${globals.MG_ADMIN_PASS}  
+**Password**: ${globals.WP_ADMIN_PASS}  
 
 The instructions below can help you with further managing your WordPress:
 

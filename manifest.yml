@@ -102,7 +102,7 @@ settings:
       hideLabel: true
       hidden: true
       name: bl_count   
-      value: 2
+      value: 1
       markup:
 
 mixins:

@@ -153,23 +153,59 @@ onInstall:
         targetGroup: bl
         targetNodes: bl
         optimization: magento
+
     - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
       settings:
         targetGroup: cp
         targetNodes: cp
         optimization: magento
+  
   - cmd[cp, bl]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
+  
   - if (/litespeed/.test("${nodes.cp.nodeType}")):
     - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
       user: root
+  
   - cmd[elasticsearch]: |-
       echo "discovery.type: single-node" >> /usr/share/elasticsearch/config/elasticsearch.yml;
       echo "xpack.security.enabled: true" >> /usr/share/elasticsearch/config/elasticsearch.yml;
       systemctl stop firewalld;
       systemctl disable firewalld;
   - restartContainers [elasticsearch]
+  
   - installMagento
- 
+
+  - if (('${settings.le_addon:false}' == 'true') || ('${settings.cdn_addon:false}' == 'true')):
+    - script: |
+        var actions = [];
+        if ('${settings.le-addon:false}' == 'true')
+          actions.push({
+            jps: "https://github.com/jelastic-jps/lets-encrypt/blob/master/manifest.jps?_r=${fn.random}?_r=${fn.random}",
+            nodeGroup: "bl",
+            skipEmail: "true",
+            settings: {
+              customDomains: "${globals.DOMAIN}",
+              fallbackToX1: "true"
+            }
+          });
+        if ('${settings.cdn-addon:false}' == 'true')
+          actions.push({
+            jps: "https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}",
+            nodeGroup: "bl",
+            skipEmail: "true",
+            settings: {
+              note: "${settings.noteCDN:}"
+            }
+          });
+        return { result: 0, onAfterReturn: { install: actions } };
+   
+  - if ('${settings.le_addon:false}' == 'true'):
+    - cmd[bl]: source /opt/letsencrypt/settings && echo $domain
+    - setupDomain:
+        domain: ${response.out}
+        
+  - if ('${settings.cdn_addon:false}' == 'true'): setupEdgeportCDN
+
 addons:
   - id: setup-site-url
     type: update
@@ -201,50 +237,26 @@ addons:
     logo: ${globals.PATH}/images/magento.png
     buttons:
       - caption: Cache Purge
-        action: cache-purge
+        action: cachePurge
         loadingText: Purging...
         confirmText: Do you want to purge cache?
         successText:  Cache has been successfully purged!                
         
 actions:
+  setupDomain:
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh domain ${this.domain}
 
-  install-LE-addon:
-    - install: https://github.com/jelastic-jps/lets-encrypt/blob/master/manifest.jps?_r=${fn.random}
-      nodeGroup: bl
-      skipEmail: true
-      settings:
-        customDomains: ${globals.DOMAIN}
-        fallbackToX1: true
-
-  setup-LE-domain:
-    - cmd[bl]: source /opt/letsencrypt/settings && echo $domain
-    - install: ${globals.PATH}/scripts/setupDomain.jps
-      settings:
-        domain: https://${response.out}
+  cachePurge:
     - install: ${globals.PATH}/scripts/cachePurge.jps
 
-  setup-domain:
-    - install: ${globals.PATH}/scripts/setupDomain.jps
-      settings:
-        domain: ${settings.magentoURL}
-    - install: ${globals.PATH}/scripts/cachePurge.jps
-        
-  cache-purge:
-    - install: ${globals.PATH}/scripts/cachePurge.jps
-
-  install-edgeport-CDN:
-    - install: https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}
-      nodeGroup: bl
-      skipEmail: true
-      settings:
-        note: ${settings.noteCDN:}
+  setupEdgeportCDN:
     - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
     - setGlobals:
         CDN_URL: ${globals.PROTOCOL}://${env.envName}-${response.response.partnerCode}.cdn.edgeport.net/
         CDN: ${env.envName}-${response.response.partnerCode}.cdn.edgeport.net
         SUCCESS: success-cdn
         EMAIL: cdn
-    - install: /scripts/setupCDN.jps
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh edgeportCDN ${globals.CDN}
 
   installMagento:
     - install: /scripts/install.jps

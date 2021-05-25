@@ -107,7 +107,6 @@ globals:
   EMAIL: default
       
 onInstall:
-
   - script: |
         return {
           result:0,
@@ -164,7 +163,7 @@ onInstall:
   - if (('${settings.le_addon:false}' == 'true') || ('${settings.cdn_addon:false}' == 'true')):
     - script: |
         var actions = [];
-        if ('${settings.le-addon:false}' == 'true')
+        if ('${settings.le_addon:false}' == 'true')
           actions.push({
             jps: "https://github.com/jelastic-jps/lets-encrypt/blob/master/manifest.jps?_r=${fn.random}?_r=${fn.random}",
             nodeGroup: "bl",
@@ -174,7 +173,7 @@ onInstall:
               fallbackToX1: "true"
             }
           });
-        if ('${settings.cdn-addon:false}' == 'true')
+        if ('${settings.cdn_addon:false}' == 'true')
           actions.push({
             jps: "https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}",
             nodeGroup: "bl",

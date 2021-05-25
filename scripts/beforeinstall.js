@@ -75,7 +75,8 @@ if ('${settings.ls_addon:false}'== 'true') {
     addons: ["setup-site-url"],
     env: {
       WP_PROTECT: "OFF",
-      WP_PROTECT_LIMIT: 100
+      WP_PROTECT_LIMIT: 100,
+      ON_ENV_INSTALL: '{"jps": "https://raw.githubusercontent.com/jelastic-jps/litespeed/master/addons/license-v2.yml", "settings": "{\"modules\":\"true\"}"}'
     }
   }, {
     nodeType: "litespeedphp",

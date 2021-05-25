@@ -64,7 +64,6 @@ actions:
         echo ${response.out} >>  /etc/jelastic/redeploy.conf;
       user: root
 
-
   setupForLS:
     - cmd[${nodes.cp.master.id}]: |-
         bash ~/bin/japp.sh litemage on

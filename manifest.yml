@@ -290,7 +290,7 @@ actions:
           protocol: NFS4
 
 success:
-  email: success/email/success-${globals.STACK}-${globals.EMAIL}.md?_r=${fn.random}
-  text: success/text/${globals.SUCCESS}.md?_r=${fn.random}
+  email: success/email/${nodes.cp.master.nodeType}/oneregion-${globals.EMAIL}.md?_r=${fn.random}
+  text: success/text/oneregion/${globals.SUCCESS}.md?_r=${fn.random}
 
 startPage: ${globals.PROTOCOL}://${env.domain}/

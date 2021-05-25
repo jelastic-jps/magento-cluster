@@ -91,7 +91,6 @@ if ('${settings.ls_addon:false}'== 'true') {
     fixedCloudlets: ${settings.cp_fixedCloudlets:1},
     nodeGroup: "cp",
     restartDelay: 10,
-    scalingMode: "STATELESS",
     addons: ["setup-site-url"],
     links: "elasticsearch:elasticsearch",
     env: {
@@ -103,7 +102,7 @@ if ('${settings.ls_addon:false}'== 'true') {
   })
 } else {
   resp.nodes.push({
-    nodeType: "nginx",
+    nodeType: "varnish",
     count: ${settings.bl_count:2},
     flexibleCloudlets: ${settings.bl_flexibleCloudlets:8},
     fixedCloudlets: ${settings.bl_fixedCloudlets:1},
@@ -119,8 +118,8 @@ if ('${settings.ls_addon:false}'== 'true') {
     fixedCloudlets: ${settings.cp_fixedCloudlets:1},
     nodeGroup: "cp",
     restartDelay: 10,
-    scalingMode: "STATELESS",
     addons: ["setup-site-url"],
+    links: "elasticsearch:elasticsearch",
     env: {
       SERVER_WEBROOT: "/var/www/webroot/ROOT",
       REDIS_ENABLED: "true"

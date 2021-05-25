@@ -233,7 +233,7 @@ actions:
     - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh domain ${this.domain}
 
   cachePurge:
-    - install: ${globals.PATH}/scripts/cachePurge.jps
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh cachePurge
 
   setupEdgeportCDN:
     - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
@@ -256,24 +256,6 @@ actions:
         mg_url: ${globals.PROTOCOL}://${globals.DOMAIN}/
         version: ${globals.version_magento}
         user_email: ${user.email}
-
-  setupCP:
-    - log: App Server Optimization
-    - install: https://raw.githubusercontent.com/jelastic/templates/master/config.jps?_r=${fn.random}
-      settings:
-        targetGroup: cp
-        targetNodes: ${this.nodeId}
-        optimization: magento
-    - cmd[${this.nodeId}]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
-
-  setupLB:
-    - log: Load Balancer Optimization
-    - install: https://raw.githubusercontent.com/jelastic/templates/master/config.jps?_r=${fn.random}
-      settings:
-        targetGroup: bl
-        targetNodes: ${this.nodeId}
-        optimization: magento
-    - cmd[${this.nodeId}]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
 
   mountStorage:
     - log: Mount Storage

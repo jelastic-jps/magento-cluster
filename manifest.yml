@@ -150,6 +150,12 @@ onInstall:
   - if (/litespeed/.test("${nodes.cp.nodeType}")):
     - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
       user: root
+
+  - if (/nginxphp/.test("${nodes.cp.nodeType}")):
+    - forEach(nodes.cp):
+        - cmd[bl]: jem balancer addCommonHost -h ${@i.intIP}
+          user: root
+        - cmd[bl]: sudo service varnish reload &>> /var/log/run.log
   
   - cmd[elasticsearch]: |-
       echo "discovery.type: single-node" >> /usr/share/elasticsearch/config/elasticsearch.yml;

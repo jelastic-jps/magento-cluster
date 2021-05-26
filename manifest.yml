@@ -1,5 +1,5 @@
 jpsType: install
-jpsVersion: '1.7.2'
+jpsVersion: '1.7.4'
 id: magento-cluster-v200
 homepage: https://github.com/jelastic-jps/magento-cluster/tree/master
 description:

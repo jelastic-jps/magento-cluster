@@ -74,6 +74,7 @@ if ('${settings.ls_addon:false}'== 'true') {
     scalingMode: "STATEFUL",
     addons: ["setup-site-url"],
     env: {
+      DEFAULT_CLUSTER: "false",
       WP_PROTECT: "OFF",
       WP_PROTECT_LIMIT: 100,
       ON_ENV_INSTALL: {

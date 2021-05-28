@@ -19,7 +19,8 @@ globals:
 onInstall:
   - installScripts
   - installMG
-  - setupForLS
+  - if (/litespeed/.test("${nodes.cp.nodeType}")): setupForLS
+  - if (/nginxphp/.test("${nodes.cp.nodeType}")): setupForNG
 
 actions:
   installMG:

@@ -165,6 +165,8 @@ onInstall:
   - restartContainers [elasticsearch]
   
   - installMagento
+  
+  - setupLEwebroot
 
   - if (('${settings.le_addon:false}' == 'true') || ('${settings.cdn_addon:false}' == 'true')):
     - script: |
@@ -176,7 +178,9 @@ onInstall:
             skipEmail: "true",
             settings: {
               customDomains: "${globals.DOMAIN}",
-              fallbackToX1: "true"
+              fallbackToX1: "true",
+              webroot: "true",
+              webrootPath: "/var/www/webroot/ROOT"
             }
           });
         if ('${settings.cdn_addon:false}' == 'true')
@@ -234,11 +238,19 @@ addons:
         successText:  Cache has been successfully purged!                
         
 actions:
+
   setupDomain:
     - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh domain ${this.domain}
 
   cachePurge:
     - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh cachePurge
+    
+  setupLEwebroot:
+    - cmd[cp, bl]: |-
+        [ ! -d /var/lib/jelastic/keys/letsencrypt ] && mkdir -p /var/lib/jelastic/keys/letsencrypt;
+        echo "webroot=true" > /var/lib/jelastic/keys/letsencrypt/settings-custom;
+        echo "webrootPath=/var/www/webroot/ROOT" >> /var/lib/jelastic/keys/letsencrypt/settings-custom;
+      user: root
 
   setupEdgeportCDN:
     - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})

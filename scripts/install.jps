@@ -72,7 +72,3 @@ actions:
   setupForNG:
     - cmd[${nodes.cp.master.id}]: |-
         bash ~/bin/japp.sh varnish on
-
-  setupMG:
-    - cmd[${nodes.cp.master.id}]: |-
-        bash ~/setupMG.sh --pgcache true &>> /var/log/run.log

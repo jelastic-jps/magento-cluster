@@ -176,6 +176,11 @@ litemage(){
     fi
 }
 
+varnish(){
+    if [ $2 == 'on' ] ; then
+        ${MAGENTO_BIN} config:set system/full_page_cache/caching_application 2 &>> /var/log/run.log;
+    fi
+}
 
 edgeportCDN(){
 
@@ -249,7 +254,13 @@ case ${1} in
     litemage)
         litemage "$@"
         ;;
+
+    varnish)
+        varnish "$@"
+        ;;
+
     edgeportCDN)
         edgeportCDN "$@"
         ;;
+        
 esac

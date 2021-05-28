@@ -168,8 +168,6 @@ onInstall:
   
   - initLEwebroot
   
-  - setupLEwebroot
-
   - if (('${settings.le_addon:false}' == 'true') || ('${settings.cdn_addon:false}' == 'true')):
     - script: |
         var actions = [];

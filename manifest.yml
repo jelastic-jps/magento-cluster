@@ -166,6 +166,8 @@ onInstall:
   
   - installMagento
   
+  - initLEwebroot
+  
   - setupLEwebroot
 
   - if (('${settings.le_addon:false}' == 'true') || ('${settings.cdn_addon:false}' == 'true')):
@@ -245,13 +247,22 @@ actions:
   cachePurge:
     - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh cachePurge
     
-  setupLEwebroot:
+  initLEwebroot:
     - cmd[cp, bl]: |-
         [ ! -d /var/lib/jelastic/keys/letsencrypt ] && mkdir -p /var/lib/jelastic/keys/letsencrypt;
         echo "webroot=true" > /var/lib/jelastic/keys/letsencrypt/settings-custom;
         echo "webrootPath=/var/www/webroot/ROOT" >> /var/lib/jelastic/keys/letsencrypt/settings-custom;
       user: root
 
+  setupLEwebroot:
+    - if (/litespeed/.test("${nodes.cp.nodeType}")):
+      - cmd[bl]: |-
+          /usr/bin/xmlstarlet ed --inplace -s "loadBalancerConfig/loadBalancerList/loadBalancer[name = 'webroot']/workerGroupList/workerGroup"  -t elem -n "pingUrl" -v "http://${nodes.cp.master.address}:80/" /var/www/conf/lslbd_config.xml;
+          /usr/bin/xmlstarlet ed --inplace -s "loadBalancerConfig/loadBalancerList/loadBalancer[name = 'webroot']/workerGroupList/workerGroup"  -t elem -n "nodeAddresses" -v "${nodes.cp.master.address}" /var/www/conf/lslbd_config.xml;
+          sudo jem service restart;
+    - if (/nginxphp/.test("${nodes.cp.nodeType}")):
+      - forEach(nodes.cp):
+  
   setupEdgeportCDN:
     - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
     - setGlobals:

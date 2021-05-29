@@ -150,6 +150,10 @@ onInstall:
   - if (/litespeed/.test("${nodes.cp.nodeType}")):
     - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
       user: root
+    - cmd[bl]: |-
+        jem balancer clear;
+        jem balancer rebuildCommon;
+      user: root
 
   - if (/nginxphp/.test("${nodes.cp.nodeType}")):
     - forEach(nodes.cp):

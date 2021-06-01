@@ -1,12 +1,6 @@
 var db_cluster = '${settings.galera}' == 'true' ? "galera" : "master";
 var db_count = '${settings.galera}' == 'true' ? 3 : 2;
 
-var resp = {
-  result: 0,
-  ssl: !!jelastic.billing.account.GetQuotas('environment.jelasticssl.enabled').array[0].value,
-  nodes: []
-}
-
 if ('${settings.glusterfs:false}' == 'true') {
   resp.nodes.push({
     nodeType: "storage",

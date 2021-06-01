@@ -107,12 +107,7 @@ globals:
   EMAIL: default
       
 onInstall:
-  - script: |
-        return {
-          result:0,
-          ssl: jelastic.billing.account.GetQuotas('environment.jelasticssl.enabled').array[0].value
-        }
-  - if (${response.ssl} || '${settings.le_addon:false}' == 'true'):
+  - if ('${settings.le_addon:false}' == 'true'):
       setGlobals:
         PROTOCOL: https
 

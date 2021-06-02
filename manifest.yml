@@ -94,6 +94,37 @@ settings:
 mixins:
  - https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/configs/vers.yaml
 
+onAfterScaleIn[cp]: updateTriggers
+  
+onAfterScaleOut[nodeGroup:cp]: updateTriggers
+       
+onAfterStart: 
+  cmd[cp]: sudo jem service restart
+  
+onAfterInstallAddon [nodeGroup:bl, id:cdn]: setupEdgeportCDN
+ 
+onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]:
+  - cmd[bl]: source /opt/letsencrypt/settings && echo $domain
+  - setupDomain:
+      domain: ${response.out}
+
+onAfterClone: 
+  - setupDomain:
+      domain: ${event.response.env.domain}
+    
+onBeforeMigrate:
+  - cmd[${nodes.cp.master.id}]: wp option get siteurl --path=${SERVER_WEBROOT} | cut -d'/' -f3;
+  - if (/${response.out}/.test(env.domain)):
+      cmd[${nodes.cp.master.id}]: echo true > ~/migrate
+  - else:
+      cmd[${nodes.cp.master.id}]: echo false > ~/migrate
+
+onAfterMigrate:
+  - cmd[${nodes.cp.master.id}]: if test -f ~/migrate; then cat ~/migrate; fi
+  - if (/${response.out}/.test(true)):
+    - setupDomain:
+        domain: ${env.domain}
+
 globals:
   PATH: ${baseUrl}
   DB_USER: jelastic-${fn.random}
@@ -263,7 +294,6 @@ actions:
   setupEdgeportCDN:
     - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
     - setGlobals:
-        CDN_URL: ${globals.PROTOCOL}://${env.envName}-${response.response.partnerCode}.cdn.edgeport.net/
         CDN: ${env.envName}-${response.response.partnerCode}.cdn.edgeport.net
         SUCCESS: success-cdn
         EMAIL: cdn
@@ -281,6 +311,12 @@ actions:
         mg_url: ${globals.PROTOCOL}://${globals.DOMAIN}/
         version: ${globals.version_magento}
         user_email: ${user.email}
+
+  updateTriggers:
+    if (!${event.params.auto:true}):
+      - log: update scaling trigger
+      - script: /scripts/updateTriggers.js
+        count: ${nodes.cp.length}
 
   mountStorage:
     - log: Mount Storage

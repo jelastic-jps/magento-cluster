@@ -1,6 +1,11 @@
 var db_cluster = '${settings.galera}' == 'true' ? "galera" : "master";
 var db_count = '${settings.galera}' == 'true' ? 3 : 2;
 
+var resp = {
+  result: 0,
+  nodes: []
+}
+
 if ('${settings.glusterfs:false}' == 'true') {
   resp.nodes.push({
     nodeType: "storage",

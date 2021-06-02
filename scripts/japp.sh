@@ -172,6 +172,8 @@ litemage(){
         $RSYNC -au --remove-source-files /tmp/magento2-LiteSpeed_LiteMage-${short_version}/ ${MAGENTO_DIR}/app/code/Litespeed/Litemage/;
         ${MAGENTO_BIN} module:enable Litespeed_Litemage &>> $LOG;
         ${MAGENTO_BIN} setup:upgrade &>>$LOG;
+        ${MAGENTO_BIN} setup:di:compile &>>$LOG;
+        [ -f ${MAGENTO_DIR}/var/di/relations.ser ] && rm -f ${MAGENTO_DIR}/var/di/relations.ser;
         ${MAGENTO_BIN} config:set system/full_page_cache/caching_application LITEMAGE &>>$LOG;
     fi
 }

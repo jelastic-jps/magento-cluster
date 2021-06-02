@@ -53,7 +53,7 @@ for (var i = 0; i < quotas.length; i++){
         prod = false;
     }
 
-    if (n == extIPperEnv && 2 > q.value){
+    if (n == extIPperEnv && 1 > q.value){
         if (!markup) err(q, "required", 2, true);
         fields["le_addon"].disabled = true;
         fields["le_addon"].value = false;
@@ -86,15 +86,12 @@ if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {
   fields["cdn_addon"].value = false;
 }
 
-var regions = jelastic.env.control.GetRegions(appid, session);
-if (regions.result != 0) return regions;
-
-if (!prod || group.groupType == 'trial' || regions.array.length < 2) {
+if (!prod || group.groupType == 'trial') {
   fields["bl_count"].markup = "Cluster is not available. " + markup + "Please upgrade your account.";
   if (!litespeed)
     fields["bl_count"].markup = "LiteSpeed software stack templates are not supported at the moment.";
   if (group.groupType == 'trial')
-    fields["bl_count"].markup = "WordPress multiregion cluster is not available for " + group.groupType + ". Please upgrade your account.";
+    fields["bl_count"].markup = "Magento cluster is not available for " + group.groupType + ". Please upgrade your account.";
   fields["bl_count"].cls = "warning";
   fields["bl_count"].hidden = false;
   fields["bl_count"].height = 30;

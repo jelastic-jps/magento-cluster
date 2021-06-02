@@ -297,7 +297,7 @@ actions:
         CDN: ${env.envName}-${response.response.partnerCode}.cdn.edgeport.net
         SUCCESS: success-cdn
         EMAIL: cdn
-    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh edgeportCDN ${globals.CDN}
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh edgeportCDN --cdn-url ${globals.CDN}
 
   installMagento:
     - install: /scripts/install.jps

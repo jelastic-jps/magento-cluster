@@ -69,13 +69,13 @@ for (var i = 0; i < quotas.length; i++){
 }    
     
 if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) {
-  fields["waf"].disabled = false;
-  fields["waf"].value = true;         
+  fields["ls_addon"].disabled = false;
+  fields["ls_addon"].value = true;         
 } else {
   prod = false;
   litespeed = false;
-  fields["waf"].disabled = true;
-  fields["waf"].value = false;
+  fields["ls_addon"].disabled = true;
+  fields["ls_addon"].value = false;
 }
     
 if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {

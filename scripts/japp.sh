@@ -184,6 +184,15 @@ varnish(){
     fi
 }
 
+ssl(){
+    if [ $2 == 'on' ] ; then
+        host=$(${MAGENTO_BIN} config:show web/unsecure/base_url | cut -d'/' -f3);
+        ${MAGENTO_BIN} config:set web/secure/base_url https://${host}/ &>> /var/log/run.log;
+        ${MAGENTO_BIN} config:set web/secure/use_in_frontend 1 &>> /var/log/run.log;
+        ${MAGENTO_BIN} config:set web/secure/use_in_adminhtml 1 &>> /var/log/run.log;
+    fi
+}
+
 edgeportCDN(){
 
     ARGUMENT_LIST=(
@@ -261,8 +270,12 @@ case ${1} in
         varnish "$@"
         ;;
 
+    ssl)
+        ssl "$@"
+        ;;
+        
     edgeportCDN)
         edgeportCDN "$@"
         ;;
-        
+
 esac

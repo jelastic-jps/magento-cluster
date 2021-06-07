@@ -190,6 +190,7 @@ ssl(){
         ${MAGENTO_BIN} config:set web/secure/base_url https://${host}/ &>> /var/log/run.log;
         ${MAGENTO_BIN} config:set web/secure/use_in_frontend 1 &>> /var/log/run.log;
         ${MAGENTO_BIN} config:set web/secure/use_in_adminhtml 1 &>> /var/log/run.log;
+        ${MAGENTO_BIN} config:set web/secure/enable_hsts 1 &>> /var/log/run.log;
     fi
 }
 

@@ -108,13 +108,14 @@ onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]:
   - cmd[bl]: source /opt/letsencrypt/settings && echo $domain
   - setupDomain:
       domain: ${response.out}
+  - cmd[cp]: bash ~/bin/japp.sh ssl on;
 
 onAfterClone: 
   - setupDomain:
       domain: ${event.response.env.domain}
     
 onBeforeMigrate:
-  - cmd[${nodes.cp.master.id}]: wp option get siteurl --path=${SERVER_WEBROOT} | cut -d'/' -f3;
+  - cmd[${nodes.cp.master.id}]: php /var/www/webroot/ROOT/bin/magento config:show web/unsecure/base_url | cut -d'/' -f3;
   - if (/${response.out}/.test(env.domain)):
       cmd[${nodes.cp.master.id}]: echo true > ~/migrate
   - else:
@@ -139,10 +140,6 @@ globals:
   EMAIL: default
       
 onInstall:
-  - if ('${settings.le_addon:false}' == 'true'):
-      setGlobals:
-        PROTOCOL: https
-
   - script: /scripts/idna.js
   - setGlobals:
       DOMAIN: ${response.domain}         
@@ -196,6 +193,8 @@ onInstall:
   - restartContainers [elasticsearch]
   
   - installMagento
+  
+  - initLEwebroot
     
   - if (('${settings.le_addon:false}' == 'true') || ('${settings.cdn_addon:false}' == 'true')):
     - script: |
@@ -207,7 +206,9 @@ onInstall:
             skipEmail: "true",
             settings: {
               customDomains: "${globals.DOMAIN}",
-              fallbackToX1: "true"
+              fallbackToX1: "true",
+              webroot: "true",
+              webrootPath: "/var/www/webroot/ROOT/pub"
             }
           });
         if ('${settings.cdn_addon:false}' == 'true')
@@ -225,6 +226,9 @@ onInstall:
     - cmd[bl]: source /opt/letsencrypt/settings && echo $domain
     - setupDomain:
         domain: ${response.out}
+    - cmd[cp]: bash ~/bin/japp.sh ssl on;
+    - setGlobals:
+        PROTOCOL: https
         
   - if ('${settings.cdn_addon:false}' == 'true'): setupEdgeportCDN
 
@@ -276,7 +280,7 @@ actions:
     - cmd[cp, bl]: |-
         [ ! -d /var/lib/jelastic/keys/letsencrypt ] && mkdir -p /var/lib/jelastic/keys/letsencrypt;
         echo "webroot=true" > /var/lib/jelastic/keys/letsencrypt/settings-custom;
-        echo "webrootPath=/var/www/webroot/ROOT" >> /var/lib/jelastic/keys/letsencrypt/settings-custom;
+        echo "webrootPath=/var/www/webroot/ROOT/pub" >> /var/lib/jelastic/keys/letsencrypt/settings-custom;
       user: root
 
   setupLEwebroot:

@@ -191,7 +191,17 @@ ssl(){
         ${MAGENTO_BIN} config:set web/secure/use_in_frontend 1 &>> /var/log/run.log;
         ${MAGENTO_BIN} config:set web/secure/use_in_adminhtml 1 &>> /var/log/run.log;
         ${MAGENTO_BIN} config:set web/secure/enable_hsts 1 &>> /var/log/run.log;
+        ${MAGENTO_BIN} cache:flush;
     fi
+}
+
+domain(){
+        [ "$(${MAGENTO_BIN} config:show web/unsecure/base_url)" != ""  ] && ${MAGENTO_BIN} config:set web/unsecure/base_url http://${2}/ &>> /var/log/run.log;
+        [ "$(${MAGENTO_BIN} config:show web/secure/base_url)" != ""  ] && ${MAGENTO_BIN} config:set web/secure/base_url https://${2}/ &>> /var/log/run.log;
+        [ "$(${MAGENTO_BIN} config:show web/secure/use_in_frontend)" != ""  ] && ${MAGENTO_BIN} config:set web/secure/use_in_frontend 1 &>> /var/log/run.log;
+        [ "$(${MAGENTO_BIN} config:show web/secure/use_in_adminhtml)" != ""  ] && ${MAGENTO_BIN} config:set web/secure/use_in_adminhtml 1 &>> /var/log/run.log;
+        [ "$(${MAGENTO_BIN} config:show web/secure/enable_hsts)" != ""  ] && ${MAGENTO_BIN} config:set web/secure/enable_hsts 1 &>> /var/log/run.log;
+        ${MAGENTO_BIN} cache:flush;
 }
 
 edgeportCDN(){
@@ -267,6 +277,10 @@ case ${1} in
         litemage "$@"
         ;;
 
+    domain)
+        domain "$@"
+        ;;
+
     varnish)
         varnish "$@"
         ;;
@@ -274,7 +288,7 @@ case ${1} in
     ssl)
         ssl "$@"
         ;;
-        
+
     edgeportCDN)
         edgeportCDN "$@"
         ;;

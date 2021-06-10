@@ -259,7 +259,7 @@ edgeportCDN(){
         [ $status = "SUCCESS" ] && echo $CONTENT | grep / | cut -d/ -f4- >> ~/checkCdnContent.txt
     done < /tmp/staticURLs
 
-    protocol=$(${MAGENTO_BIN} config:show web/unsecure/base_url | cut -d':' -f1)
+    [ "$(${MAGENTO_BIN} config:show web/secure/base_url)" != ""  ] && protocol=https || protocol=http;
     cat > ~/checkCdnStatus.sh <<EOF
 #!/bin/bash
 while read -ru 4 CONTENT; do

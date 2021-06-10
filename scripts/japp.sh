@@ -11,6 +11,7 @@ TAR=`which tar`
 COMPOSER=`which composer`
 
 install(){
+
     ARGUMENT_LIST=(
         "base-url"
         "db-host"
@@ -124,9 +125,11 @@ install(){
             ;;
         esac
     done
-
+    
+    echo $(date -u) "Create magento database" >>$LOG;
     $MYSQL -u${db_user} -p${db_password} -h ${db_host} -e "CREATE DATABASE IF NOT EXISTS ${db_name};"
-
+    
+    echo $(date -u) "Begin magento installation" >>$LOG;
     ${MAGENTO_BIN} setup:install -s \
         --backend-frontname=admin \
         --db-host=${db_host} \
@@ -153,6 +156,8 @@ install(){
         --admin-password=${admin_password} \
         --disable-modules Magento_TwoFactorAuth;
 
+     echo $(date -u) "End magento installation" >>$LOG;
+
     ${MAGENTO_BIN} index:reindex;
 }
 
@@ -166,7 +171,8 @@ litemage(){
             [ $? == 0 ] && break;
             sleep 6
         done
-
+        
+        echo $(date -u) "Begin latemage setup" >>$LOG;
         $TAR -C "/tmp" -xpzf "/tmp/${version}.tgz";
         [ -d ${MAGENTO_DIR}/app/code/Litespeed/Litemage ] || mkdir -p ${MAGENTO_DIR}/app/code/Litespeed/Litemage;
         $RSYNC -au --remove-source-files /tmp/magento2-LiteSpeed_LiteMage-${short_version}/ ${MAGENTO_DIR}/app/code/Litespeed/Litemage/;
@@ -175,33 +181,40 @@ litemage(){
         ${MAGENTO_BIN} setup:di:compile &>>$LOG;
         [ -f ${MAGENTO_DIR}/var/di/relations.ser ] && rm -f ${MAGENTO_DIR}/var/di/relations.ser;
         ${MAGENTO_BIN} config:set system/full_page_cache/caching_application LITEMAGE &>>$LOG;
+        echo $(date -u) "End latemage setup" >>$LOG;
     fi
 }
 
 varnish(){
     if [ $2 == 'on' ] ; then
-        ${MAGENTO_BIN} config:set system/full_page_cache/caching_application 2 &>> /var/log/run.log;
+        echo $(date -u) "Begin varnish setup" >>$LOG;
+        ${MAGENTO_BIN} config:set system/full_page_cache/caching_application 2 &>>$LOG;
+        echo $(date -u) "End varnish setup" >>$LOG;
     fi
 }
 
 ssl(){
     if [ $2 == 'on' ] ; then
+        echo $(date -u) "Begin SSL setup" >>$LOG;
         host=$(${MAGENTO_BIN} config:show web/unsecure/base_url | cut -d'/' -f3);
-        ${MAGENTO_BIN} config:set web/secure/base_url https://${host}/ &>> /var/log/run.log;
-        ${MAGENTO_BIN} config:set web/secure/use_in_frontend 1 &>> /var/log/run.log;
-        ${MAGENTO_BIN} config:set web/secure/use_in_adminhtml 1 &>> /var/log/run.log;
-        ${MAGENTO_BIN} config:set web/secure/enable_hsts 1 &>> /var/log/run.log;
+        ${MAGENTO_BIN} config:set web/secure/base_url https://${host}/ &>>$LOG;
+        ${MAGENTO_BIN} config:set web/secure/use_in_frontend 1 &>>$LOG;
+        ${MAGENTO_BIN} config:set web/secure/use_in_adminhtml 1 &>>$LOG;
+        ${MAGENTO_BIN} config:set web/secure/enable_hsts 1 &>>$LOG;
         ${MAGENTO_BIN} cache:flush;
+        echo $(date -u) "Begin SSL setup" >>$LOG;
     fi
 }
 
 domain(){
-        [ "$(${MAGENTO_BIN} config:show web/unsecure/base_url)" != ""  ] && ${MAGENTO_BIN} config:set web/unsecure/base_url http://${2}/ &>> /var/log/run.log;
-        [ "$(${MAGENTO_BIN} config:show web/secure/base_url)" != ""  ] && ${MAGENTO_BIN} config:set web/secure/base_url https://${2}/ &>> /var/log/run.log;
-        [ "$(${MAGENTO_BIN} config:show web/secure/use_in_frontend)" != ""  ] && ${MAGENTO_BIN} config:set web/secure/use_in_frontend 1 &>> /var/log/run.log;
-        [ "$(${MAGENTO_BIN} config:show web/secure/use_in_adminhtml)" != ""  ] && ${MAGENTO_BIN} config:set web/secure/use_in_adminhtml 1 &>> /var/log/run.log;
-        [ "$(${MAGENTO_BIN} config:show web/secure/enable_hsts)" != ""  ] && ${MAGENTO_BIN} config:set web/secure/enable_hsts 1 &>> /var/log/run.log;
-        ${MAGENTO_BIN} cache:flush;
+    echo $(date -u) "Begin ${2} DOMAIN setup" >>$LOG;
+    [ "$(${MAGENTO_BIN} config:show web/unsecure/base_url)" != ""  ] && ${MAGENTO_BIN} config:set web/unsecure/base_url http://${2}/ &>>$LOG;
+    [ "$(${MAGENTO_BIN} config:show web/secure/base_url)" != ""  ] && ${MAGENTO_BIN} config:set web/secure/base_url https://${2}/ &>>$LOG;
+    [ "$(${MAGENTO_BIN} config:show web/secure/use_in_frontend)" != ""  ] && ${MAGENTO_BIN} config:set web/secure/use_in_frontend 1 &>>$LOG;
+    [ "$(${MAGENTO_BIN} config:show web/secure/use_in_adminhtml)" != ""  ] && ${MAGENTO_BIN} config:set web/secure/use_in_adminhtml 1 &>>$LOG;
+    [ "$(${MAGENTO_BIN} config:show web/secure/enable_hsts)" != ""  ] && ${MAGENTO_BIN} config:set web/secure/enable_hsts 1 &>>$LOG;
+    ${MAGENTO_BIN} cache:flush;
+    echo $(date -u) "End ${2} DOMAIN setup" >>$LOG;
 }
 
 edgeportCDN(){
@@ -230,6 +243,8 @@ edgeportCDN(){
         esac
     done
 
+    echo $(date -u) "Begin ${2} CDN setup" >>$LOG;
+    
     [ -f ~/checkCdnContent.txt ] && rm -f ~/checkCdnContent.txt;
     base_url=$(${MAGENTO_BIN} config:show web/unsecure/base_url);
     wget ${base_url} -O /tmp/index.html;
@@ -256,12 +271,14 @@ while read -ru 4 CONTENT; do
         exit
     fi
     done 4< ~/checkCdnContent.txt
+    echo $(date -u) "Begin ${2} CDN set values" >>$LOG;
     ${MAGENTO_BIN} config:set web/unsecure/base_static_url ${protocol}://${cdn_url}/static/ &>> /var/log/run.log
     ${MAGENTO_BIN} config:set web/unsecure/base_media_url ${protocol}://${cdn_url}/media/ &>> /var/log/run.log
     ${MAGENTO_BIN} config:set web/secure/base_static_url ${protocol}://${cdn_url}/static/ &>> /var/log/run.log
     ${MAGENTO_BIN} config:set web/secure/base_media_url ${protocol}://${cdn_url}/media/ &>> /var/log/run.log
     ${MAGENTO_BIN} cache:flush &>> /var/log/run.log
     crontab -l | sed "/checkCdnStatus/d" | crontab -
+    echo $(date -u) "End ${2} CDN set values" >>$LOG;
 EOF
     chmod +x ~/checkCdnStatus.sh
     crontab -l | { cat; echo "* * * * * /bin/bash ~/checkCdnStatus.sh ${protocol}://${cdn_url}/"; } | crontab

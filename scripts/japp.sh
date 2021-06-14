@@ -154,7 +154,8 @@ install(){
         --admin-email=${admin_email} \
         --admin-user=admin \
         --admin-password=${admin_password} \
-        --disable-modules Magento_TwoFactorAuth;
+        --disable-modules Magento_TwoFactorAuth \
+        --disable-modules Magento_Csp;
 
      echo $(date -u) "End magento installation" >>$LOG;
 

@@ -105,7 +105,7 @@ onAfterStart:
 onAfterInstallAddon [nodeGroup:bl, id:cdn]: setupEdgeportCDN
  
 onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]:
-  - cmd[bl]: source /opt/letsencrypt/settings && echo $domain
+  - cmd[${nodes.cp.master.id}]: source /opt/letsencrypt/settings && echo $domain
   - setupDomain:
       domain: ${response.out}
   - cmd[cp]: bash ~/bin/japp.sh ssl on;
@@ -223,10 +223,10 @@ onInstall:
         return { result: 0, onAfterReturn: { install: actions } };
    
   - if ('${settings.le_addon:false}' == 'true'):
-    - cmd[bl]: source /opt/letsencrypt/settings && echo $domain
+    - cmd[${nodes.cp.master.id}]: source /opt/letsencrypt/settings && echo $domain
     - setupDomain:
         domain: ${response.out}
-    - cmd[cp]: bash ~/bin/japp.sh ssl on;
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh ssl on;
     - setGlobals:
         PROTOCOL: https
         

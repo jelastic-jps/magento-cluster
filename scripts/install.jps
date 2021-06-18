@@ -21,6 +21,7 @@ onInstall:
   - installMG
   - if (/litespeed/.test("${nodes.cp.nodeType}") || /llsmp/.test("${nodes.cp.nodeType}")): setupForLS
   - if (/nginxphp/.test("${nodes.cp.nodeType}")): setupForNG
+  - restartContainers[cp]
   
 actions:
   installMG:
@@ -72,3 +73,4 @@ actions:
   setupForNG:
     - cmd[${nodes.cp.master.id}]: |-
         bash ~/bin/japp.sh varnish on
+        

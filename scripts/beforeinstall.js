@@ -1,132 +1,144 @@
+var db_cluster = '${settings.galera}' == 'true' ? "galera" : "master";
+var db_count = '${settings.galera}' == 'true' ? 3 : 2;
 
 var resp = {
   result: 0,
-  ssl: !!jelastic.billing.account.GetQuotas('environment.jelasticssl.enabled').array[0].value,
-  nodes: [{
-    nodeType: "storage",
-    flexibleCloudlets: ${settings.st_flexibleCloudlets:8},
-    fixedCloudlets: ${settings.st_fixedCloudlets:1},
-    diskLimit: ${settings.st_diskLimit:100},
-    nodeGroup: "storage",
-    displayName: "Storage"
-  }]
+  nodes: []
 }
 
-if (${settings.galera:false}) {
+if ('${settings.glusterfs:false}' == 'true') {
   resp.nodes.push({
-    nodeType: "mariadb-dockerized",
-    tag: "10.3.22",
+    nodeType: "storage",
     count: 3,
-    flexibleCloudlets: ${settings.db_flexibleCloudlets:16},
-    fixedCloudlets: ${settings.db_fixedCloudlets:1},
-    diskLimit: ${settings.db_diskLimit:10},
-    nodeGroup: "sqldb",
-    displayName: "Galera cluster",
-    restartDelay: 5,
-    skipNodeEmails: true,
-    env: {
-      ON_ENV_INSTALL: ""
+    cluster: true,
+    flexibleCloudlets: ${settings.st_flexibleCloudlets:8},
+    fixedCloudlets: ${settings.st_fixedCloudlets:1},
+    nodeGroup: "storage",
+    restartDelay: 10,
+    validation: {
+      minCount: 3,
+      maxCount: 3
+    }
+  })
+} else {
+  resp.nodes.push({
+    nodeType: "storage",
+    count: 1,
+    flexibleCloudlets: ${settings.st_flexibleCloudlets:8},
+    fixedCloudlets: ${settings.st_fixedCloudlets:1},
+    nodeGroup: "storage",
+    validation: {
+      minCount: 1,
+      maxCount: 1
     }
   })
 }
 
-if (!${settings.galera:false}) {
-  resp.nodes.push({
-    nodeType: "mariadb-dockerized",
-    tag: "10.3.22",
-    count: 2,
-    flexibleCloudlets: ${settings.db_flexibleCloudlets:16},
-    fixedCloudlets: ${settings.db_fixedCloudlets:1},
-    diskLimit: ${settings.db_diskLimit:10},
-    nodeGroup: "sqldb",
-    skipNodeEmails: true,
-    displayName: "DB Server"
-  })
-}
+resp.nodes.push({
+  nodeType: "mariadb-dockerized",
+  flexibleCloudlets: ${settings.db_flexibleCloudlets:16},
+  fixedCloudlets: ${settings.db_fixedCloudlets:1},
+  tag: "10.4.17",
+  count: db_count,
+  nodeGroup: "sqldb",
+  restartDelay: 10,
+  skipNodeEmails: true,
+  validation: {
+    minCount: db_count,
+    maxCount: db_count
+  },
+  cluster: {
+    scheme: db_cluster,
+    db_user: "${globals.DB_USER}",
+    db_pass: "${globals.DB_PASS}",
+    is_proxysql: false,
+    custom_conf: "${baseUrl}/configs/sqldb/wordpress.cnf"
+  },
+  env: {
+    SCHEME: db_cluster,
+    DB_USER: "${globals.DB_USER}",
+    DB_PASS: "${globals.DB_PASS}",
+    IS_PROXYSQL: false
+  }  
+});
 
-if (${settings.ls-addon:false}) {
+if ('${settings.ls_addon:false}'== 'true') {
   resp.nodes.push({
     nodeType: "litespeedadc",
-    tag: "2.7",
-    count: 1,
+    count: ${settings.bl_count:1},
     flexibleCloudlets: ${settings.bl_flexibleCloudlets:8},
     fixedCloudlets: ${settings.bl_fixedCloudlets:1},
-    diskLimit: ${settings.bl_diskLimit:10},
     nodeGroup: "bl",
+    restartDelay: 10,
     scalingMode: "STATEFUL",
-    displayName: "Load balancer",
-    addons: ["setup-site-url","cache-purge"],
+    addons: ["setup-site-url"],
     env: {
-      WP_PROTECT: "OFF"
+      WP_PROTECT: "OFF",
+      WP_PROTECT_LIMIT: 100,
+      ON_ENV_INSTALL: {
+        jps: "https://raw.githubusercontent.com/jelastic-jps/litespeed/master/addons/license-v2.yml",
+        settings: {
+          modules: "true"
+        }
+      }
     }
   }, {
     nodeType: "litespeedphp",
-    tag: "5.4.6-php-7.3.15",
     count: ${settings.cp_count:2},
-    flexibleCloudlets: ${settings.cp_flexibleCloudlets:16},
+    engine: "php7.4",
+    flexibleCloudlets: ${settings.cp_flexibleCloudlets:32},
     fixedCloudlets: ${settings.cp_fixedCloudlets:1},
-    diskLimit: ${settings.cp_diskLimit:10},
     nodeGroup: "cp",
-    scalingMode: "STATELESS",
-    displayName: "AppServer",
-    addons: ["setup-site-url","cache-purge"],
+    restartDelay: 10,
+    addons: ["setup-site-url"],
+    links: "elasticsearch:elasticsearch",
     env: {
       SERVER_WEBROOT: "/var/www/webroot/ROOT",
       REDIS_ENABLED: "true",
       WAF: "${settings.waf:false}",
       WP_PROTECT: "OFF"
-    },
-    volumes: [
-      "/var/www/webroot/ROOT"
-    ],  
-    volumeMounts: {
-      "/var/www/webroot/ROOT": {
-        readOnly: "false",
-        sourcePath: "/data/ROOT",
-        sourceNodeGroup: "storage"
-      }
+    }
+  })
+} else {
+  resp.nodes.push({
+    nodeType: "varnish",
+    count: ${settings.bl_count:2},
+    flexibleCloudlets: ${settings.bl_flexibleCloudlets:8},
+    fixedCloudlets: ${settings.bl_fixedCloudlets:1},
+    nodeGroup: "bl",
+    restartDelay: 10,
+    addons: ["setup-site-url"],
+    scalingMode: "STATEFUL"
+  }, {
+    nodeType: "nginxphp",
+    count: ${settings.cp_count:2},
+    engine: "php7.4",
+    flexibleCloudlets: ${settings.cp_flexibleCloudlets:32},                  
+    fixedCloudlets: ${settings.cp_fixedCloudlets:1},
+    nodeGroup: "cp",
+    restartDelay: 10,
+    addons: ["setup-site-url"],
+    links: "elasticsearch:elasticsearch",
+    env: {
+      SERVER_WEBROOT: "/var/www/webroot/ROOT",
+      REDIS_ENABLED: "true"
     }
   })
 }
 
-if (!${settings.ls-addon:false}) {
-  resp.nodes.push({
-    nodeType: "varnish",
-    tag: "6.3.2",
-    count: 1,
-    flexibleCloudlets: ${settings.bl_flexibleCloudlets:8},
-    fixedCloudlets: ${settings.bl_fixedCloudlets:1},
-    diskLimit: ${settings.bl_diskLimit:10},
-    nodeGroup: "bl",
-    scalingMode: "STATEFUL",
-    displayName: "Load balancer",
-    addons: ["setup-site-url","cache-purge"],
-  }, {
-    nodeType: "nginxphp",
-    tag: "1.16.1-php-7.3.14",
-    count: ${settings.cp_count:2},
-    flexibleCloudlets: ${settings.cp_flexibleCloudlets:8},                  
-    fixedCloudlets: ${settings.cp_fixedCloudlets:1},
-    diskLimit: ${settings.cp_diskLimit:10},
-    nodeGroup: "cp",
-    scalingMode: "STATELESS",
-    displayName: "AppServer",
-    addons: ["setup-site-url","cache-purge"],
-    env: {
-      SERVER_WEBROOT: "/var/www/webroot/ROOT",
-      REDIS_ENABLED: "true"
-    },
-    volumes: [
-      "/var/www/webroot/ROOT"
-    ],  
-    volumeMounts: {
-      "/var/www/webroot/ROOT": {
-        readOnly: "false",
-        sourcePath: "/data/ROOT",
-        sourceNodeGroup: "storage"
-      }
-    }
-  })
-}
+resp.nodes.push({
+  nodeType: "docker",
+  count: 1,
+  flexibleCloudlets: ${settings.st_flexibleCloudlets:16},
+  fixedCloudlets: ${settings.st_fixedCloudlets:1},
+  nodeGroup: "elasticsearch",
+  dockerName: "elasticsearch",
+  dockerTag: "7.12.1",
+  displayName: "Elasticsearch",
+  env: {
+    ES_JAVA_OPTS: "-Xms512m -Xmx512m",
+    ELASTIC_PASSWORD: "${globals.ES_PASS}"
+  }
+})
 
 return resp;

@@ -6,5 +6,4 @@ globals:
   DOMAIN: ${settings.domain}
 
 onInstall:
-  - cmd[${nodes.cp.master.id}]: bash ~/setupMG.sh --DOMAIN ${globals.DOMAIN}
-
+  - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh domain ${globals.DOMAIN}

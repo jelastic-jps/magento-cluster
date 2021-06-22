@@ -159,8 +159,20 @@ onInstall:
   - install:
     - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
       settings:
-        targetGroup: bl, cp, sqldb
-        targetNodes: bl, cp, sqldb
+        targetGroup: bl
+        targetNodes: bl
+        optimization: magento
+
+    - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+      settings:
+        targetGroup: cp
+        targetNodes: cp
+        optimization: magento
+
+    - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+      settings:
+        targetGroup: sqldb
+        targetNodes: sqldb
         optimization: magento
   
   - cmd[cp, bl]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi

@@ -105,7 +105,7 @@ onAfterStart:
 onAfterInstallAddon [nodeGroup:bl, id:cdn]: setupEdgeportCDN
  
 onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]:
-  - cmd[${nodes.cp.master.id}]: source /opt/letsencrypt/settings && echo $domain
+  - cmd[${nodes.bl.master.id}]: source /opt/letsencrypt/settings && echo $domain
   - setupDomain:
       domain: ${response.out}
   - cmd[cp]: bash ~/bin/japp.sh ssl on;
@@ -159,14 +159,8 @@ onInstall:
   - install:
     - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
       settings:
-        targetGroup: bl
-        targetNodes: bl
-        optimization: magento
-
-    - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
-      settings:
-        targetGroup: cp
-        targetNodes: cp
+        targetGroup: bl, cp, sqldb
+        targetNodes: bl, cp, sqldb
         optimization: magento
   
   - cmd[cp, bl]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
@@ -193,9 +187,7 @@ onInstall:
   - restartContainers [elasticsearch]
   
   - installMagento
-  
-  - initLEwebroot
-    
+      
   - if (('${settings.le_addon:false}' == 'true') || ('${settings.cdn_addon:false}' == 'true')):
     - script: |
         var actions = [];
@@ -206,9 +198,7 @@ onInstall:
             skipEmail: "true",
             settings: {
               customDomains: "${globals.DOMAIN}",
-              fallbackToX1: "true",
-              webroot: "true",
-              webrootPath: "/var/www/webroot/ROOT/pub"
+              fallbackToX1: "true"
             }
           });
         if ('${settings.cdn_addon:false}' == 'true')
@@ -223,7 +213,7 @@ onInstall:
         return { result: 0, onAfterReturn: { install: actions } };
    
   - if ('${settings.le_addon:false}' == 'true'):
-    - cmd[${nodes.cp.master.id}]: source /opt/letsencrypt/settings && echo $domain
+    - cmd[${nodes.bl.master.id}]: source /opt/letsencrypt/settings && echo $domain
     - setupDomain:
         domain: ${response.out}
     - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh ssl on;
@@ -275,22 +265,6 @@ actions:
 
   cachePurge:
     - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh cachePurge
-    
-  initLEwebroot:
-    - cmd[cp, bl]: |-
-        [ ! -d /var/lib/jelastic/keys/letsencrypt ] && mkdir -p /var/lib/jelastic/keys/letsencrypt;
-        echo "webroot=true" > /var/lib/jelastic/keys/letsencrypt/settings-custom;
-        echo "webrootPath=/var/www/webroot/ROOT/pub" >> /var/lib/jelastic/keys/letsencrypt/settings-custom;
-      user: root
-
-  setupLEwebroot:
-    - if (/litespeed/.test("${nodes.cp.nodeType}")):
-      - cmd[bl]: |-
-          /usr/bin/xmlstarlet ed --inplace -s "loadBalancerConfig/loadBalancerList/loadBalancer[name = 'webroot']/workerGroupList/workerGroup"  -t elem -n "pingUrl" -v "http://${nodes.cp.master.address}:80/" /var/www/conf/lslbd_config.xml;
-          /usr/bin/xmlstarlet ed --inplace -s "loadBalancerConfig/loadBalancerList/loadBalancer[name = 'webroot']/workerGroupList/workerGroup"  -t elem -n "nodeAddresses" -v "${nodes.cp.master.address}" /var/www/conf/lslbd_config.xml;
-          sudo jem service restart;
-    - if (/nginxphp/.test("${nodes.cp.nodeType}")):
-      - forEach(nodes.cp):
   
   setupEdgeportCDN:
     - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})

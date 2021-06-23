@@ -1,6 +1,6 @@
 **Magento environment**: [${globals.PROTOCOL}://${env.domain}/](${globals.PROTOCOL}://${env.domain}/)   
 
-**CDN Endpoint URL**:  [${globals.CDN_URL}](${globals.CDN_URL})   
+**CDN Endpoint URL**:  [${globals.CDN}](${globals.CDN})   
 
 Use the following credentials to access the admin panel:   
 

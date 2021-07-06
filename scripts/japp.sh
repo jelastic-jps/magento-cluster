@@ -125,10 +125,10 @@ install(){
             ;;
         esac
     done
-    
+
     echo $(date -u) "Create magento database" >>$LOG;
     $MYSQL -u${db_user} -p${db_password} -h ${db_host} -e "CREATE DATABASE IF NOT EXISTS ${db_name};"
-    
+
     echo $(date -u) "Begin magento installation" >>$LOG;
     ${MAGENTO_BIN} setup:install -s \
         --backend-frontname=admin \
@@ -171,7 +171,7 @@ litemage(){
             [ $? == 0 ] && break;
             sleep 6
         done
-        
+
         echo $(date -u) "Begin latemage setup" >>$LOG;
         $TAR -C "/tmp" -xpzf "/tmp/${version}.tgz";
         [ -d ${MAGENTO_DIR}/app/code/Litespeed/Litemage ] || mkdir -p ${MAGENTO_DIR}/app/code/Litespeed/Litemage;
@@ -217,6 +217,23 @@ domain(){
     echo $(date -u) "End ${2} DOMAIN setup" >>$LOG;
 }
 
+cors(){
+    if [ $2 == 'on' ] ; then
+        echo $(date -u) "Begin CORS setup" >>$LOG;    
+        cat >> ${MAGENTO_DIR}/pub/.htaccess <<EOF
+<IfModule mod_headers.c>
+  <FilesMatch "\.(eot|ttf|ttc|otf|woff|woff2|html|js|iframe|font.css|css|ico|json)$">
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "POST, GET, OPTIONS, DELETE, PUT"
+    Header set Access-Control-Allow-Headers "x-requested-with"
+  </FilesMatch>
+</IfModule>
+
+EOF
+        echo $(date -u) "End CORS setup" >>$LOG;
+    fi
+}
+
 edgeportCDN(){
 
     ARGUMENT_LIST=(
@@ -244,7 +261,7 @@ edgeportCDN(){
     done
 
     echo $(date -u) "Begin ${2} CDN setup" >>$LOG;
-    
+
     [ -f ~/checkCdnContent.txt ] && rm -f ~/checkCdnContent.txt;
     base_url=$(${MAGENTO_BIN} config:show web/unsecure/base_url);
     wget ${base_url} -O /tmp/index.html;
@@ -310,4 +327,8 @@ case ${1} in
         edgeportCDN "$@"
         ;;
 
+    cors)
+        cors "$@"
+        ;;
+        
 esac

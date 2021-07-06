@@ -68,7 +68,8 @@ actions:
 
   setupForLS:
     - cmd[${nodes.cp.master.id}]: |-
-        bash ~/bin/japp.sh litemage on
+        bash ~/bin/japp.sh litemage on;
+        bash ~/bin/japp.sh cors on;
 
   setupForNG:
     - cmd[${nodes.cp.master.id}]: |-

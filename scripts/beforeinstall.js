@@ -75,6 +75,7 @@ if ('${settings.ls_addon:false}'== 'true') {
     env: {
       WP_PROTECT: "OFF",
       WP_PROTECT_LIMIT: 100,
+      DEFAULT_CLUSTER: false,
       ON_ENV_INSTALL: {
         jps: "https://raw.githubusercontent.com/jelastic-jps/litespeed/master/addons/license-v2.yml",
         settings: {

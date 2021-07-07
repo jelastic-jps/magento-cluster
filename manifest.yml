@@ -104,11 +104,7 @@ onAfterStart:
   
 onAfterInstallAddon [nodeGroup:bl, id:cdn]: setupEdgeportCDN
  
-onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]:
-  - cmd[${nodes.bl.master.id}]: source /opt/letsencrypt/settings && echo $domain
-  - setupDomain:
-      domain: ${response.out}
-  - cmd[cp]: bash ~/bin/japp.sh ssl on;
+onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]: setupLEdomain
 
 onAfterClone: 
   - setupDomain:
@@ -229,10 +225,7 @@ onInstall:
         return { result: 0, onAfterReturn: { install: actions } };
    
   - if ('${settings.le_addon:false}' == 'true'):
-    - cmd[${nodes.bl.master.id}]: source /opt/letsencrypt/settings && echo $domain
-    - setupDomain:
-        domain: ${response.out}
-    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh ssl on;
+    - setupLEdomain
     - setGlobals:
         PROTOCOL: https
         
@@ -276,8 +269,11 @@ addons:
         
 actions:
 
-  setupDomain:
-    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh domain ${this.domain}
+  setupLEdomain:
+    - cmd[${nodes.cp.master.id}]: |-
+        source /opt/letsencrypt/settings;
+        bash ~/bin/japp.sh domain $domain;
+        bash ~/bin/japp.sh ssl on;
 
   cachePurge:
     - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh cachePurge

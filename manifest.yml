@@ -314,6 +314,7 @@ actions:
         mg_url: ${globals.PROTOCOL}://${globals.DOMAIN}/
         version: ${globals.version_magento}
         user_email: ${user.email}
+    - cmd[cp]: sudo jem service restart
 
   updateTriggers:
     if (!${event.params.auto:true}):

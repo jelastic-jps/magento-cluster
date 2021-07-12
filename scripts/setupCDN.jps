@@ -1,0 +1,14 @@
+jpsType: update
+id: magento-cdn-setup
+name: Magento CDN setup
+
+onInstall:
+- script: | 
+    return jelastic.dev.scripting.Eval("appstore", session, "GetApps", {
+      search: {"appstore":"1","app_id":"cdn"},
+      targetAppid: "${env.appid}"
+    });
+- if (${response.response.apps[0].isInstalled}):
+    - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
+    - setGlobals:
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh edgeportCDN --cdn-url ${env.envName}-${response.response.partnerCode}.cdn.edgeport.net

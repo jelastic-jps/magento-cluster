@@ -260,6 +260,14 @@ edgeportCDN(){
         esac
     done
 
+    echo $(date -u) "Begin CDN reset values" >>$LOG;
+    ${MAGENTO_BIN} config:set web/unsecure/base_static_url "" &>> /var/log/run.log
+    ${MAGENTO_BIN} config:set web/unsecure/base_media_url "" &>> /var/log/run.log
+    ${MAGENTO_BIN} config:set web/secure/base_static_url "" &>> /var/log/run.log
+    ${MAGENTO_BIN} config:set web/secure/base_media_url "" &>> /var/log/run.log
+    ${MAGENTO_BIN} cache:flush &>> /var/log/run.log
+    echo $(date -u) "End CDN reset values" >>$LOG;
+    
     echo $(date -u) "Begin ${2} CDN setup" >>$LOG;
 
     [ -f ~/checkCdnContent.txt ] && rm -f ~/checkCdnContent.txt;

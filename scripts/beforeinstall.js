@@ -139,7 +139,10 @@ resp.nodes.push({
   env: {
     ES_JAVA_OPTS: "-Xms512m -Xmx512m",
     ELASTIC_PASSWORD: "${globals.ES_PASS}"
-  }
+  },
+  volumes: [
+    "/usr/share/elasticsearch/config/"
+  ]
 })
 
 return resp;

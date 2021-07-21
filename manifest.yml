@@ -71,13 +71,6 @@ settings:
             disabled: true
             tooltip: "Protect web sites with <a href='https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:waf' target='_blank'>LiteSpeed built-in WAF</a> based on Free ModSecurity Rules from Comodo"
 
-    - caption: Install MariaDB Galera Cluster
-      type: checkbox
-      name: galera
-      value: true
-      disabled: false
-      tooltip: "<h3>Requirements for All Tables:</h3> * run on InnoDB storage engine <p>* have a primary key</p>Read more about <a href='https://mariadb.com/kb/en/library/mariadb-galera-cluster-known-limitations/'>limitations</a>"
-
     - caption: Install Let's Encrypt SSL with Auto-Renewal
       type: checkbox
       name: le_addon

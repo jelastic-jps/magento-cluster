@@ -15,10 +15,11 @@ var perEnv = "environment.maxnodescount",
       maxCloudletsPerRec = "environment.maxcloudletsperrec",
       extIP = "environment.externalip.enabled",
       extIPperEnv = "environment.externalip.maxcount",
-      extIPperNode = "environment.externalip.maxcount.per.node";
-var   nodesPerEnvMin = 9,
-      nodesPerGroupMin = 3,
-      maxCloudlets = 16,
+      extIPperNode = "environment.externalip.maxcount.per.node",
+      isDocker = "environment.docker.enabled";
+var   nodesPerEnvMin = 7,
+      nodesPerGroupMin = 2,
+      maxCloudlets = 32,
       markup = "", cur = null, text = "used", prod = true, litespeed = true;
 
 var settings = jps.settings;
@@ -26,7 +27,7 @@ var fields = {};
 for (var i = 0, field; field = jps.settings.fields[i]; i++)
   fields[field.name] = field;
 
-var quotas = jelastic.billing.account.GetQuotas(perEnv + ";"+maxEnvs+";" + perNodeGroup + ";" + maxCloudletsPerRec + ";" + extIP + ";" + extIPperEnv + ";" + extIPperNode).array;
+var quotas = jelastic.billing.account.GetQuotas(perEnv + ";"+maxEnvs+";" + perNodeGroup + ";" + maxCloudletsPerRec + ";" + extIP + ";" + extIPperEnv + ";" + extIPperNode + ";" + isDocker).array;
 var group = jelastic.billing.account.GetAccount(appid, session);
 for (var i = 0; i < quotas.length; i++){
     var q = quotas[i], n = toNative(q.quota.name);
@@ -46,6 +47,11 @@ for (var i = 0; i < quotas.length; i++){
         prod = false;
     }
 
+    if (n == isDocker &&  !q.value){
+        if (!markup) err(q, "required", 1, true);
+        prod  = false; 
+    }
+      
     if (n == extIP && !q.value){
         if (!markup) err(q, "required", 1, true);
         fields["le_addon"].disabled = true;
@@ -54,7 +60,7 @@ for (var i = 0; i < quotas.length; i++){
     }
 
     if (n == extIPperEnv && 1 > q.value){
-        if (!markup) err(q, "required", 2, true);
+        if (!markup) err(q, "required", 1, true);
         fields["le_addon"].disabled = true;
         fields["le_addon"].value = false;
         prod = false;

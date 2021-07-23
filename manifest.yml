@@ -103,13 +103,26 @@ onAfterStart:
   cmd[cp]: sudo jem service restart
   
 onAfterInstallAddon [nodeGroup:bl, id:cdn]: setupEdgeportCDN
- 
-onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]: setupLEdomain
+  
+onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]:
+  - cmd[${nodes.cp.master.id}]: source /opt/letsencrypt/settings && echo $domain
+  - install: 
+      jps: ${globals.PATH}/setupDomain.jps?_r=${fn.random}
+      settings:
+        domain: ${response.out}
+  - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh ssl on;
 
 onAfterClone: 
-  - setupDomain:
-      domain: ${event.response.env.domain}
-    
+  - install: 
+      jps: ${globals.PATH}/setupDomain.jps?_r=${fn.random}
+      envName: ${event.response.env.envName}
+      settings:
+        domain: ${event.response.env.domain}
+
+  - install: 
+      jps: ${globals.PATH}/setupCDN.jps?_r=${fn.random}
+      envName: ${event.response.env.envName}
+
 onBeforeMigrate:
   - cmd[${nodes.cp.master.id}]: php /var/www/webroot/ROOT/bin/magento config:show web/unsecure/base_url | cut -d'/' -f3;
   - if (/${response.out}/.test(env.domain)):
@@ -120,8 +133,10 @@ onBeforeMigrate:
 onAfterMigrate:
   - cmd[${nodes.cp.master.id}]: if test -f ~/migrate; then cat ~/migrate; fi
   - if (/${response.out}/.test(true)):
-    - setupDomain:
-        domain: ${env.domain}
+    - install: 
+        jps: ${globals.PATH}/setupDomain.jps?_r=${fn.random}
+        settings:
+          domain: ${env.domain}
 
 globals:
   PATH: ${baseUrl}
@@ -195,6 +210,7 @@ onInstall:
   - restartContainers [elasticsearch]
   
   - installMagento
+
   - initLEwebroot
       
   - if (('${settings.le_addon:false}' == 'true') || ('${settings.cdn_addon:false}' == 'true')):
@@ -224,7 +240,12 @@ onInstall:
         return { result: 0, onAfterReturn: { install: actions } };
    
   - if ('${settings.le_addon:false}' == 'true'):
-    - setupLEdomain
+    - cmd[${nodes.cp.master.id}]: source /opt/letsencrypt/settings && echo $domain
+    - install: 
+        jps: ${globals.PATH}/setupDomain.jps?_r=${fn.random}
+        settings:
+          domain: ${response.out}
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh ssl on;
     - setGlobals:
         PROTOCOL: https
         
@@ -284,15 +305,6 @@ actions:
         echo "webrootPath=/var/www/webroot/ROOT/pub" >> /var/lib/jelastic/keys/letsencrypt/settings-custom;
       user: root
   
-  setupLEwebroot:
-    - if (/litespeed/.test("${nodes.cp.nodeType}")):
-      - cmd[bl]: |-
-          /usr/bin/xmlstarlet ed --inplace -s "loadBalancerConfig/loadBalancerList/loadBalancer[name = 'webroot']/workerGroupList/workerGroup"  -t elem -n "pingUrl" -v "http://${nodes.cp.master.address}:80/" /var/www/conf/lslbd_config.xml;
-          /usr/bin/xmlstarlet ed --inplace -s "loadBalancerConfig/loadBalancerList/loadBalancer[name = 'webroot']/workerGroupList/workerGroup"  -t elem -n "nodeAddresses" -v "${nodes.cp.master.address}" /var/www/conf/lslbd_config.xml;
-          sudo jem service restart;
-    - if (/nginxphp/.test("${nodes.cp.nodeType}")):
-      - forEach(nodes.cp):
-
   setupEdgeportCDN:
     - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
     - setGlobals:

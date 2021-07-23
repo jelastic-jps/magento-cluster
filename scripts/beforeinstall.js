@@ -134,12 +134,15 @@ resp.nodes.push({
   fixedCloudlets: ${settings.st_fixedCloudlets:1},
   nodeGroup: "elasticsearch",
   dockerName: "elasticsearch",
-  dockerTag: "7.12.1",
+  dockerTag: "7.13.4",
   displayName: "Elasticsearch",
   env: {
     ES_JAVA_OPTS: "-Xms512m -Xmx512m",
     ELASTIC_PASSWORD: "${globals.ES_PASS}"
-  }
+  },
+  volumes: [
+    "/usr/share/elasticsearch/config/"
+  ]
 })
 
 return resp;

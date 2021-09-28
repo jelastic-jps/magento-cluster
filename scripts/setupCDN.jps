@@ -11,4 +11,4 @@ onInstall:
 - if (${response.response.apps[0].isInstalled}):
     - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
     - setGlobals:
-    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh edgeportCDN --cdn-url ${env.envName}-${response.response.partnerCode}.cdn.edgeport.net
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh edgeportCDN --cdn-url ${env.envName}-${response.response.partnerCode}.cdn.jelastic.net

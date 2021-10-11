@@ -158,9 +158,8 @@ actions:
   setupCP:
   - log: App Servers Setup
   - cmd[cp]: |-
-      wget ${globals.PATH}/configs/nginx/nginx.conf -O /etc/nginx/nginx.conf
-      wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini
-      sudo /etc/init.d/nginx restart &>> /var/log/run.log
+      wget ${globals.PATH}/configs/php/extensions.ini -O /etc/php.d/extensions.ini;
+      sudo /etc/init.d/nginx restart &>> /var/log/run.log;
 
   setEnvs:
   - forEach(i:nodes.sqldb):

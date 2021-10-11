@@ -1,6 +1,6 @@
 jpsType: install
 jpsVersion: '1.4'
-id: magento-cluster
+id: magento-cluster-v100
 homepage: https://github.com/jelastic-jps/magento-cluster/tree/master
 description:
   text: Auto-scalable and highly-available Magento eCommerce cluster with out-of-box
@@ -20,9 +20,9 @@ settings:
     caption: Magento version
     type: list
     values:
-      https://download.jelastic.com/public.php?service=files&t=b33bcd8ca64a0dcc1f5cf9218e06ff88&download: Magento CE 2.3.x
-      https://download.jelastic.com/public.php?service=files&t=61ae85fbcfc249b4e63bd38efbb8945f&download: Magento CE 1.9.4.x
-    default: https://download.jelastic.com/public.php?service=files&t=b33bcd8ca64a0dcc1f5cf9218e06ff88&download
+      https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-2.3.6.tar.bz2: Magento CE 2.3.x
+      https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-1.9.4.tar.bz2: Magento CE 1.9.4.x
+    default: https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-2.3.6.tar.bz2
 
 globals:
   PATH: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v1.0.0
@@ -128,11 +128,11 @@ onInstall:
   - rm -rf /data/* && curl -fsSL "${settings.magento_version}" | tar xj -C /data/  
   - chown 700:700 -Rh /data/
 
-- if (/61ae85fbcfc249b4e63bd38efbb8945f/.test("${settings.magento_version}")):
+- if (/Magento-CE-1.9.4/.test("${settings.magento_version}")):
     - cmd[storage]: wget ${globals.PATH}/configs/magento/local.xml.template -O /data/app/etc/local.xml.template
     - setupRDConnect:
         config: /data/app/etc/local.xml.template
-    - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg19.conf -O /etc/nginx/conf.d/site-default.conf
+    - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg19.conf -O /etc/nginx/conf.d/sites-enabled/default.conf
     - setupCP
     - cmd[${nodes.cp.first.id}]:
         - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/health_check.php
@@ -140,11 +140,10 @@ onInstall:
           ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
           ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log
 
-- if (/b33bcd8ca64a0dcc1f5cf9218e06ff88/.test("${settings.magento_version}")):
-    - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/site-default.conf
+- if (/Magento-CE-2.3/.test("${settings.magento_version}")):
+    - cmd[cp]: wget ${globals.PATH}/configs/nginx/site-default-mg2.conf -O /etc/nginx/conf.d/sites-enabled/default.conf
     - setupCP
     - cmd[${nodes.cp.first.id}]:
-        - wget ${globals.PATH}/configs/varnish/varnish-probe.php -O ${globals.MAGE_ROOT}/pub/health_check.php
         - wget ${globals.PATH}/scripts/setupMG2.sh -O /tmp/setupMG2.sh && bash -x /tmp/setupMG2.sh
           ${globals.DB_USER} ${globals.DB_PASS} DB_MASTER ${globals.DB_NAME} ${globals.ADMIN_PASSWD}
           ${globals.MAGE_ROOT} ${env.url} ${user.email} &>> /var/log/run.log

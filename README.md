@@ -9,7 +9,7 @@ The Magento Cluster is an advanced eCommerce solution for those who aim for grow
 </p>
 
 Premium Magento is a PHP based eCommerce platform that is packaged as an advanced, highly-reliable, and auto-scalable cluster on top of certified Jelastic stack templates with the following topology and peculiarities:
-- **Premium CDN** - integration with the Edgecast CDN network provides a lightning-fast user experience and ensures higher search engines rank with advanced caching and acceleration strategies, massive bandwidth capacity, HTTP/3 support
+- **Premium CDN** - integration with the [Edgecast CDN](https://jelastic.com/blog/enterprise-cdn-verizon-integration/) network provides a lightning-fast user experience and ensures higher search engines rank with advanced caching and acceleration strategies, massive bandwidth capacity, HTTP/3 support
 - **Let's Encrypt SSL** the add-on provides automation for all the SSL certificate management operations - trusted certificate issuing, custom domain validation, automatic certificate renewal
 - **LiteSpeed Web ADC** advanced load balancer with flexible traffic distribution algorithm (to optimize performance), modern HTTP/3 protocol support, and ESI dynamic cache (to serve dynamic requests directly reducing the number of requests to backend servers) 
 - **LiteSpeed Web Server** a high-performance web server with a wide feature set, such as HTTP/3 support, ESI cache, CSS and JavaScript optimization, image optimization, browser and object cache support, CDN support, built-in WAF, Geo-DNS, CAPTCHA, IP throttling, cutting-edge anti-DDoS protection, etc.

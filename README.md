@@ -50,7 +50,12 @@ Choose the required **Advances Features** for your cluster:
 - **Install Let’s Encrypt SSL with Auto-Renewal** - installs the *Let's Encrypt* add-on to issue a trusted SSL certificate for a custom domain. The add-on also manages domain validation, certificates renewal, and SSL-related notifications.
 - **Install Lightning-Fast Premium CDN** - installs the *Premium CDN* add-on to integrate Edgecast CDN into the Magento application.
 
+Finalize customization with general details:
+**Environment** - preferred environment name
+**Display Name** - any [alias](https://docs.jelastic.com/environment-aliases/) for the environment (optional)
+**Region** - select the [environment region](https://docs.jelastic.com/environment-regions/) (if several are available on the platform)
 
+Click Install and wait several minutes for the Jelastic PaaS to configure everything for you.
 
 Once the deployment is finished, you’ll see the appropriate success pop-up with access credentials to your administration Magento panel, whilst the same information will be duplicated to your email box.
 

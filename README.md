@@ -5,7 +5,7 @@ The Magento Cluster is an advanced eCommerce solution for those who aim for grow
 ## Magento Cluster Topology
 
 <p align="center"> 
-<img src="https://github.com/jelastic-jps/magento-cluster/blob/master/images/magento-topology.png" width="400">
+<img src="https://github.com/sych74/magento-cluster/blob/v2.2.0/images/magento-topology-v2.png" width="400">
 </p>
 
 Premium Magento is a PHP based eCommerce platform that is packaged as an advanced, highly-reliable, and auto-scalable cluster on top of certified Jelastic stack templates with the following topology and peculiarities:

@@ -3,7 +3,7 @@ id: magento-cluster-events
 name: Magento Cluster Events
 
 globals:
-  PATH: https://raw.githubusercontent.com/sych74/magento-cluster/v2.2.0
+  PATH: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.2.0
 
 onAfterScaleIn[cp]: updateTriggers
   

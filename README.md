@@ -1,4 +1,4 @@
-# Auto-Scalable Magento Cluster
+# Highly Available and Auto-Scalable Magento Cluster v2
 
 The Magento Cluster is an advanced eCommerce solution for those who aim for growth and want to get the most out of their installation. The package offers such features as high availability, auto-scalability, high-performance web server and load balancing stacks, auto-renewable SSL, and more.
 

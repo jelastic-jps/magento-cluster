@@ -1,13 +1,12 @@
 jpsType: install
 jpsVersion: '1.7.4'
 id: magento-cluster
-homepage: https://github.com/jelastic-jps/magento-cluster/tree/master
+homepage: https://github.com/jelastic-jps/magento-cluster/tree/v2.2.0
 description:
-  text: Auto-scalable and highly-available Magento eCommerce cluster with out-of-box
-    auto-scaling, even load and traffic distribution, Galera cluster,
-    page caching and user session storage on certified Jelastic dockerized stack templates.
-  short: Auto-scalable and highly-available Magento cluster with load balancing, data
-    replication, content caching and user session storage.
+  text: Auto-scalable and highly-available cluster for Premium level Magento eCommerce hosting 
+    with out-of-box auto-scaling, load and traffic distribution, database replication, page caching and user session storage.
+  short: Auto-scalable and highly-available Magento cluster with load balancing, 
+    data replication, content caching and user session storage.
 categories:
 - apps/clusters
 - apps/e-commerce

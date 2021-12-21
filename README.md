@@ -31,7 +31,7 @@ Click the **Deploy** button below, specify your email address within the widget,
 Before the installation, the package provides a dialog that includes customization options for the Magento cluster.
 
 <p align="center"> 
-<img src="https://github.com/jelastic-jps/magento-cluster/blob/master/images/magento-installation.png" width="400">
+<img src="https://github.com/jelastic-jps/magento-cluster/blob/v2.2.0/images/magento-installation.png" width="400">
 </p>
 
 Based on the expected cluster load level, select the Scaling Strategy to determine the automatic horizontal scaling options (can be re-adjust manually):

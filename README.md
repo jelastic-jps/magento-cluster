@@ -28,11 +28,25 @@ Click the **Deploy** button below, specify your email address within the widget,
 *Note:* If you are already registered at Jelastic, you can deploy this cluster by importing [the package manifest raw link](https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.2.0/manifest.yml) within the dashboard.
 
 ## Installation Process
-In the opened confirmation window at Jelastic dashboard, type the *Environment* name, optionally, customize its [Display Name](https://docs.jelastic.com/environment-aliases). Then, select the preferable [region](https://docs.jelastic.com/environment-regions) (if several are available) and click on **Install**.
+Before the installation, the package provides a dialog that includes customization options for the Magento cluster.
 
 <p align="center"> 
 <img src="https://github.com/jelastic-jps/magento-cluster/blob/master/images/magento-installation.png" width="400">
 </p>
+
+Based on the expected cluster load level, select the Scaling Strategy to determine the automatic horizontal scaling options (can be re-adjust manually):
+###Low Load
+adds 1 application server node if the workload is higher than 70%
+removes 1 application server node if the workload goes below 20%
+###Medium Load
+adds 1 application server node if the workload is higher than 50%
+removes 1 application server node if the workload goes below 20%
+###High Load
+adds 2 application server nodes if the workload is higher than 30%
+removes 1 application server node if the workload goes below 10%
+
+
+
 
 Once the deployment is finished, you’ll see the appropriate success pop-up with access credentials to your administration Magento panel, whilst the same information will be duplicated to your email box.
 
@@ -41,9 +55,3 @@ Once the deployment is finished, you’ll see the appropriate success pop-up wit
 </p>
 
 So now you can just click on the **Open in browser** button within the shown frame and start filling your highly available and reliable Magento installation with the required content, being ready to handle as much users as your service requires.
-
-## Customization  
-Fine tuning and customization: multi-cloud HA and DR, geo distributed load balancing, performance optimization, WAF, CDN and other required addons can be installed afterward [on demand](https://jelastic.com/managed-auto-scalable-clusters-for-business/).
-
-## Magento Managed Hosting Business
-To start offering this solution to your customers please follow to [Auto-Scalable Clusters for Managed Cloud Business](https://jelastic.com/apaas/)

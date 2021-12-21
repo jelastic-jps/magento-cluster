@@ -60,7 +60,7 @@ Click Install and wait several minutes for the Jelastic PaaS to configure everyt
 Once the deployment is finished, you’ll see the appropriate success pop-up with access credentials to your administration Magento panel, whilst the same information will be duplicated to your email box.
 
 <p align="center"> 
-<img src="https://github.com/jelastic-jps/magento-cluster/blob/v2.2.0/images/magento-successful-install.png" width="400">
+<img src="https://github.com/jelastic-jps/magento-cluster/blob/v2.2.0/images/magento-successful-install-v2.png" width="400">
 </p>
 
 So now you can just click on the **Open in browser** button within the shown frame and start filling your highly available and reliable Magento installation with the required content, being ready to handle as much users as your service requires.

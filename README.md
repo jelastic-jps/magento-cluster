@@ -35,13 +35,13 @@ Before the installation, the package provides a dialog that includes customizati
 </p>
 
 Based on the expected cluster load level, select the Scaling Strategy to determine the automatic horizontal scaling options (can be re-adjust manually):
-### Low Load
+**Low Load**
 - adds **1** application server node if the workload is higher than **70%**
 - removes **1** application server node if the workload goes below **20%**
-### Medium Load
+**Medium Load**
 - adds **1** application server node if the workload is higher than **50%**
 - removes **1** application server node if the workload goes below **20%**
-### High Load
+**High Load**
 - adds **2** application server nodes if the workload is higher than **30%**
 - removes **1** application server node if the workload goes below **10%**
 

@@ -1,0 +1,86 @@
+type: update
+id: magento-cluster-events
+name: Magento Cluster Events
+
+globals:
+  PATH: https://raw.githubusercontent.com/sych74/magento-cluster/v2.0.0
+
+onAfterScaleIn[cp]: updateTriggers
+  
+onAfterScaleOut[nodeGroup:cp]: updateTriggers
+       
+onAfterStart: 
+  cmd[cp]: sudo jem service restart
+  
+onAfterInstallAddon [nodeGroup:bl, id:cdn]: setupEdgeportCDN
+  
+onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]:
+  - cmd[${nodes.cp.master.id}]: source /opt/letsencrypt/settings && echo $domain
+  - install: 
+      jps: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
+      settings:
+        domain: ${response.out}
+  - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh ssl on;
+  
+onAfterRedeployContainer[nosqldb]:
+  - cmd[nosqldb]: |-
+      iptables -t nat -I PREROUTING -p tcp -m tcp --dport 4949 -j REDIRECT --to-ports 9200;
+      iptables-save > /etc/sysconfig/iptables4-jelastic-nat;
+    user: root
+
+onAfterClone: 
+  - install: 
+      jps: ${globals.PATH}/scripts/balancerRebuild.jps?_r=${fn.random}
+      envName: ${event.response.env.envName}
+
+  - install: 
+      jps: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
+      envName: ${event.response.env.envName}
+      settings:
+        domain: ${event.response.env.domain}
+
+  - install: 
+      jps: ${globals.PATH}/scripts/setupCDN.jps?_r=${fn.random}
+      envName: ${event.response.env.envName}
+      
+  - install: 
+      jps: ${globals.PATH}/addon/addons.jps?_r=${fn.random}
+      envName: ${event.response.env.envName}
+      
+  - script: delete MANIFEST.id; return {result:0, jps:MANIFEST};
+  - install: ${response.jps}
+    envName: ${event.response.env.envName}  
+
+onBeforeMigrate:
+  - cmd[${nodes.cp.master.id}]: php /var/www/webroot/ROOT/bin/magento config:show web/unsecure/base_url | cut -d'/' -f3;
+  - if (/${response.out}/.test(env.domain)):
+      cmd[${nodes.cp.master.id}]: echo true > ~/migrate
+  - else:
+      cmd[${nodes.cp.master.id}]: echo false > ~/migrate
+
+onAfterMigrate:
+  - install: ${globals.PATH}/scripts/balancerRebuild.jps?_r=${fn.random}
+  - cmd[${nodes.cp.master.id}]: if test -f ~/migrate; then cat ~/migrate; fi
+  - if (/${response.out}/.test(true)):
+    - install: 
+        jps: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
+        settings:
+          domain: ${env.domain}
+  - env.control.ApplyNodeGroupData[nosqldb]:
+      data:
+        adminUrl: "http://node${nodes.nosqldb.master.id}-${env.domain}:4949"
+
+actions:
+  setupEdgeportCDN:
+    - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
+    - setGlobals:
+        CDN: ${env.envName}-${response.response.partnerCode}.cdn.jelastic.net
+        SUCCESS: success-cdn
+        EMAIL: cdn
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh edgeportCDN --cdn-url ${globals.CDN}
+    
+  updateTriggers:
+    if (!${event.params.auto:true}):
+      - log: update scaling trigger
+      - script: /scripts/updateTriggers.js
+        count: ${nodes.cp.length}

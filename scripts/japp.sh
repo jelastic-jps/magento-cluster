@@ -217,10 +217,20 @@ domain(){
     echo $(date -u) "End ${2} DOMAIN setup" >>$LOG;
 }
 
+baseUrl(){
+    echo $(date -u) "Begin ${2} baseUrl setup" >>$LOG;
+    domain=$(echo ${2} | sed '/\/$/! s|$|/|')
+    ${MAGENTO_BIN} config:set web/unsecure/base_url ${domain} &>>$LOG;
+    ${MAGENTO_BIN} config:set web/secure/base_url ${domain} &>>$LOG;
+    ${MAGENTO_BIN} cache:flush;
+    echo $(date -u) "End ${2} baseUrl setup" >>$LOG;
+}
+
 cors(){
     if [ $2 == 'on' ] ; then
-        echo $(date -u) "Begin CORS setup" >>$LOG;    
-        cat >> ${MAGENTO_DIR}/pub/.htaccess <<EOF
+        echo $(date -u) "Begin CORS setup" >>$LOG;
+        for file in ${MAGENTO_DIR}/pub/.htaccess ${MAGENTO_DIR}/.htaccess; do
+            cat >> ${file} <<EOF
 <IfModule mod_headers.c>
   <FilesMatch "\.(eot|ttf|ttc|otf|woff|woff2|html|js|iframe|font.css|css|ico|json)$">
     Header set Access-Control-Allow-Origin "*"
@@ -230,6 +240,7 @@ cors(){
 </IfModule>
 
 EOF
+        done
         echo $(date -u) "End CORS setup" >>$LOG;
     fi
 }
@@ -267,7 +278,7 @@ edgeportCDN(){
     ${MAGENTO_BIN} config:set web/secure/base_media_url "" &>> /var/log/run.log
     ${MAGENTO_BIN} cache:flush &>> /var/log/run.log
     echo $(date -u) "End CDN reset values" >>$LOG;
-    
+
     echo $(date -u) "Begin ${2} CDN setup" >>$LOG;
 
     [ -f ~/checkCdnContent.txt ] && rm -f ~/checkCdnContent.txt;
@@ -323,6 +334,10 @@ case ${1} in
         domain "$@"
         ;;
 
+    baseUrl)
+        baseUrl "$@"
+        ;;
+
     varnish)
         varnish "$@"
         ;;
@@ -338,5 +353,5 @@ case ${1} in
     cors)
         cors "$@"
         ;;
-        
+
 esac

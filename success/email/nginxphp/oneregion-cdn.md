@@ -1,6 +1,6 @@
 **Magento environment**: [${globals.PROTOCOL}://${env.domain}/](${globals.PROTOCOL}://${env.domain}/)
 
-**CDN Endpoint URL**:  [${globals.CDN}](${globals.CDN})
+**CDN Endpoint URL**:  [${globals.PROTOCOL}://${globals.CDN}/](${globals.PROTOCOL}://${globals.CDN}/)
 
 Use the following credentials to access the admin panel:
 
@@ -14,3 +14,8 @@ Manage the database nodes using the next credentials:
 **Username**: ${globals.DB_USER}    
 **Password**: ${globals.DB_PASS}  
 
+Use the following credentials to access the OpenSearch:
+
+**Access URL**: [http://node${nodes.nosqldb.master.id}-${env.domain}:4949](http://node${nodes.nosqldb.master.id}-${env.domain}:4949)  
+**Login**: admin  
+**Password**: ${globals.ES_PASS}  

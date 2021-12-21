@@ -12,3 +12,8 @@ Manage the database nodes using the next credentials:
 **Username**: ${globals.DB_USER}    
 **Password**: ${globals.DB_PASS}  
 
+Use the following credentials to access the OpenSearch:
+
+**Access URL**: [http://node${nodes.nosqldb.master.id}-${env.domain}:4949](http://node${nodes.nosqldb.master.id}-${env.domain}:4949)  
+**Login**: admin  
+**Password**: ${globals.ES_PASS}  

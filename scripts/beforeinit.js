@@ -15,19 +15,18 @@ var perEnv = "environment.maxnodescount",
       maxCloudletsPerRec = "environment.maxcloudletsperrec",
       extIP = "environment.externalip.enabled",
       extIPperEnv = "environment.externalip.maxcount",
-      extIPperNode = "environment.externalip.maxcount.per.node",
-      isDocker = "environment.docker.enabled";
+      extIPperNode = "environment.externalip.maxcount.per.node";
 var   nodesPerEnvMin = 7,
       nodesPerGroupMin = 2,
       maxCloudlets = 32,
-      markup = "", cur = null, text = "used", prod = true, litespeed = true;
+      markup = "", cur = null, text = "used", letsencrypt = true, prod = true, litespeed = true;
 
 var settings = jps.settings;
 var fields = {};
 for (var i = 0, field; field = jps.settings.fields[i]; i++)
   fields[field.name] = field;
 
-var quotas = jelastic.billing.account.GetQuotas(perEnv + ";"+maxEnvs+";" + perNodeGroup + ";" + maxCloudletsPerRec + ";" + extIP + ";" + extIPperEnv + ";" + extIPperNode + ";" + isDocker).array;
+var quotas = jelastic.billing.account.GetQuotas(perEnv + ";"+maxEnvs+";" + perNodeGroup + ";" + maxCloudletsPerRec + ";" + extIP + ";" + extIPperEnv + ";" + extIPperNode ).array;
 var group = jelastic.billing.account.GetAccount(appid, session);
 for (var i = 0; i < quotas.length; i++){
     var q = quotas[i], n = toNative(q.quota.name);
@@ -46,42 +45,38 @@ for (var i = 0; i < quotas.length; i++){
         if (!markup) err(q, "required", nodesPerGroupMin, true);
         prod = false;
     }
-
-    if (n == isDocker &&  !q.value){
-        if (!markup) err(q, "required", 1, true);
-        prod  = false; 
-    }
       
     if (n == extIP && !q.value){
         if (!markup) err(q, "required", 1, true);
         fields["le_addon"].disabled = true;
         fields["le_addon"].value = false;
-        prod = false;
+        letsencrypt = false;
     }
 
     if (n == extIPperEnv && 1 > q.value){
         if (!markup) err(q, "required", 1, true);
         fields["le_addon"].disabled = true;
         fields["le_addon"].value = false;
-        prod = false;
+        letsencrypt = false;
     }
 
     if (n == extIPperNode && 1 > q.value){
         if (!markup) err(q, "required", 1, true);
         fields["le_addon"].disabled = true;
         fields["le_addon"].value = false;
-        prod = false;
+        letsencrypt = false;
     }
 }    
     
 if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) {
-  fields["ls_addon"].disabled = false;
-  fields["ls_addon"].value = true;         
+  prod = true;         
 } else {
-  prod = false;
   litespeed = false;
-  fields["ls_addon"].disabled = true;
-  fields["ls_addon"].value = false;
+  prod = false;
+  fields["bl_count"].markup = "LiteSpeed software stack templates are not supported at the moment.";
+  fields["bl_count"].cls = "warning";
+  fields["bl_count"].hidden = false;
+  fields["bl_count"].height = 30;
 }
     
 if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {
@@ -92,10 +87,17 @@ if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {
   fields["cdn_addon"].value = false;
 }
 
+if (!letsencrypt) {
+  fields["le_addon"].disabled = true;
+  fields["le_addon"].value = false;
+  fields["bl_count"].markup = "Let's Encrypt is not available. " + markup + "Please upgrade your account.";
+  fields["bl_count"].cls = "warning";
+  fields["bl_count"].hidden = false;
+  fields["bl_count"].height = 30;  
+}
+
 if (!prod || group.groupType == 'trial') {
   fields["bl_count"].markup = "Cluster is not available. " + markup + "Please upgrade your account.";
-  if (!litespeed)
-    fields["bl_count"].markup = "LiteSpeed software stack templates are not supported at the moment.";
   if (group.groupType == 'trial')
     fields["bl_count"].markup = "Magento cluster is not available for " + group.groupType + ". Please upgrade your account.";
   fields["bl_count"].cls = "warning";

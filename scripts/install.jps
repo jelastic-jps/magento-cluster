@@ -29,7 +29,7 @@ actions:
         cmd[${nodes.cp.master.id}]: |-
           [ -d /tmp/magento ] && rm -rf /tmp/magento;
           mkdir /tmp/magento;
-          rm -rf /var/www/webroot/ROOT/* && wget -qO- 'https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-${globals.VERSION}.tar.bz2' | tar xj -C /var/www/webroot/ROOT;
+          cd /var/www/webroot/ROOT && wget -qO- 'https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-${globals.VERSION}.tar.bz2' | tar xj -C /var/www/webroot/ROOT;
           bash ~/bin/japp.sh install \
             --db-host ${globals.DB_HOST} \
             --db-password ${globals.DB_PASS} \
@@ -39,7 +39,7 @@ actions:
             --admin-email ${globals.USER_EMAIL} \
             --admin-password ${globals.MG_ADMIN_PASS} \
             --elasticsearch-host ${globals.ES_HOST} \
-            --elasticsearch-username elastic \
+            --elasticsearch-username admin \
             --elasticsearch-password ${globals.ES_PASS} \
             --cache-backend redis \
             --cache-backend-redis-server /var/run/redis/redis.sock \

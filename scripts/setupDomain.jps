@@ -6,4 +6,19 @@ globals:
   DOMAIN: ${settings.domain}
 
 onInstall:
-  - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh domain ${globals.DOMAIN}
+  - setupDomain
+  - cache_purge
+
+actions:
+  setupDomain:
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh domain ${globals.DOMAIN};
+    
+  cache_purge:
+    - cmd[${nodes.cp.master.id}]: |-
+        [ -d /var/www/webroot/ROOT/var/cache/ ] && rm -rf /var/www/webroot/ROOT/var/cache/* &>> /var/log/run.log;
+    - cmd[cp]: |-
+        [ -f /var/www/webroot/ROOT/bin/magento ] && php /var/www/webroot/ROOT/bin/magento cache:flush &>> /var/log/run.log;
+        [ -f /var/www/webroot/ROOT/bin/magento ] && php /var/www/webroot/ROOT/bin/magento cache:clean &>> /var/log/run.log;
+    - if (nodes.bl):
+        cmd[bl]: |-
+          [ -d /tmp/lscache/vhosts/Jelastic/ ] && rm -rf /tmp/lscache/vhosts/Jelastic/* &>> /var/log/run.log;

@@ -1,6 +1,6 @@
 jpsType: install
 jpsVersion: '1.7.4'
-id: magento-cluster-v210
+id: magento-cluster
 homepage: https://github.com/jelastic-jps/magento-cluster/tree/master
 description:
   text: Auto-scalable and highly-available Magento eCommerce cluster with out-of-box
@@ -11,10 +11,10 @@ description:
 categories:
 - apps/clusters
 - apps/e-commerce
-name: Auto-Scalable Magento Cluster
+name: Auto-Scalable Magento Cluster v2
 logo: /images/magento.png
 
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.1.0
+baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/v2.0.0
 
 onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}
 onBeforeInit: /scripts/beforeinit.js?_r=${fn.random}
@@ -48,28 +48,12 @@ settings:
       name: displayfield
       markup:
  
-    - caption: Install LiteSpeed High-Performance Web Server
+    - caption: Web Application Firewall
       type: checkbox
-      name: ls_addon
+      name: waf
       value: true
       disabled: false
-      tooltip: "If this option is disabled, the cluster will be installed using NGINX load balancer and application servers"
-      showIf:
-        true:
-          - caption: Web Application Firewall
-            type: checkbox
-            name: waf
-            value: true
-            disabled: false
-            tooltip: "Protect web sites with <a href='https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:waf' target='_blank'>LiteSpeed built-in WAF</a> based on Free ModSecurity Rules from Comodo"
-
-        false:
-          - caption: Web Application Firewall
-            type: checkbox
-            name: waf
-            value: false
-            disabled: true
-            tooltip: "Protect web sites with <a href='https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:waf' target='_blank'>LiteSpeed built-in WAF</a> based on Free ModSecurity Rules from Comodo"
+      tooltip: "Protect web sites with <a href='https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:waf' target='_blank'>LiteSpeed built-in WAF</a> based on Free ModSecurity Rules from Comodo"
 
     - caption: Install Let's Encrypt SSL with Auto-Renewal
       type: checkbox
@@ -95,49 +79,6 @@ settings:
 mixins:
  - https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/configs/vers.yaml
 
-onAfterScaleIn[cp]: updateTriggers
-  
-onAfterScaleOut[nodeGroup:cp]: updateTriggers
-       
-onAfterStart: 
-  cmd[cp]: sudo jem service restart
-  
-onAfterInstallAddon [nodeGroup:bl, id:cdn]: setupEdgeportCDN
-  
-onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]:
-  - cmd[${nodes.cp.master.id}]: source /opt/letsencrypt/settings && echo $domain
-  - install: 
-      jps: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
-      settings:
-        domain: ${response.out}
-  - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh ssl on;
-
-onAfterClone: 
-  - install: 
-      jps: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
-      envName: ${event.response.env.envName}
-      settings:
-        domain: ${event.response.env.domain}
-
-  - install: 
-      jps: ${globals.PATH}/scripts/setupCDN.jps?_r=${fn.random}
-      envName: ${event.response.env.envName}
-
-onBeforeMigrate:
-  - cmd[${nodes.cp.master.id}]: php /var/www/webroot/ROOT/bin/magento config:show web/unsecure/base_url | cut -d'/' -f3;
-  - if (/${response.out}/.test(env.domain)):
-      cmd[${nodes.cp.master.id}]: echo true > ~/migrate
-  - else:
-      cmd[${nodes.cp.master.id}]: echo false > ~/migrate
-
-onAfterMigrate:
-  - cmd[${nodes.cp.master.id}]: if test -f ~/migrate; then cat ~/migrate; fi
-  - if (/${response.out}/.test(true)):
-    - install: 
-        jps: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
-        settings:
-          domain: ${env.domain}
-
 globals:
   PATH: ${baseUrl}
   DB_USER: jelastic-${fn.random}
@@ -151,6 +92,11 @@ globals:
   EMAIL: default
       
 onInstall:
+  - env.control.ApplyNodeGroupData [sqldb]:
+      data:
+        validation : 
+          maxCount: 2
+  - install: ${baseUrl}/scripts/events.jps?_r=${fn.random}
   - script: /scripts/idna.js
   - setGlobals:
       DOMAIN: ${response.domain}         
@@ -163,8 +109,10 @@ onInstall:
       loadGrowth: ${settings.loadGrowth}
       cleanOldTriggers: true
       scaleDownLimit: ${nodes.cp.length}
+      
+  - storageHealthCheck
 
-  - mountStorage
+  - mountStorageByGroup: NFS4
    
   - log: Nodes configurations
   - install:
@@ -188,26 +136,15 @@ onInstall:
   
   - cmd[cp, bl]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
   
-  - if (/litespeed/.test("${nodes.cp.nodeType}")):
-    - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
-      user: root
-    - cmd[bl]: |-
-        jem balancer clear;
-        jem balancer rebuildCommon;
-      user: root
+  - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
+    user: root
 
-  - if (/nginxphp/.test("${nodes.cp.nodeType}")):
-    - forEach(nodes.cp):
-        - cmd[bl]: jem balancer addCommonHost -h ${@i.intIP}
-          user: root
-        - cmd[bl]: sudo service varnish reload &>> /var/log/run.log
+  - cmd[bl]: |-
+      jem balancer clear;
+      jem balancer rebuildCommon;
+    user: root
   
-  - cmd[elasticsearch]: |-
-      echo "discovery.type: single-node" >> /usr/share/elasticsearch/config/elasticsearch.yml;
-      echo "xpack.security.enabled: true" >> /usr/share/elasticsearch/config/elasticsearch.yml;
-      systemctl stop firewalld;
-      systemctl disable firewalld;
-  - restartContainers [elasticsearch]
+  - setupOpenSearch
   
   - installMagento
 
@@ -250,59 +187,25 @@ onInstall:
         PROTOCOL: https
         
   - if ('${settings.cdn_addon:false}' == 'true'): setupEdgeportCDN
-
-addons:
-  - id: setup-site-url
-    type: update
-    name: Magento Base URL
-    description: Magento Base URL Configuration.
-    logo: ${globals.PATH}/images/magento.png
-    settings:
-      fields:
-        - type: string
-          name: magentoURL
-          caption: Configuration Base URL for Magento
-          default: ''
-          required: true
-          regex: "^https?:\\/\\/.+$"
-          regexText: Incorrect Base URL.
-
-    buttons:
-      - caption: Base URL
-        settings: main
-        action: setup-domain
-        loadingText: Applying...
-        confirmText: Do you want to change Base URL?
-        successText:  Base URL for Magento has been successfully applyed!        
-
-  - id: cache-purge
-    type: update
-    name: Cache Purge
-    description: Cache Purge.
-    logo: ${globals.PATH}/images/magento.png
-    buttons:
-      - caption: Cache Purge
-        action: cachePurge
-        loadingText: Purging...
-        confirmText: Do you want to purge cache?
-        successText:  Cache has been successfully purged!                
+  
+  - installAddons
         
 actions:
-
+  installAddons:
+    - install: ${globals.PATH}/addon/addons.jps
+  
   setupLEdomain:
     - cmd[${nodes.cp.master.id}]: |-
         source /opt/letsencrypt/settings;
         bash ~/bin/japp.sh domain $domain;
         bash ~/bin/japp.sh ssl on;
-
-  cachePurge:
-    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh cachePurge
     
   initLEwebroot:
     - cmd[cp, bl]: |-
         [ ! -d /var/lib/jelastic/keys/letsencrypt ] && mkdir -p /var/lib/jelastic/keys/letsencrypt;
         echo "webroot=true" > /var/lib/jelastic/keys/letsencrypt/settings-custom;
         echo "webrootPath=/var/www/webroot/ROOT/pub" >> /var/lib/jelastic/keys/letsencrypt/settings-custom;
+        echo "test=false" >> /var/lib/jelastic/keys/letsencrypt/settings-custom;
       user: root
   
   setupEdgeportCDN:
@@ -319,7 +222,7 @@ actions:
         db_host: ${globals.DB_HOST}
         db_user: ${globals.DB_USER}
         db_pass: ${globals.DB_PASS}
-        es_host: elasticsearch
+        es_host: nosqldb
         es_pass: ${globals.ES_PASS}
         mg_admin_pass: ${globals.MG_ADMIN_PASS}
         mg_url: ${globals.PROTOCOL}://${globals.DOMAIN}/
@@ -333,8 +236,8 @@ actions:
       - script: /scripts/updateTriggers.js
         count: ${nodes.cp.length}
 
-  mountStorage:
-    - log: Mount Storage
+  mountStorageByGroup:
+    - log: Mount Storage by Group
     - api:
       - method: jelastic.environment.file.AddMountPointByGroup
         params:
@@ -343,7 +246,31 @@ actions:
           sourcePath: /data
           path: /var/www/webroot/ROOT
           sourceAddressType: NODE_GROUP
-          protocol: NFS4
+          protocol: ${this}
+          
+  storageHealthCheck:
+    - cmd[cp]: |-
+        service autofs stop;  mountpoint -q /var/www/webroot/ROOT && umount /var/www/webroot/ROOT;
+        wget ${globals.PATH}/scripts/health_check.php -O /var/www/webroot/ROOT/health_check.php;
+        [ ! -d /var/www/webroot/ROOT/pub ] && mkdir /var/www/webroot/ROOT/pub;
+        wget ${globals.PATH}/scripts/health_check.php -O /var/www/webroot/ROOT/pub/health_check.php;
+        service autofs start;
+      user: root
+
+  setupOpenSearch:
+    - cmd[nosqldb]: |-
+        jem passwd set -p ${globals.ES_PASS}
+        sed -i "s/plugins.security.ssl.http.enabled.*/plugins.security.ssl.http.enabled: false/" /etc/opensearch/opensearch.yml;
+        iptables -t nat -I PREROUTING -p tcp -m tcp --dport 4949 -j REDIRECT --to-ports 9200;
+        iptables-save > /etc/sysconfig/iptables4-jelastic-nat;
+        jem service restart
+      user: root
+  
+    - env.control.ApplyNodeGroupData[nosqldb]:
+        data:
+          adminUrl: "http://node${nodes.nosqldb.master.id}-${env.domain}:4949"
+          validation : 
+            maxCount: 1
 
 success:
   email: success/email/${nodes.cp.master.nodeType}/oneregion-${globals.EMAIL}.md?_r=${fn.random}

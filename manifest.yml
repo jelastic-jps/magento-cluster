@@ -14,7 +14,7 @@ categories:
 name: Auto-Scalable Magento Cluster v2
 logo: /images/magento.png
 
-baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/v2.0.0
+baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/v2.2.0
 
 onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}
 onBeforeInit: /scripts/beforeinit.js?_r=${fn.random}

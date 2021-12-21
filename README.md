@@ -15,7 +15,7 @@ Premium Magento is a PHP based eCommerce platform that is packaged as an advance
 - [**LiteSpeed Web Server**](https://docs.jelastic.com/litespeed-web-server/) a high-performance web server with a wide feature set, such as HTTP/3 support, ESI cache, CSS and JavaScript optimization, image optimization, browser and object cache support, CDN support, built-in WAF, Geo-DNS, CAPTCHA, IP throttling, cutting-edge anti-DDoS protection, etc.
 - [**Web Application Firewall**](https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:waf) (WAF) a security feature for the LiteSpeed Web Server stacks that comes with Layer-7 Anti-DDoS Filtering, IP level bandwidth, and request rate throttling
 - [**LiteMage Cache**](https://www.litespeedtech.com/products/cache-plugins/magento-acceleration) enhanced caching solution for dynamic assets that allows storing them as static ones to significantly speed up the requests serving
-- **MariaDB Cluster** the primary-primary replication topology offers better performance for storing dynamic content and a simpler failover procedure
+- [**MariaDB Cluster**](https://jelastic.com/blog/master-master-slave-replication-mysql-mariadb-auto-clustering/) the primary-primary replication topology offers better performance for storing dynamic content and a simpler failover procedure
 - **Redis** a high-performance RAM-allocated caching solution that is running inside the LiteSpeed Web Server container to store already loaded database query results and serve them up faster per request
 - [**OpenSearch**](https://opensearch.org/) a community-driven, open-source search engine (based on the Jelastic OpenSearch certified template) that provides a distributed, multitenant-capable full-text search
 - [**Data Storage**](https://docs.jelastic.com/data-storage-container) node for media files
@@ -31,7 +31,7 @@ Click the **Deploy** button below, specify your email address within the widget,
 Before the installation, the package provides a dialog that includes customization options for the Magento cluster.
 
 <p align="center"> 
-<img src="https://github.com/jelastic-jps/magento-cluster/blob/master/images/magento-installation.png" width="400">
+<img src="https://github.com/jelastic-jps/magento-cluster/blob/v2.2.0/images/magento-installation.png" width="500">
 </p>
 
 Based on the expected cluster load level, select the Scaling Strategy to determine the automatic horizontal scaling options (can be re-adjust manually):
@@ -60,7 +60,7 @@ Click Install and wait several minutes for the Jelastic PaaS to configure everyt
 Once the deployment is finished, you’ll see the appropriate success pop-up with access credentials to your administration Magento panel, whilst the same information will be duplicated to your email box.
 
 <p align="center"> 
-<img src="https://github.com/jelastic-jps/magento-cluster/blob/master/images/magento-successful-install.png" width="400">
+<img src="https://github.com/jelastic-jps/magento-cluster/blob/v2.2.0/images/magento-successful-install.png" width="400">
 </p>
 
 So now you can just click on the **Open in browser** button within the shown frame and start filling your highly available and reliable Magento installation with the required content, being ready to handle as much users as your service requires.

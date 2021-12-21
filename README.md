@@ -45,6 +45,10 @@ Based on the expected cluster load level, select the Scaling Strategy to determi
 - adds **2** application server nodes if the workload is higher than **30%**
 - removes **1** application server node if the workload goes below **10%**
 
+Choose the required **Advances Features** for your cluster:
+- **Web Application Firewall** - enables security option for malicious requests filtering (the feature available with the *LiteSpeed Web Server* only). 
+- **Install Let’s Encrypt SSL with Auto-Renewal** - installs the *Let's Encrypt* add-on to issue a trusted SSL certificate for a custom domain. The add-on also manages domain validation, certificates renewal, and SSL-related notifications.
+- **Install Lightning-Fast Premium CDN** - installs the *Premium CDN* add-on to integrate Edgecast CDN into the Magento application.
 
 
 

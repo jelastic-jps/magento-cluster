@@ -11,7 +11,7 @@ categories:
 - apps/clusters
 - apps/e-commerce
 name: Auto-Scalable Magento Cluster v2
-logo: /images/magento.png
+logo: /images/magento-enterprise-small.png
 
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.2.0
 

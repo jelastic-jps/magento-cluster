@@ -1,18 +1,24 @@
 # Auto-Scalable Magento Cluster
 
-Magento, PHP based eCommerce platform, is packaged as an advanced highly reliable and auto-scalable cluster on top of certified Jelastic dockerized stack templates with the following topology:
+The Magento Cluster is an advanced eCommerce solution for those who aim for growth and want to get the most out of their installation. The package offers such features as high availability, auto-scalability, high-performance web server and load balancing stacks, auto-renewable SSL, and more.
 
-- **Varnish** load balancer is supplemented with **NGINX** server as HTTPS proxy
-- **Scalable NGINX PHP** application servers with preconfigured [automatic horizontal scaling](https://docs.jelastic.com/automatic-horizontal-scaling) to handle load spikes
-- [**MariaDB Cluster**](https://github.com/jelastic-jps/mysql-cluster) with asynchronous master-slave replication to ensure high availability, fault tolerance and data security
-- **Redis Sessions** node to retain user session parameters
-- **Redis Cache** node for content cache storing
-- [**Elastic Data Storage**](https://docs.jelastic.com/data-storage-container) node for media files
+## Magento Cluster Topology
+
 <p align="center"> 
 <img src="https://github.com/jelastic-jps/magento-cluster/blob/master/images/magento-topology.png" width="400">
 </p>
 
-More details can be found at the article [Running Auto-Scalable Magento Platform in Containers](https://jelastic.com/blog/auto-scalable-magento-cluster-in-containers/).
+Premium Magento is a PHP based eCommerce platform that is packaged as an advanced, highly-reliable, and auto-scalable cluster on top of certified Jelastic stack templates with the following topology and peculiarities:
+- **Premium CDN** - integration with the Edgecast CDN network provides a lightning-fast user experience and ensures higher search engines rank with advanced caching and acceleration strategies, massive bandwidth capacity, HTTP/3 support
+- **Let's Encrypt SSL** the add-on provides automation for all the SSL certificate management operations - trusted certificate issuing, custom domain validation, automatic certificate renewal
+- **LiteSpeed Web ADC** advanced load balancer with flexible traffic distribution algorithm (to optimize performance), modern HTTP/3 protocol support, and ESI dynamic cache (to serve dynamic requests directly reducing the number of requests to backend servers) 
+- **LiteSpeed Web Server** a high-performance web server with a wide feature set, such as HTTP/3 support, ESI cache, CSS and JavaScript optimization, image optimization, browser and object cache support, CDN support, built-in WAF, Geo-DNS, CAPTCHA, IP throttling, cutting-edge anti-DDoS protection, etc.
+Web Application Firewall (WAF) - a security feature for the LiteSpeed Web Server stacks that comes with Layer-7 Anti-DDoS Filtering, IP level bandwidth, and request rate throttling
+- **LiteMage Cache** enhanced caching solution for dynamic assets that allows storing them as static ones to significantly speed up the requests serving
+- **MariaDB Cluster** the primary-primary replication topology offers better performance for storing dynamic content and a simpler failover procedure
+- **Redis** a high-performance RAM-allocated caching solution that is running inside the LiteSpeed Web Server container to store already loaded database query results and serve them up faster per request
+- **OpenSearch** a community-driven, open-source search engine (based on the Jelastic OpenSearch certified template) that provides a distributed, multitenant-capable full-text search
+- [**Data Storage**](https://docs.jelastic.com/data-storage-container) node for media files
 
 ## Deployment to the Cloud
 Click the **Deploy** button below, specify your email address within the widget, choose one of the [Jelastic Public Cloud providers](https://jelastic.com/install-application/?manifest=https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/manifest.jps&keys=app.jelastic.eapps.com;app.cloud.hostnet.nl;app.jelastichosting.nl;app.appengine.flow.ch;app.jelasticlw.com.br;app.mircloud.host;app.jcs.opusinteractive.io;app.paas.quarinet.eu) and press **Install**.

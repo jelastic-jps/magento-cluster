@@ -116,28 +116,36 @@ onInstall:
       var isLS = jelastic.dev.apps.GetApp(lsAppid);
 
       if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) {
-        var jps = "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.2.0/manifest.yml";
-        var version = "Magento Cluster v2";
+        var version = "v2.2.0";
       } else {
-        var jps = "https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v1.0.0/manifest.jps";
-        var version = "Magento Cluster v1";
+        var version = "v1.0.0";
       }
       return {
         result:0, 
         envGroups:eval('(' + MANIFEST + ')').envGroups, 
-        jps: jps,
+        version: version,
       }
 
-  - install:
-      jps: ${response.jps}?_r=${fn.random}
+  - if ("${response.version}" == "v2.2.0"):
+    - install:
+      jps: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.2.0/manifest.yml?_r=${fn.random}
       envName: ${settings.envName}
       region: ${settings.region}
       loggerName: ${settings.envName}
-      displayName: ${response.version}
+      displayName: Magento Cluster v2
       envGroups: ${response.envGroups}    
       settings:
         loadGrowth: ${settings.loadGrowth}
         waf: ${settings.waf}
         le_addon: ${settings.le_addon}
         cdn_addon: ${settings.cdn_addon}
+  - else:
+    - install:
+      jps: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v1.0.0/manifest.jps?_r=${fn.random}
+      envName: ${settings.envName}
+      region: ${settings.region}
+      loggerName: ${settings.envName}
+      displayName: Magento Cluster v1
+      envGroups: ${response.envGroups}    
+      settings:
         magento_version: ${settings.magento_version}

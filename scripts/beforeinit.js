@@ -24,7 +24,7 @@ var   nodesPerEnvMin = 7,
 if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) {
   var settings = jps.settings.settingsMagentoV2;
   var fields = {};
-  for (var i = 0, field; field = jps.settings.test1.fields[i]; i++)
+  for (var i = 0, field; field = jps.settings.settingsMagentoV2.fields[i]; i++)
     fields[field.name] = field;
 } else {
   var settings = jps.settings.settingsMagentoV1;

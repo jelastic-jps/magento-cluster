@@ -121,9 +121,9 @@ onInstall:
         var version = "v1.0.0";
       }
       return {
-        result:0, 
-        envGroups:eval('(' + MANIFEST + ')').envGroups, 
-        version: version,
+        result:0,
+        envGroups:eval('(' + MANIFEST + ')').envGroups,
+        version: version
       }
 
   - if ("${response.version}" == "v2.2.0"):
@@ -133,7 +133,7 @@ onInstall:
       region: ${settings.region}
       loggerName: ${settings.envName}
       displayName: Magento Cluster v2
-      envGroups: ${response.envGroups}    
+      envGroups: ${response.envGroups}
       settings:
         loadGrowth: ${settings.loadGrowth}
         waf: ${settings.waf}
@@ -146,6 +146,8 @@ onInstall:
       region: ${settings.region}
       loggerName: ${settings.envName}
       displayName: Magento Cluster v1
-      envGroups: ${response.envGroups}    
+      envGroups: ${response.envGroups}
       settings:
         magento_version: ${settings.magento_version}
+
+success: Check your mailbox for a message with access credentials.

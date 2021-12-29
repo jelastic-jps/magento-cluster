@@ -150,4 +150,5 @@ onInstall:
       settings:
         magento_version: ${settings.magento_version}
 
-success: Check your mailbox for a message with access credentials.
+success:
+  text: Check your mailbox for a message with access credentials.

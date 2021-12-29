@@ -152,3 +152,5 @@ onInstall:
 
 success:
   text: Check your mailbox for a message with access credentials.
+  email: false
+

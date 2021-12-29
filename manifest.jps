@@ -11,7 +11,7 @@ categories:
 - apps/e-commerce
 name: Auto-Scalable Magento Cluster
 logo: /images/magento-enterprise-small-v2.png
-baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/master
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master
 
 onBeforeInit: /scripts/beforeinit.js?_r=${fn.random}
 

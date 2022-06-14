@@ -1,0 +1,11 @@
+jps: https://github.com/ihorstep/magento-cluster/blob/v2.0.0/manifest.yml
+component: magento
+stack:
+  - nodeType: litespeedadc
+    nodeGroup: bl
+  - nodeType: litespeedphp
+    nodeGroup: cp
+  - nodeType: mariadb
+    nodeGroup: sqldb
+  - nodeType: storage
+    nodeGroup: storage

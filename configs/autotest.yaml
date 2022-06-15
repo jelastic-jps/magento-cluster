@@ -1,4 +1,4 @@
-jps: https://github.com/ihorstep/magento-cluster/blob/v2.0.0/manifest.yml
+jps: https://github.com/jelastic-jps/magento-cluster/blob/master/manifest.jps
 component: magento
 stack:
   - nodeType: litespeedadc

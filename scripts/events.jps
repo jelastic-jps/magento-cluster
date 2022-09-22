@@ -30,10 +30,6 @@ onAfterRedeployContainer[nosqldb]:
 
 onAfterClone: 
   - install: 
-      jps: ${globals.PATH}/scripts/balancerRebuild.jps?_r=${fn.random}
-      envName: ${event.response.env.envName}
-
-  - install: 
       jps: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
       envName: ${event.response.env.envName}
       settings:
@@ -59,7 +55,6 @@ onBeforeMigrate:
       cmd[${nodes.cp.master.id}]: echo false > ~/migrate
 
 onAfterMigrate:
-  - install: ${globals.PATH}/scripts/balancerRebuild.jps?_r=${fn.random}
   - cmd[${nodes.cp.master.id}]: if test -f ~/migrate; then cat ~/migrate; fi
   - if (/${response.out}/.test(true)):
     - install: 

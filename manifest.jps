@@ -137,11 +137,6 @@ onInstall:
   
   - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
     user: root
-
-  - cmd[bl]: |-
-      jem balancer clear;
-      jem balancer rebuildCommon;
-    user: root
   
   - setupOpenSearch
   
@@ -249,12 +244,9 @@ actions:
           
   storageHealthCheck:
     - cmd[cp]: |-
-        service autofs stop;  mountpoint -q /var/www/webroot/ROOT && umount /var/www/webroot/ROOT;
-        wget ${globals.PATH}/scripts/health_check.php -O /var/www/webroot/ROOT/health_check.php;
         [ ! -d /var/www/webroot/ROOT/pub ] && mkdir /var/www/webroot/ROOT/pub;
-        wget ${globals.PATH}/scripts/health_check.php -O /var/www/webroot/ROOT/pub/health_check.php;
-        service autofs start;
-      user: root
+        echo "<?php http_response_code(500); ?>" > /var/www/webroot/ROOT/health_check.php;
+        echo "<?php http_response_code(500); ?>" > /var/www/webroot/ROOT/pub/health_check.php;
 
   setupOpenSearch:
     - cmd[nosqldb]: |-

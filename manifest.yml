@@ -243,7 +243,10 @@ actions:
           protocol: ${this}
           
   storageHealthCheck:
-    - cmd[cp]: echo "<?php http_response_code(500); ?>" > /var/www/webroot/ROOT/health_check.php;
+    - cmd[cp]: |-
+        [ ! -d /var/www/webroot/ROOT/pub ] && mkdir /var/www/webroot/ROOT/pub;
+        echo "<?php http_response_code(500); ?>" > /var/www/webroot/ROOT/health_check.php;
+        echo "<?php http_response_code(500); ?>" > /var/www/webroot/ROOT/pub/health_check.php;
 
   setupOpenSearch:
     - cmd[nosqldb]: |-

@@ -49,6 +49,7 @@ resp.nodes.push({
     WP_PROTECT: "OFF",
     WP_PROTECT_LIMIT: 100,
     LITEMAGE: "ON",
+    HEALTH_CHECK_PATH: "health_check.php",
     ON_ENV_INSTALL: {
       jps: "https://raw.githubusercontent.com/jelastic-jps/litespeed/master/addons/license-v2.yml",
       settings: {

@@ -13,7 +13,7 @@ categories:
 name: Auto-Scalable Magento Cluster v2
 logo: /images/magento-enterprise-small-v2.png
 
-baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/v2.2.0
+baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/JE-63910
 
 onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}
 onBeforeInit: /scripts/beforeinit.js?_r=${fn.random}
@@ -115,7 +115,7 @@ onInstall:
    
   - log: Nodes configurations
   - install:
-    - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+    - jps: https://raw.githubusercontent.com/jelastic/templates/JE-63910/config_v2.jps?_r=${fn.random}
       settings:
         targetGroup: bl
         targetNodes: bl
@@ -136,11 +136,6 @@ onInstall:
   - cmd[cp, bl]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
   
   - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
-    user: root
-
-  - cmd[bl]: |-
-      jem balancer clear;
-      jem balancer rebuildCommon;
     user: root
   
   - setupOpenSearch

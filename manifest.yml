@@ -220,7 +220,7 @@ actions:
         es_pass: ${globals.ES_PASS}
         mg_admin_pass: ${globals.MG_ADMIN_PASS}
         mg_url: ${globals.PROTOCOL}://${globals.DOMAIN}/
-        version: 2.4.5
+        version: ${globals.version_magento}
         user_email: ${user.email}
     - cmd[cp]: sudo jem service restart
 

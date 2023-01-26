@@ -30,6 +30,7 @@ actions:
           [ -d /tmp/magento ] && rm -rf /tmp/magento;
           mkdir /tmp/magento;
           cd /var/www/webroot/ROOT && wget -qO- 'https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-${globals.VERSION}.tar.bz2' | tar xj -C /var/www/webroot/ROOT;
+          curl -fsSL "https://raw.githubusercontent.com/colinmollenhour/credis/v1.14.0/Client.php" -o vendor/colinmollenhour/credis/Client.php
           bash ~/bin/japp.sh install \
             --db-host ${globals.DB_HOST} \
             --db-password ${globals.DB_PASS} \

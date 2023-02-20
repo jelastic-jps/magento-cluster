@@ -16,10 +16,9 @@ resp.nodes.push({
 })
 
 resp.nodes.push({
-  nodeType: "mariadb-dockerized",
+  nodeType: "mariadb104",
   flexibleCloudlets: ${settings.db_flexibleCloudlets:16},
   fixedCloudlets: ${settings.db_fixedCloudlets:1},
-  tag: "10.4.25",
   count: 2,
   nodeGroup: "sqldb",
   restartDelay: 10,

@@ -185,7 +185,7 @@ litemage(){
         ${MAGENTO_BIN} setup:upgrade &>>$LOG;
         ${MAGENTO_BIN} setup:di:compile &>>$LOG;
         [ -f ${MAGENTO_DIR}/var/di/relations.ser ] && rm -f ${MAGENTO_DIR}/var/di/relations.ser;
-        ${MAGENTO_BIN} config:set system/full_page_cache/caching_application LITEMAGE &>>$LOG;
+        ${MAGENTO_BIN} config:set system/full_page_cache/caching_application 168 &>>$LOG;
         echo $(date -u) "End latemage setup" >>$LOG;
     fi
 }

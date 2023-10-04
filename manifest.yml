@@ -13,7 +13,7 @@ categories:
 name: Auto-Scalable Magento Cluster v2
 logo: /images/magento-enterprise-small-v2.png
 
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.2.0
+baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/JE-66684
 
 onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}
 onBeforeInit: /scripts/beforeinit.js?_r=${fn.random}

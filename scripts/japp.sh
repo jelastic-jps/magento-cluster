@@ -72,6 +72,10 @@ install(){
                 admin_password=$2
                 shift 2
                 ;;
+            --search-engine)
+                search_engine=$2
+                shift 2
+                ;;
             --elasticsearch-host)
                 elasticsearch_host=$2
                 shift 2
@@ -136,6 +140,7 @@ install(){
         --db-name=${db_name} \
         --db-user=${db_user} \
         --db-password=${db_password} \
+        --search-engine=${search_engine} \
         --elasticsearch-host=${elasticsearch_host} \
         --elasticsearch-username=${elasticsearch_username} \
         --elasticsearch-password=${elasticsearch_password} \
@@ -153,8 +158,7 @@ install(){
         --admin-lastname=AdminLast \
         --admin-email=${admin_email} \
         --admin-user=admin \
-        --admin-password=${admin_password} \
-        --disable-modules 'Magento_TwoFactorAuth,Magento_Csp' &>> $LOG;
+        --admin-password=${admin_password} >> $LOG;
 
      echo $(date -u) "End magento installation" >>$LOG;
 

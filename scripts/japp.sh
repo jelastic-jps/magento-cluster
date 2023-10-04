@@ -20,6 +20,7 @@ install(){
         "db-password"
         "admin-email"
         "admin-password"
+        "search-engine"
         "elasticsearch-host"
         "elasticsearch-port"
         "elasticsearch-username"

@@ -68,9 +68,7 @@ for (var i = 0; i < quotas.length; i++){
     }
 }    
     
-if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) {
-  prod = true;         
-} else {
+if (!(isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED)) {         
   litespeed = false;
   prod = false;
 }

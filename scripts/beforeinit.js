@@ -73,10 +73,6 @@ if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) {
 } else {
   litespeed = false;
   prod = false;
-  fields["bl_count"].markup = "LiteSpeed software stack templates are not supported at the moment.";
-  fields["bl_count"].cls = "warning";
-  fields["bl_count"].hidden = false;
-  fields["bl_count"].height = 30;
 }
     
 if (isCDN.result == 0 || isCDN.result == Response.PERMISSION_DENIED) {
@@ -100,6 +96,8 @@ if (!prod || group.groupType == 'trial') {
   fields["bl_count"].markup = "Cluster is not available. " + markup + "Please upgrade your account.";
   if (group.groupType == 'trial')
     fields["bl_count"].markup = "Magento cluster is not available for " + group.groupType + ". Please upgrade your account.";
+  if (!litespeed)
+    fields["bl_count"].markup = "LiteSpeed software stack templates are not supported at the moment for the current Hosting Provider (Partner)"; 
   fields["bl_count"].cls = "warning";
   fields["bl_count"].hidden = false;
   fields["bl_count"].height = 30;

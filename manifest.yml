@@ -98,7 +98,7 @@ onInstall:
   - install: ${baseUrl}/scripts/events.jps?_r=${fn.random}
   - script: /scripts/idna.js
   - setGlobals:
-      DOMAIN: ${response.domain}         
+      DOMAIN: ${response.domains}         
 
   - if (${settings.is_trigger:true}):
     - log: Auto Scaling Triggers

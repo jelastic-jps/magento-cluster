@@ -79,27 +79,20 @@ mixins:
  - https://raw.githubusercontent.com/sych74/magento/master/configs/vers.yaml
 
 globals:
-  PATH: ${baseUrl}
-  DB_USER: jelastic-${fn.random}
-  DB_PASS: ${fn.password(10)}
+  DB_USER: ${settings.DB_USER:user-[fn.random]}
+  DB_PASS: ${settings.DB_PASS:[fn.password(10)]}
   DB_HOST: sqldb
-  ES_PASS: ${fn.password(10)}
+  ES_PASS: ${settings.ES_PASS:[fn.password(10)]}
   PROTOCOL: http
-  MG_ADMIN_PASS: ${fn.password(10)}
-  LS_ADMIN_PASS: ${fn.password(10)}
+  MG_ADMIN_PASS: ${settings.MG_ADMIN_PASS:[fn.password(10)]}
+  LS_ADMIN_PASS: ${settings.LS_ADMIN_PASS:[fn.password(10)]}
   SUCCESS: success
   EMAIL: default
       
 onInstall:
-  - env.control.ApplyNodeGroupData [sqldb]:
-      data:
-        validation : 
-          maxCount: 2
-  - install: ${baseUrl}/scripts/events.jps?_r=${fn.random}
-  - script: /scripts/idna.js
-  - setGlobals:
-      DOMAIN: ${response.domains}         
-
+  - addLimits
+  - setProtocol
+  - setDomain
   - if (${settings.is_trigger:true}):
     - log: Auto Scaling Triggers
     - script: /scripts/addTriggers.js
@@ -108,42 +101,13 @@ onInstall:
       loadGrowth: ${settings.loadGrowth}
       cleanOldTriggers: true
       scaleDownLimit: ${nodes.cp.length}
-      
   - storageHealthCheck
-
   - mountStorageByGroup: NFS4
-   
-  - log: Nodes configurations
-  - install:
-    - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
-      settings:
-        targetGroup: bl
-        targetNodes: bl
-        optimization: magento
-
-    - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
-      settings:
-        targetGroup: cp
-        targetNodes: cp
-        optimization: magento
-
-    - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
-      settings:
-        targetGroup: sqldb
-        targetNodes: sqldb
-        optimization: magento
-  
-  - cmd[cp, bl]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
-  
-  - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
-    user: root
-  
+  - setupNodes  
   - setupOpenSearch
-  
+  - initLEsettings
   - installMagento
 
-  - initLEwebroot
-      
   - if (('${settings.le_addon:false}' == 'true') || ('${settings.cdn_addon:false}' == 'true')):
     - script: |
         var actions = [];
@@ -153,9 +117,10 @@ onInstall:
             nodeGroup: "bl",
             skipEmail: "true",
             settings: {
+              test: false,
               customDomains: "${globals.DOMAIN}",
-              fallbackToX1: "true",
-              webroot: "true",
+              fallbackToX1: true,
+              webroot: true,
               webrootPath: "/var/www/webroot/ROOT/pub"
             }
           });
@@ -170,23 +135,61 @@ onInstall:
           });
         return { result: 0, onAfterReturn: { install: actions } };
    
-  - if ('${settings.le_addon:false}' == 'true'):
-    - cmd[${nodes.cp.master.id}]: source /opt/letsencrypt/settings && echo $domain
-    - install: 
-        jps: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
-        settings:
-          domain: ${response.out}
-    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh ssl on;
-    - setGlobals:
-        PROTOCOL: https
-        
-  - if ('${settings.cdn_addon:false}' == 'true'): setupEdgeportCDN
-  
-  - installAddons
+  - if ('${settings.le_addon:false}' == 'true'): setupLEdomain        
+  - if ('${settings.cdn_addon:false}' == 'true'): setupCDN
+  - install: 
+    - jps: /scripts/events.jps?_r=${fn.random}
+    - jps: /scripts/addons.jps?_r=${fn.random}
         
 actions:
-  installAddons:
-    - install: ${globals.PATH}/addon/addons.jps
+
+  addLimits:
+    - env.control.ApplyNodeGroupData [sqldb]:
+        data:
+          validation : 
+            maxCount: 2
+
+  setProtocol:
+    - script: |
+        return {
+          result:0,
+          ssl: jelastic.billing.account.GetQuotas('environment.jelasticssl.enabled').array[0].value
+        }
+    - if (${response.ssl} || ${settings.le_addon:false}):
+        setGlobals:
+          PROTOCOL: https
+
+  setDomain:
+    - script: /scripts/idna.js
+      domains: ${env.domain}
+    - setGlobals:
+        DOMAIN: ${response.domains}
+  
+  setupNodes:
+    - log: Nodes configurations
+    - install:
+      - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+        settings:
+          targetGroup: bl
+          targetNodes: bl
+          optimization: magento
+
+      - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+        settings:
+          targetGroup: cp
+          targetNodes: cp
+          optimization: magento
+
+      - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+        settings:
+          targetGroup: sqldb
+          targetNodes: sqldb
+          optimization: magento
+  
+    - cmd[cp, bl]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
+  
+    - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
+      user: root
   
   setupLEdomain:
     - cmd[${nodes.cp.master.id}]: |-
@@ -194,7 +197,7 @@ actions:
         bash ~/bin/japp.sh domain $domain;
         bash ~/bin/japp.sh ssl on;
     
-  initLEwebroot:
+  initLEsettings:
     - cmd[cp, bl]: |-
         [ ! -d /var/lib/jelastic/keys/letsencrypt ] && mkdir -p /var/lib/jelastic/keys/letsencrypt;
         echo "webroot=true" > /var/lib/jelastic/keys/letsencrypt/settings-custom;
@@ -202,7 +205,7 @@ actions:
         echo "test=false" >> /var/lib/jelastic/keys/letsencrypt/settings-custom;
       user: root
   
-  setupEdgeportCDN:
+  setupCDN:
     - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
     - setGlobals:
         CDN: ${env.envName}-${response.response.partnerCode}.cdn.jelastic.net

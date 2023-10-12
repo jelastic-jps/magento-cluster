@@ -20,5 +20,6 @@ actions:
         [ -f /var/www/webroot/ROOT/bin/magento ] && php /var/www/webroot/ROOT/bin/magento cache:flush &>> /var/log/run.log;
         [ -f /var/www/webroot/ROOT/bin/magento ] && php /var/www/webroot/ROOT/bin/magento cache:clean &>> /var/log/run.log;
     - if (nodes.bl):
-        cmd[bl]: |-
-          [ -d /tmp/lscache/vhosts/Jelastic/ ] && rm -rf /tmp/lscache/vhosts/Jelastic/* &>> /var/log/run.log;
+      - if (/litespeedadc/.test("${nodes.bl.nodeType}")):
+          cmd[bl]: |-
+            [ -d /tmp/lscache/vhosts/Jelastic/ ] && rm -rf /tmp/lscache/vhosts/Jelastic/* &>> /var/log/run.log;

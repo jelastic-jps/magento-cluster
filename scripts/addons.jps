@@ -15,6 +15,7 @@ addons:
     type: update
     name: Magento Base URL
     description: Magento Base URL Configuration.
+    logo: https://github.com/jelastic-jps/magento/blob/v2.2.0/images/magento.png
     settings:
       fields:
         - type: string
@@ -33,15 +34,11 @@ addons:
         confirmText: Do you want to change Base URL?
         successText:  Base URL for Magento has been successfully applyed!        
 
-    actions:
-      setup_base_url:
-        - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh baseUrl ${settings.magentoURL};
-        - cache_purge
-
   - id: cache-purge-addon
     type: update
     name: Cache Manager
     description: Clean all caches.
+    logo: https://github.com/jelastic-jps/magento/blob/v2.2.0/images/magento.png
     buttons:
       - caption: Clean all caches
         action: cache_purge
@@ -50,12 +47,18 @@ addons:
         successText:  Caches have been successfully cleaned!                
     
 actions:
-      cache_purge:
-        - cmd[${nodes.cp.master.id}]: |-
-            [ -d /var/www/webroot/ROOT/var/cache/ ] && rm -rf /var/www/webroot/ROOT/var/cache/* &>> /var/log/run.log;
-        - cmd[cp]: |-
-            [ -f /var/www/webroot/ROOT/bin/magento ] && php /var/www/webroot/ROOT/bin/magento cache:flush &>> /var/log/run.log;
-            [ -f /var/www/webroot/ROOT/bin/magento ] && php /var/www/webroot/ROOT/bin/magento cache:clean &>> /var/log/run.log;
-        - if (nodes.bl):
-            cmd[bl]: |-
-              [ -d /tmp/lscache/vhosts/Jelastic/ ] && rm -rf /tmp/lscache/vhosts/Jelastic/* &>> /var/log/run.log;
+  setup_base_url:
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh baseUrl ${settings.magentoURL};
+    - cache_purge
+
+  cache_purge:
+    - cmd[${nodes.cp.master.id}]: |-
+        [ -d /var/www/webroot/ROOT/var/cache/ ] && rm -rf /var/www/webroot/ROOT/var/cache/* &>> /var/log/run.log;
+    - cmd[cp]: |-
+        [ -f /var/www/webroot/ROOT/bin/magento ] && php /var/www/webroot/ROOT/bin/magento cache:flush &>> /var/log/run.log;
+        [ -f /var/www/webroot/ROOT/bin/magento ] && php /var/www/webroot/ROOT/bin/magento cache:clean &>> /var/log/run.log;
+    - if (nodes.bl):
+      - if (/litespeedadc/.test("${nodes.bl.nodeType}")):
+          cmd[bl]: |-
+            [ -d /tmp/lscache/vhosts/Jelastic/ ] && rm -rf /tmp/lscache/vhosts/Jelastic/* &>> /var/log/run.log;
+              

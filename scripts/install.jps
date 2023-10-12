@@ -27,10 +27,13 @@ actions:
   installMG:
     - if ('${globals.CLUSTER}' == 'true'):
         cmd[${nodes.cp.master.id}]: |-
-          [ -d /tmp/magento ] && rm -rf /tmp/magento;
-          mkdir /tmp/magento;
-          cd /var/www/webroot/ROOT && wget -qO- 'https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-${globals.VERSION}.tar.bz2' | tar xj -C /var/www/webroot/ROOT;
-          curl -fsSL "https://raw.githubusercontent.com/colinmollenhour/credis/v1.14.0/Client.php" -o vendor/colinmollenhour/credis/Client.php
+          wget -qO /tmp/magento.tar.gz https://github.com/magento/magento2/archive/refs/tags/${globals.VERSION}.tar.gz
+          tar -xzf /tmp/magento.tar.gz -C /tmp/;
+          rsync -a /tmp/magento2-${globals.VERSION}/* /var/www/webroot/ROOT/;
+          rsync -a --checksum /tmp/magento2-${globals.VERSION}/* /var/www/webroot/ROOT/;
+          echo "Composer install" >> /var/log/run.log;
+          cd /var/www/webroot/ROOT && composer install >> /var/log/run.log;
+          echo "Magento install" >> /var/log/run.log; 
           bash ~/bin/japp.sh install \
             --db-host ${globals.DB_HOST} \
             --db-password ${globals.DB_PASS} \
@@ -39,6 +42,7 @@ actions:
             --base-url ${globals.MG_URL} \
             --admin-email ${globals.USER_EMAIL} \
             --admin-password ${globals.MG_ADMIN_PASS} \
+            --search-engine elasticsearch7 \
             --elasticsearch-host ${globals.ES_HOST} \
             --elasticsearch-username admin \
             --elasticsearch-password ${globals.ES_PASS} \

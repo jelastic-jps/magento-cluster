@@ -20,6 +20,7 @@ install(){
         "db-password"
         "admin-email"
         "admin-password"
+        "search-engine"
         "elasticsearch-host"
         "elasticsearch-port"
         "elasticsearch-username"
@@ -70,6 +71,10 @@ install(){
                 ;;
             --admin-password)
                 admin_password=$2
+                shift 2
+                ;;
+            --search-engine)
+                search_engine=$2
                 shift 2
                 ;;
             --elasticsearch-host)
@@ -136,6 +141,7 @@ install(){
         --db-name=${db_name} \
         --db-user=${db_user} \
         --db-password=${db_password} \
+        --search-engine=${search_engine} \
         --elasticsearch-host=${elasticsearch_host} \
         --elasticsearch-username=${elasticsearch_username} \
         --elasticsearch-password=${elasticsearch_password} \
@@ -153,8 +159,7 @@ install(){
         --admin-lastname=AdminLast \
         --admin-email=${admin_email} \
         --admin-user=admin \
-        --admin-password=${admin_password} \
-        --disable-modules 'Magento_TwoFactorAuth,Magento_Csp' &>> $LOG;
+        --admin-password=${admin_password} >> $LOG;
 
      echo $(date -u) "End magento installation" >>$LOG;
 
@@ -180,7 +185,7 @@ litemage(){
         ${MAGENTO_BIN} setup:upgrade &>>$LOG;
         ${MAGENTO_BIN} setup:di:compile &>>$LOG;
         [ -f ${MAGENTO_DIR}/var/di/relations.ser ] && rm -f ${MAGENTO_DIR}/var/di/relations.ser;
-        ${MAGENTO_BIN} config:set system/full_page_cache/caching_application LITEMAGE &>>$LOG;
+        ${MAGENTO_BIN} config:set system/full_page_cache/caching_application 168 &>>$LOG;
         echo $(date -u) "End latemage setup" >>$LOG;
     fi
 }

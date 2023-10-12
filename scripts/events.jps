@@ -2,9 +2,6 @@ type: update
 id: magento-cluster-events
 name: Magento Cluster Events
 
-globals:
-  PATH: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.2.0
-
 onAfterScaleIn[cp]: updateTriggers
   
 onAfterScaleOut[nodeGroup:cp]: updateTriggers
@@ -17,7 +14,7 @@ onAfterInstallAddon [nodeGroup:bl, id:cdn]: setupEdgeportCDN
 onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]:
   - cmd[${nodes.cp.master.id}]: source /opt/letsencrypt/settings && echo $domain
   - install: 
-      jps: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
+      jps: /setupDomain.jps?_r=${fn.random}
       settings:
         domain: ${response.out}
   - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh ssl on;
@@ -30,17 +27,17 @@ onAfterRedeployContainer[nosqldb]:
 
 onAfterClone: 
   - install: 
-      jps: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
+      jps: /setupDomain.jps?_r=${fn.random}
       envName: ${event.response.env.envName}
       settings:
         domain: ${event.response.env.domain}
 
   - install: 
-      jps: ${globals.PATH}/scripts/setupCDN.jps?_r=${fn.random}
+      jps: /setupCDN.jps?_r=${fn.random}
       envName: ${event.response.env.envName}
       
   - install: 
-      jps: ${globals.PATH}/addon/addons.jps?_r=${fn.random}
+      jps: /addons.jps?_r=${fn.random}
       envName: ${event.response.env.envName}
       
   - script: delete MANIFEST.id; return {result:0, jps:MANIFEST};
@@ -58,7 +55,7 @@ onAfterMigrate:
   - cmd[${nodes.cp.master.id}]: if test -f ~/migrate; then cat ~/migrate; fi
   - if (/${response.out}/.test(true)):
     - install: 
-        jps: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
+        jps: /setupDomain.jps?_r=${fn.random}
         settings:
           domain: ${env.domain}
   - env.control.ApplyNodeGroupData[nosqldb]:

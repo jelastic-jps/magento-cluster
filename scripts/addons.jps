@@ -50,8 +50,16 @@ actions:
   setup_base_url:
     - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh baseUrl ${settings.magentoURL};
     - cache_purge
+    - opcache_reset
+
+  opcache_reset:
+    - cmd[cp]: |-
+        echo "<?php opcache_reset(); ?>" > /var/www/webroot/ROOT/pub/vz-opcache-reset.php;
+        curl http://localhost/vz-opcache-reset.php;
+        rm -f /var/www/webroot/ROOT/pub/vz-opcache-reset.php;
 
   cache_purge:
+    - opcache_reset
     - cmd[${nodes.cp.master.id}]: |-
         [ -d /var/www/webroot/ROOT/var/cache/ ] && rm -rf /var/www/webroot/ROOT/var/cache/* &>> /var/log/run.log;
     - cmd[cp]: |-

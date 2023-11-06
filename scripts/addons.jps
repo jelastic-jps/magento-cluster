@@ -1,0 +1,72 @@
+type: update
+id: magento-addons
+name: Magento Addons
+description: Magento Addons
+
+onInstall:
+  installAddon:
+  - id: setup-base-url-addon
+    nodeGroup: cp  
+  - id: cache-purge-addon
+    nodeGroup: cp  
+
+addons:
+  - id: setup-base-url-addon
+    type: update
+    name: Magento Base URL
+    description: Magento Base URL Configuration.
+    logo: https://github.com/jelastic-jps/magento/blob/v2.2.0/images/magento.png
+    settings:
+      fields:
+        - type: string
+          name: magentoURL
+          caption: Base URL for Magento
+          default: ''
+          required: true
+          regex: "^https?:\\/\\/.+$"
+          regexText: Incorrect Base URL.
+
+    buttons:
+      - caption: Base URL
+        settings: main
+        action: setup_base_url
+        loadingText: Applying...
+        confirmText: Do you want to change Base URL?
+        successText:  Base URL for Magento has been successfully applyed!        
+
+  - id: cache-purge-addon
+    type: update
+    name: Cache Manager
+    description: Clean all caches.
+    logo: https://github.com/jelastic-jps/magento/blob/v2.2.0/images/magento.png
+    buttons:
+      - caption: Clean all caches
+        action: cache_purge
+        loadingText: Cleaning...
+        confirmText: Do you want to clean all caches?
+        successText:  Caches have been successfully cleaned!                
+    
+actions:
+  setup_base_url:
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh baseUrl ${settings.magentoURL};
+    - cache_purge
+    - opcache_reset
+
+  opcache_reset:
+    - cmd[cp]: |-
+        echo "<?php opcache_reset(); ?>" > /var/www/webroot/ROOT/pub/vz-opcache-reset.php;
+        curl http://localhost/vz-opcache-reset.php;
+        rm -f /var/www/webroot/ROOT/pub/vz-opcache-reset.php;
+
+  cache_purge:
+    - opcache_reset
+    - cmd[${nodes.cp.master.id}]: |-
+        [ -d /var/www/webroot/ROOT/var/cache/ ] && rm -rf /var/www/webroot/ROOT/var/cache/* &>> /var/log/run.log;
+    - cmd[cp]: |-
+        [ -f /var/www/webroot/ROOT/bin/magento ] && php /var/www/webroot/ROOT/bin/magento cache:flush &>> /var/log/run.log;
+        [ -f /var/www/webroot/ROOT/bin/magento ] && php /var/www/webroot/ROOT/bin/magento cache:clean &>> /var/log/run.log;
+    - if (nodes.bl):
+      - if (/litespeedadc/.test("${nodes.bl.nodeType}")):
+          cmd[bl]: |-
+            [ -d /tmp/lscache/vhosts/Jelastic/ ] && rm -rf /tmp/lscache/vhosts/Jelastic/* &>> /var/log/run.log;
+              

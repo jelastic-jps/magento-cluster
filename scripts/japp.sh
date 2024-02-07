@@ -21,10 +21,10 @@ install(){
         "admin-email"
         "admin-password"
         "search-engine"
-        "elasticsearch-host"
-        "elasticsearch-port"
-        "elasticsearch-username"
-        "elasticsearch-password"
+        "opensearch-host"
+        "opensearch-port"
+        "opensearch-username"
+        "opensearch-password"
         "cache-backend"
         "cache-backend-redis-server"
         "cache-backend-redis-port"
@@ -77,19 +77,19 @@ install(){
                 search_engine=$2
                 shift 2
                 ;;
-            --elasticsearch-host)
+            --opensearch-host)
                 elasticsearch_host=$2
                 shift 2
                 ;;
-            --elasticsearch-port)
+            --opensearch-port)
                 elasticsearch_port=$2
                 shift 2
                 ;;
-            --elasticsearch-username)
+            --opensearch-username)
                 elasticsearch_username=$2
                 shift 2
                 ;;
-            --elasticsearch-password)
+            --opensearch-password)
                 elasticsearch_password=$2
                 shift 2
                 ;;
@@ -142,10 +142,10 @@ install(){
         --db-user=${db_user} \
         --db-password=${db_password} \
         --search-engine=${search_engine} \
-        --elasticsearch-host=${elasticsearch_host} \
-        --elasticsearch-username=${elasticsearch_username} \
-        --elasticsearch-password=${elasticsearch_password} \
-        --elasticsearch-enable-auth=1 \
+        --opensearch-host=${opensearch_host} \
+        --opensearch-username=${opensearch_username} \
+        --opensearch-password=${opensearch_password} \
+        --opensearch-enable-auth=1 \
         --cache-backend=${cache_backend} \
         --cache-backend-redis-server=${cache_backend_redis_server} \
         --cache-backend-redis-db=${cache_backend_redis_db} \

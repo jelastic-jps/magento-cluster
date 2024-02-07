@@ -78,19 +78,19 @@ install(){
                 shift 2
                 ;;
             --opensearch-host)
-                elasticsearch_host=$2
+                opensearch_host=$2
                 shift 2
                 ;;
             --opensearch-port)
-                elasticsearch_port=$2
+                opensearch_port=$2
                 shift 2
                 ;;
             --opensearch-username)
-                elasticsearch_username=$2
+                opensearch_username=$2
                 shift 2
                 ;;
             --opensearch-password)
-                elasticsearch_password=$2
+                opensearch_password=$2
                 shift 2
                 ;;
             --cache-backend)

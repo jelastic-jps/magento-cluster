@@ -42,10 +42,10 @@ actions:
             --base-url ${globals.MG_URL} \
             --admin-email ${globals.USER_EMAIL} \
             --admin-password ${globals.MG_ADMIN_PASS} \
-            --search-engine elasticsearch7 \
-            --elasticsearch-host ${globals.ES_HOST} \
-            --elasticsearch-username admin \
-            --elasticsearch-password ${globals.ES_PASS} \
+            --search-engine opensearch \
+            --opensearch-host ${globals.ES_HOST} \
+            --opensearch-username admin \
+            --opensearch-password ${globals.ES_PASS} \
             --cache-backend redis \
             --cache-backend-redis-server /var/run/redis/redis.sock \
             --cache-backend-redis-db 0 \

@@ -169,7 +169,7 @@ actions:
           targetNodes: bl
           optimization: magento
 
-      - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+      - jps: https://raw.githubusercontent.com/jelastic/templates/JE-71582/config_v2.jps?_r=${fn.random}
         settings:
           targetGroup: cp
           targetNodes: cp

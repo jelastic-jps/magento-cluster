@@ -76,7 +76,7 @@ settings:
       markup:
 
 mixins:
- - https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/configs/vers.yaml
+ - https://raw.githubusercontent.com/sych74/magento-cluster/master/configs/vers.yaml
 
 globals:
   DB_USER: ${settings.DB_USER:user-[fn.random]}

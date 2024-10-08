@@ -159,8 +159,7 @@ install(){
         --admin-lastname=AdminLast \
         --admin-email=${admin_email} \
         --admin-user=admin \
-        --admin-password=${admin_password} \
-        --disable-modules 'Magento_Csp' &>> $LOG;
+        --admin-password=${admin_password} &>> $LOG;
     
      echo $(date -u) "End magento installation" >>$LOG;
 

@@ -16,7 +16,7 @@ resp.nodes.push({
 })
 
 resp.nodes.push({
-  nodeType: "mariadb104",
+  nodeType: "mariadb106",
   flexibleCloudlets: ${settings.db_flexibleCloudlets:16},
   fixedCloudlets: ${settings.db_fixedCloudlets:1},
   count: 2,
@@ -59,7 +59,7 @@ resp.nodes.push({
 }, {
   nodeType: "litespeedphp",
   count: ${settings.cp_count:2},
-  engine: "php8.1",
+  engine: "php8.2",
   flexibleCloudlets: ${settings.cp_flexibleCloudlets:32},
   fixedCloudlets: ${settings.cp_fixedCloudlets:1},
   nodeGroup: "cp",

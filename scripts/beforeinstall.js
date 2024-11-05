@@ -59,7 +59,7 @@ resp.nodes.push({
 }, {
   nodeType: "litespeedphp",
   count: ${settings.cp_count:2},
-  engine: "php8.2",
+  engine: "php8.3",
   flexibleCloudlets: ${settings.cp_flexibleCloudlets:32},
   fixedCloudlets: ${settings.cp_fixedCloudlets:1},
   nodeGroup: "cp",

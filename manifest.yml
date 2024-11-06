@@ -13,7 +13,7 @@ categories:
 name: Auto-Scalable Magento Cluster v2
 logo: /images/magento-enterprise-small-v2.png
 
-baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/v2.2.0
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.2.0
 
 onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}
 onBeforeInit: /scripts/beforeinit.js?_r=${fn.random}
@@ -76,7 +76,7 @@ settings:
       markup:
 
 mixins:
- - https://raw.githubusercontent.com/sych74/magento-cluster/master/configs/vers.yaml
+ - https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/configs/vers.yaml
 
 globals:
   DB_USER: ${settings.DB_USER:user-[fn.random]}

@@ -1,6 +1,7 @@
 jpsType: install
 jpsVersion: '1.7.4'
 id: magento-cluster
+homepage: https://github.com/jelastic-jps/magento-cluster/tree/v2.2.0
 description:
   text: Auto-scalable and highly-available cluster for Premium level Magento eCommerce hosting 
     with out-of-box auto-scaling, load and traffic distribution, database replication, page caching and user session storage.
@@ -9,148 +10,261 @@ description:
 categories:
 - apps/clusters
 - apps/e-commerce
-name: Auto-Scalable Magento Cluster
+name: Auto-Scalable Magento Cluster v2
 logo: /images/magento-enterprise-small-v2.png
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master
 
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.2.0
+
+onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}
 onBeforeInit: /scripts/beforeinit.js?_r=${fn.random}
+nodes: definedInOnBeforeInstall
+skipNodeEmails: true
 
 settings:
-  settingsMagentoV2:
-    fields:    
-      - caption: Env Name    
-        type: envname
-        name: envName
-        randomName: true
-        showFullDomain: true
-        dependsOn: region
-
-      - caption: Region
-        type: regionlist
-        name: region
-        disableInactive: true
-        selectFirstAvailable: true
-        message: unavailable region
- 
-      - caption: Scaling Strategy
-        type: list
-        name: loadGrowth
-        default: slow
-        required: true
-        width: 225
-        tooltip: | 
-          Configure auto-scaling triggers, i.e. how fast the system responds to load spikes by adding or removing nodes.
-          <p>Read more about <a href="https://docs.jelastic.com/automatic-horizontal-scaling">Automatic Horizontal Scaling</a></p>
-        values:        
-          - value: slow
-            caption: Low Load
-            tooltip: <h2>Low load scaling strategy</h2>add 1 new node when CPU > 70% <p>remove when CPU < 20%</p>
-          - value: medium
-            caption: Medium Load
-            tooltip: <h3>Medium load scaling strategy</h3>add 1 new node when CPU > 50% <p>remove when CPU < 20%</p>
-          - value: fast
-            caption: High Load
-            tooltip: <h3>High load scaling strategy</h3>add 2 new nodes when CPU > 30% <p>remove when CPU < 10%</p>
+  fields:
+    - caption: Scaling Strategy
+      type: list
+      name: loadGrowth
+      default: slow
+      required: true
+      width: 225
+      tooltip: | 
+        Configure auto-scaling triggers, i.e. how fast the system responds to load spikes by adding or removing nodes.
+        <p>Read more about <a href="https://docs.jelastic.com/automatic-horizontal-scaling">Automatic Horizontal Scaling</a></p>
+      values:        
+        - value: slow
+          caption: Low Load
+          tooltip: <h2>Low load scaling strategy</h2>add 1 new node when CPU > 70% <p>remove when CPU < 20%</p>
+        - value: medium
+          caption: Medium Load
+          tooltip: <h3>Medium load scaling strategy</h3>add 1 new node when CPU > 50% <p>remove when CPU < 20%</p>
+        - value: fast
+          caption: High Load
+          tooltip: <h3>High load scaling strategy</h3>add 2 new nodes when CPU > 30% <p>remove when CPU < 10%</p>
   
-      - caption: Advanced Features
-        type: displayfield
-        name: displayfield
-        markup:
+    - caption: Advanced Features
+      type: displayfield
+      name: displayfield
+      markup:
  
-      - caption: Web Application Firewall
-        type: checkbox
-        name: waf
-        value: true
-        disabled: false
-        tooltip: "Protect web sites with <a href='https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:waf' target='_blank'>LiteSpeed built-in WAF</a> based on Free ModSecurity Rules from Comodo"
+    - caption: Web Application Firewall
+      type: checkbox
+      name: waf
+      value: true
+      disabled: false
+      tooltip: "Protect web sites with <a href='https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:waf' target='_blank'>LiteSpeed built-in WAF</a> based on Free ModSecurity Rules from Comodo"
 
-      - caption: Install Let's Encrypt SSL with Auto-Renewal
-        type: checkbox
-        name: le_addon
-        value: true
-        disabled: false
-        tooltip: "Advanced integration with Let's Encrypt certificate authority that simplifies and automates the process of issuing, configuring and updating trusted custom SSL certificates."
+    - caption: Install Let's Encrypt SSL with Auto-Renewal
+      type: checkbox
+      name: le_addon
+      value: true
+      disabled: false
+      tooltip: "Advanced integration with Let's Encrypt certificate authority that simplifies and automates the process of issuing, configuring and updating trusted custom SSL certificates."
 
-      - caption: Install Lightning-Fast Premium CDN
-        type: checkbox
-        name: cdn_addon
-        value: true
-        disabled: false
-        tooltip: "Jelastic CDN is an HTTP/3 premium content delivery network of 160+ Super PoPs (points of presence) with bandwidth capacity up to 115 Tbps, advanced caching and acceleration strategies based on best-in-class IP Anycast technology."
+    - caption: Install Lightning-Fast Premium CDN
+      type: checkbox
+      name: cdn_addon
+      value: true
+      disabled: false
+      tooltip: "Jelastic CDN is an HTTP/3 premium content delivery network of 160+ Super PoPs (points of presence) with bandwidth capacity up to 115 Tbps, advanced caching and acceleration strategies based on best-in-class IP Anycast technology."
 
-      - type: displayfield
-        hideLabel: true
-        hidden: true
-        name: bl_count   
-        value: 1
-        markup:
+    - type: displayfield
+      hideLabel: true
+      hidden: true
+      name: bl_count   
+      value: 1
+      markup:
 
-  settingsMagentoV1:
-    fields:
-      - caption: Env Name    
-        type: envname
-        name: envName
-        randomName: true
-        showFullDomain: true
-        dependsOn: region
+mixins:
+ - https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/configs/vers.yaml
 
-      - caption: Region
-        type: regionlist
-        name: region
-        disableInactive: true
-        selectFirstAvailable: true
-        message: unavailable region
-
-      - name: magento_version
-        caption: Magento version
-        type: list
-        values:
-          https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-2.3.6.tar.bz2: Magento CE 2.3.x
-          https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-1.9.4.tar.bz2: Magento CE 1.9.4.x
-        default: https://app-artifacts.s3.eu-central-1.amazonaws.com/magento/Magento-CE-2.3.6.tar.bz2
-
+globals:
+  PATH: ${baseUrl}
+  DB_USER: jelastic-${fn.random}
+  DB_PASS: ${fn.password(10)}
+  DB_HOST: sqldb
+  ES_PASS: ${fn.password(10)}
+  PROTOCOL: http
+  MG_ADMIN_PASS: ${fn.password(10)}
+  LS_ADMIN_PASS: ${fn.password(10)}
+  SUCCESS: success
+  EMAIL: default
+      
 onInstall:
-  - script: |
-      import com.hivext.api.Response;
-      var lsAppid = "9e6afcf310004ac84060f90ff41a5aba";
-      var isLS = jelastic.dev.apps.GetApp(lsAppid);
+  - env.control.ApplyNodeGroupData [sqldb]:
+      data:
+        validation : 
+          maxCount: 2
+  - install: ${baseUrl}/scripts/events.jps?_r=${fn.random}
+  - script: /scripts/idna.js
+  - setGlobals:
+      DOMAIN: ${response.domain}         
 
-      if (isLS.result == 0 || isLS.result == Response.PERMISSION_DENIED) {
-        var version = "v2.2.0";
-      } else {
-        var version = "v1.0.0";
-      }
-      return {
-        result:0,
-        envGroups:eval('(' + MANIFEST + ')').envGroups,
-        version: version
-      }
+  - if (${settings.is_trigger:true}):
+    - log: Auto Scaling Triggers
+    - script: /scripts/addTriggers.js
+      nodeGroup: cp
+      resourceType: CPU
+      loadGrowth: ${settings.loadGrowth}
+      cleanOldTriggers: true
+      scaleDownLimit: ${nodes.cp.length}
+      
+  - storageHealthCheck
 
-  - if ("${response.version}" == "v2.2.0"):
-    - install:
-      jps: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.2.0/manifest.yml?_r=${fn.random}
-      envName: ${settings.envName}
-      region: ${settings.region}
-      loggerName: ${settings.envName}
-      displayName: Magento Cluster v2
-      envGroups: ${response.envGroups}
+  - mountStorageByGroup: NFS4
+   
+  - log: Nodes configurations
+  - install:
+    - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
       settings:
-        loadGrowth: ${settings.loadGrowth}
-        waf: ${settings.waf}
-        le_addon: ${settings.le_addon}
-        cdn_addon: ${settings.cdn_addon}
-  - else:
-    - install:
-      jps: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v1.0.0/manifest.jps?_r=${fn.random}
-      envName: ${settings.envName}
-      region: ${settings.region}
-      loggerName: ${settings.envName}
-      displayName: Magento Cluster v1
-      envGroups: ${response.envGroups}
+        targetGroup: bl
+        targetNodes: bl
+        optimization: magento
+
+    - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
       settings:
-        magento_version: ${settings.magento_version}
+        targetGroup: cp
+        targetNodes: cp
+        optimization: magento
+
+    - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+      settings:
+        targetGroup: sqldb
+        targetNodes: sqldb
+        optimization: magento
+  
+  - cmd[cp, bl]: if test -f /usr/local/sbin/optimization.sh; then bash /usr/local/sbin/optimization.sh &>> /var/log/run.log; fi
+  
+  - cmd[cp, bl]: jem passwd set -p ${globals.LS_ADMIN_PASS}
+    user: root
+  
+  - setupOpenSearch
+  
+  - installMagento
+
+  - initLEwebroot
+      
+  - if (('${settings.le_addon:false}' == 'true') || ('${settings.cdn_addon:false}' == 'true')):
+    - script: |
+        var actions = [];
+        if ('${settings.le_addon:false}' == 'true')
+          actions.push({
+            jps: "https://github.com/jelastic-jps/lets-encrypt/blob/master/manifest.jps?_r=${fn.random}?_r=${fn.random}",
+            nodeGroup: "bl",
+            skipEmail: "true",
+            settings: {
+              customDomains: "${globals.DOMAIN}",
+              fallbackToX1: "true",
+              webroot: "true",
+              webrootPath: "/var/www/webroot/ROOT/pub"
+            }
+          });
+        if ('${settings.cdn_addon:false}' == 'true')
+          actions.push({
+            jps: "https://raw.githubusercontent.com/edgeport/cdn/master/manifest.yml?_r=${fn.random}",
+            nodeGroup: "bl",
+            skipEmail: "true",
+            settings: {
+              note: "${settings.noteCDN:}"
+            }
+          });
+        return { result: 0, onAfterReturn: { install: actions } };
+   
+  - if ('${settings.le_addon:false}' == 'true'):
+    - cmd[${nodes.cp.master.id}]: source /opt/letsencrypt/settings && echo $domain
+    - install: 
+        jps: ${globals.PATH}/scripts/setupDomain.jps?_r=${fn.random}
+        settings:
+          domain: ${response.out}
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh ssl on;
+    - setGlobals:
+        PROTOCOL: https
+        
+  - if ('${settings.cdn_addon:false}' == 'true'): setupEdgeportCDN
+  
+  - installAddons
+        
+actions:
+  installAddons:
+    - install: ${globals.PATH}/addon/addons.jps
+  
+  setupLEdomain:
+    - cmd[${nodes.cp.master.id}]: |-
+        source /opt/letsencrypt/settings;
+        bash ~/bin/japp.sh domain $domain;
+        bash ~/bin/japp.sh ssl on;
+    
+  initLEwebroot:
+    - cmd[cp, bl]: |-
+        [ ! -d /var/lib/jelastic/keys/letsencrypt ] && mkdir -p /var/lib/jelastic/keys/letsencrypt;
+        echo "webroot=true" > /var/lib/jelastic/keys/letsencrypt/settings-custom;
+        echo "webrootPath=/var/www/webroot/ROOT/pub" >> /var/lib/jelastic/keys/letsencrypt/settings-custom;
+        echo "test=false" >> /var/lib/jelastic/keys/letsencrypt/settings-custom;
+      user: root
+  
+  setupEdgeportCDN:
+    - script: return jelastic.dev.scripting.Eval("c05ffa5b45628a2a0c95467ebca8a0b4", session, "cdn.info", {partnerCode:1})
+    - setGlobals:
+        CDN: ${env.envName}-${response.response.partnerCode}.cdn.jelastic.net
+        SUCCESS: success-cdn
+        EMAIL: cdn
+    - cmd[${nodes.cp.master.id}]: bash ~/bin/japp.sh edgeportCDN --cdn-url ${globals.CDN}
+
+  installMagento:
+    - install: /scripts/install.jps
+      settings:
+        db_host: ${globals.DB_HOST}
+        db_user: ${globals.DB_USER}
+        db_pass: ${globals.DB_PASS}
+        es_host: nosqldb
+        es_pass: ${globals.ES_PASS}
+        mg_admin_pass: ${globals.MG_ADMIN_PASS}
+        mg_url: ${globals.PROTOCOL}://${globals.DOMAIN}/
+        version: ${globals.version_magento}
+        user_email: ${user.email}
+    - cmd[cp]: sudo jem service restart
+
+  updateTriggers:
+    if (!${event.params.auto:true}):
+      - log: update scaling trigger
+      - script: /scripts/updateTriggers.js
+        count: ${nodes.cp.length}
+
+  mountStorageByGroup:
+    - log: Mount Storage by Group
+    - api:
+      - method: jelastic.environment.file.AddMountPointByGroup
+        params:
+          nodeGroup: cp
+          sourceNodeId: ${nodes.storage.master.id}
+          sourcePath: /data
+          path: /var/www/webroot/ROOT
+          sourceAddressType: NODE_GROUP
+          protocol: ${this}
+          
+  storageHealthCheck:
+    - cmd[cp]: |-
+        [ ! -d /var/www/webroot/ROOT/pub ] && mkdir /var/www/webroot/ROOT/pub;
+        echo "<?php http_response_code(500); ?>" > /var/www/webroot/ROOT/health_check.php;
+        echo "<?php http_response_code(500); ?>" > /var/www/webroot/ROOT/pub/health_check.php;
+
+  setupOpenSearch:
+    - cmd[nosqldb]: |-
+        jem passwd set -p ${globals.ES_PASS}
+        sed -i "s/plugins.security.ssl.http.enabled.*/plugins.security.ssl.http.enabled: false/" /etc/opensearch/opensearch.yml;
+        iptables -t nat -I PREROUTING -p tcp -m tcp --dport 4949 -j REDIRECT --to-ports 9200;
+        iptables-save > /etc/sysconfig/iptables4-jelastic-nat;
+        jem service restart
+      user: root
+  
+    - env.control.ApplyNodeGroupData[nosqldb]:
+        data:
+          adminUrl: "http://node${nodes.nosqldb.master.id}-${env.domain}:4949"
+          validation : 
+            maxCount: 1
 
 success:
-  text: Check your mailbox for a message with access credentials.
-  email: false
+  email: success/email/${nodes.cp.master.nodeType}/oneregion-${globals.EMAIL}.md?_r=${fn.random}
+  text: success/text/oneregion/${globals.SUCCESS}.md?_r=${fn.random}
 
+startPage: ${globals.PROTOCOL}://${env.domain}/

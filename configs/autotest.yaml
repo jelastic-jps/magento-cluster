@@ -1,0 +1,11 @@
+jps: https://github.com/jelastic-jps/magento-cluster/blob/master/manifest.jps
+component: magento
+stack:
+  - nodeType: litespeedadc
+    nodeGroup: bl
+  - nodeType: litespeedphp
+    nodeGroup: cp
+  - nodeType: mariadb
+    nodeGroup: sqldb
+  - nodeType: storage
+    nodeGroup: storage

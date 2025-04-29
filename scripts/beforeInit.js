@@ -105,7 +105,7 @@ if (!le) {
 }
 
 if (!prod || group.groupType == 'trial') {
-  disableFields(["le_addon", "cdn_addon"]);    
+  disableFields(["loadGrowth", "waf", "le_addon", "cdn_addon"]);    
   setDisplayWarning("displayfield", "Advanced features are not available.", 25);
   warn_text = (group.groupType == 'trial')
     ? "Magento cluster is not available for " + group.groupType + ". Please upgrade your account."

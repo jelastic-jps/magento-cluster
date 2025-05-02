@@ -113,10 +113,7 @@ if (!prod || group.groupType == 'trial') {
   if (!ls)
     warn_text = "LiteSpeed software stack templates are not supported at the moment for the current Hosting Provider (Partner)";
   addDisplayWarning(warn_text, 30);
-
-  settings.fields.push(
-    {"type": "compositefield","height": 0,"hideLabel": true,"width": 0,"items": [{"height": 0,"type": "string","required": true}]}
-  );
+  settings.submitType = 'upgrade';
 }
 
 function getQuotaDescription(name) {

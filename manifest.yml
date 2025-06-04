@@ -1,19 +1,19 @@
 jpsType: install
 jpsVersion: '1.7.4'
 id: magento-cluster
-homepage: https://github.com/jelastic-jps/magento-cluster/tree/v2.2.0
+name: Auto-Scalable Magento Cluster v2
+categories:
+- apps/clusters
+- apps/e-commerce
+logo: /images/magento-enterprise-small-v2.png
+homepage: https://business.adobe.com/products/magento/magento-commerce.html
 description:
   text: Auto-scalable and highly-available cluster for Premium level Magento eCommerce hosting 
     with out-of-box auto-scaling, load and traffic distribution, database replication, page caching and user session storage.
   short: Auto-scalable and highly-available Magento cluster with load balancing, 
     data replication, content caching and user session storage.
-categories:
-- apps/clusters
-- apps/e-commerce
-name: Auto-Scalable Magento Cluster v2
-logo: /images/magento-enterprise-small-v2.png
 
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/magento-cluster/v2.2.0
+baseUrl: https://cdn.jsdelivr.net/gh/jelastic-jps/magento-cluster@2.2.0
 
 onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}
 onBeforeInit: /scripts/beforeinit.js?_r=${fn.random}
@@ -80,6 +80,7 @@ mixins:
  - https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/configs/vers.yaml
 
 globals:
+  cdnUrl: https://cdn.jsdelivr.net/gh
   DB_USER: ${settings.DB_USER:user-[fn.random]}
   DB_PASS: ${settings.DB_PASS:[fn.password(10)]}
   DB_HOST: sqldb
@@ -114,7 +115,7 @@ onInstall:
         var actions = [];
         if ('${settings.le_addon:false}' == 'true')
           actions.push({
-            jps: "https://github.com/jelastic-jps/lets-encrypt/blob/master/manifest.jps?_r=${fn.random}?_r=${fn.random}",
+            jps: "${globals.cdnUrl}/jelastic-jps/lets-encrypt@master/manifest.jps?_r=${fn.random}?_r=${fn.random}",
             nodeGroup: "bl",
             skipEmail: "true",
             settings: {
@@ -127,7 +128,7 @@ onInstall:
           });
         if ('${settings.cdn_addon:false}' == 'true')
           actions.push({
-            jps: "https://raw.githubusercontent.com/jelastic-jps/cdn/master/manifest.yml?_r=${fn.random}",
+            jps: "${globals.cdnUrl}/jelastic-jps/cdn@master/manifest.yml?_r=${fn.random}",
             nodeGroup: "bl",
             skipEmail: "true",
             settings: {
@@ -164,19 +165,19 @@ actions:
   setupNodes:
     - log: Nodes configurations
     - install:
-      - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+      - jps: ${globals.cdnUrl}/jelastic/templates@master/config_v2.jps?_r=${fn.random}
         settings:
           targetGroup: bl
           targetNodes: bl
           optimization: magento
 
-      - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+      - jps: ${globals.cdnUrl}/jelastic/templates@master/config_v2.jps?_r=${fn.random}
         settings:
           targetGroup: cp
           targetNodes: cp
           optimization: magento
 
-      - jps: https://raw.githubusercontent.com/jelastic/templates/master/config_v2.jps?_r=${fn.random}
+      - jps: ${globals.cdnUrl}/jelastic/templates@master/config_v2.jps?_r=${fn.random}
         settings:
           targetGroup: sqldb
           targetNodes: sqldb

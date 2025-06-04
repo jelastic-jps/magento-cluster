@@ -15,7 +15,7 @@ addons:
     type: update
     name: Magento Base URL
     description: Magento Base URL Configuration.
-    logo: https://github.com/jelastic-jps/magento/blob/v2.2.0/images/magento.png
+    logo: https://cdn.jsdelivr.net/gh/jelastic-jps/magento@2.2.0/images/magento.png
     settings:
       fields:
         - type: string
@@ -38,7 +38,7 @@ addons:
     type: update
     name: Cache Manager
     description: Clean all caches.
-    logo: https://github.com/jelastic-jps/magento/blob/v2.2.0/images/magento.png
+    logo: https://cdn.jsdelivr.net/gh/jelastic-jps/magento@2.2.0/images/magento.png
     buttons:
       - caption: Clean all caches
         action: cache_purge

@@ -50,7 +50,7 @@ resp.nodes.push({
     LITEMAGE: "ON",
     HEALTH_CHECK_PATH: "health_check.php",
     ON_ENV_INSTALL: {
-      jps: "https://raw.githubusercontent.com/jelastic-jps/litespeed/master/addons/license-v2.yml",
+      jps: "https://cdn.jsdelivr.net/gh/jelastic-jps/litespeed@master/addons/license-v2.yml",
       settings: {
         modules: "true"
       }

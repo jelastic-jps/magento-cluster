@@ -3,7 +3,7 @@ jpsVersion: '1.1'
 id: magento-perfomance-testing
 name: Generate data for performance testing
 description: Generate data for performance testing
-baseUrl: 
+baseUrl: https://cdn.jsdelivr.net/gh/jelastic-jps/magento-cluster@2.2.0
 
 settings:
   fields:

@@ -77,7 +77,7 @@ settings:
       markup:
 
 mixins:
- - https://raw.githubusercontent.com/jelastic-jps/magento-cluster/master/configs/vers.yaml
+ - https://cdn.jsdelivr.net/gh/jelastic-jps/magento-cluster@master/configs/vers.yaml
 
 globals:
   cdnUrl: https://cdn.jsdelivr.net/gh

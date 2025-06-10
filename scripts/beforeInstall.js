@@ -1,4 +1,3 @@
-var db_cluster = '${settings.galera}' == 'true' ? "galera" : "master";
 var resp = {
   result: 0,
   nodes: []
@@ -24,13 +23,13 @@ resp.nodes.push({
   restartDelay: 10,
   skipNodeEmails: true,
   cluster: {
-    scheme: db_cluster,
+    scheme: "master",
     db_user: "${globals.DB_USER}",
     db_pass: "${globals.DB_PASS}",
     is_proxysql: false,
   },
   env: {
-    SCHEME: db_cluster,
+    SCHEME: "master",
     DB_USER: "${globals.DB_USER}",
     DB_PASS: "${globals.DB_PASS}",
     IS_PROXYSQL: false

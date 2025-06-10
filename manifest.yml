@@ -251,7 +251,7 @@ actions:
         jem service restart
       user: root
   
-    - env.control.ApplyData[nosqldb]:
+    - env.control.ApplyNodeGroupData[nosqldb]:
         data:
           adminUrl: "http://node${nodes.nosqldb.master.id}-${env.domain}:4949"
           validation : 

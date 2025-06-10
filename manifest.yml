@@ -15,12 +15,13 @@ description:
 
 baseUrl: https://cdn.jsdelivr.net/gh/jelastic-jps/magento-cluster@2.2.0
 
-onBeforeInstall: /scripts/beforeinstall.js?_r=${fn.random}
-onBeforeInit: /scripts/beforeinit.js?_r=${fn.random}
+onBeforeInstall: /scripts/beforeInstall.js?_r=${fn.random}
+onBeforeInit: /scripts/beforeInit.js?_r=${fn.random}
 nodes: definedInOnBeforeInstall
 skipNodeEmails: true
 
 settings:
+  onBeforeInit: return settings;
   fields:
     - caption: Scaling Strategy
       type: list
@@ -68,13 +69,6 @@ settings:
       hidden: true
       disabled: false
       tooltip: "Jelastic CDN is an HTTP/3 premium content delivery network of 160+ Super PoPs (points of presence) with bandwidth capacity up to 115 Tbps, advanced caching and acceleration strategies based on best-in-class IP Anycast technology."
-
-    - type: displayfield
-      hideLabel: true
-      hidden: true
-      name: bl_count   
-      value: 1
-      markup:
 
 mixins:
  - https://cdn.jsdelivr.net/gh/jelastic-jps/magento-cluster@master/configs/vers.yaml
@@ -257,7 +251,7 @@ actions:
         jem service restart
       user: root
   
-    - env.control.ApplyNodeGroupData[nosqldb]:
+    - env.control.ApplyData[nosqldb]:
         data:
           adminUrl: "http://node${nodes.nosqldb.master.id}-${env.domain}:4949"
           validation : 

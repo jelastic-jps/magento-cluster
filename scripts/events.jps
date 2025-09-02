@@ -9,8 +9,6 @@ onAfterScaleOut[nodeGroup:cp]: updateTriggers
 onAfterStart: 
   cmd[cp]: sudo jem service restart
   
-onAfterInstallAddon [nodeGroup:bl, id:cdn]: setupEdgeportCDN
-  
 onAfterInstallAddon [nodeGroup:bl, id:letsencrypt-ssl-addon]:
   - cmd[${nodes.cp.master.id}]: source /opt/letsencrypt/settings && echo $domain
   - install: 
@@ -31,10 +29,6 @@ onAfterClone:
       envName: ${event.response.env.envName}
       settings:
         domain: ${event.response.env.domain}
-
-  - install: 
-      jps: /setupCDN.jps?_r=${fn.random}
-      envName: ${event.response.env.envName}
       
   - install: 
       jps: /addons.jps?_r=${fn.random}

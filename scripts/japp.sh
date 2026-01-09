@@ -167,7 +167,7 @@ install(){
             os_ready=1
             break
         fi
-        [ "${os_ready}" = "1" ] && break
+        echo $(date -u) "OpenSearch not ready yet (HTTP ${http_code}). Retry $((i+1))/${loop_limit}." >>$LOG;
         sleep 2
     done
 

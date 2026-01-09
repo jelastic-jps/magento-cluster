@@ -9,6 +9,7 @@ WGET=`which wget`
 RSYNC=`which rsync`
 TAR=`which tar`
 COMPOSER=`which composer`
+CURL=`which curl`
 
 install(){
 
@@ -133,6 +134,37 @@ install(){
 
     echo $(date -u) "Create magento database" >>$LOG;
     $MYSQL -u${db_user} -p${db_password} -h ${db_host} -e "CREATE DATABASE IF NOT EXISTS ${db_name};"
+
+    # Validate OpenSearch before running Magento setup:install to avoid partial installs
+    echo $(date -u) "Begin OpenSearch validation (${opensearch_host}:${opensearch_port})" >>$LOG;
+
+    if [ -z "${opensearch_username}" ] || [ -z "${opensearch_password}" ]; then
+        echo $(date -u) "ERROR: OpenSearch credentials are required (${opensearch_username}:${opensearch_password})" >>$LOG;
+        exit 1
+    fi
+
+    auth_args=(-u "${opensearch_username}:${opensearch_password}")
+
+    # OpenSearch health check (HTTP only)
+    os_url="http://${opensearch_host}:${opensearch_port}/_cluster/health"
+    os_ready=0
+    loop_limit=60
+    for (( i=0 ; i<${loop_limit} ; i++ )); do
+        http_code=$("${CURL}" -k -sS -o /dev/null -w "%{http_code}" --connect-timeout 5 --max-time 10 "${auth_args[@]}" "${os_url}" || true)
+        if [ "${http_code}" = "200" ]; then
+            os_ready=1
+            break
+        fi
+        [ "${os_ready}" = "1" ] && break
+        sleep 2
+    done
+
+    if [ "${os_ready}" != "1" ]; then
+        echo $(date -u) "ERROR: OpenSearch validation failed (unreachable or unauthorized). Check host/port/credentials and OpenSearch health." >>$LOG;
+        exit 1
+    fi
+
+    echo $(date -u) "End OpenSearch validation (OK)" >>$LOG;
 
     echo $(date -u) "Begin magento installation" >>$LOG;
     ${MAGENTO_BIN} setup:install -s \

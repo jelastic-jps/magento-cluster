@@ -136,6 +136,14 @@ install(){
     $MYSQL -u${db_user} -p${db_password} -h ${db_host} -e "CREATE DATABASE IF NOT EXISTS ${db_name};"
 
     # Validate OpenSearch before running Magento setup:install to avoid partial installs
+    if [ -z "${opensearch_host}" ]; then
+        echo $(date -u) "ERROR: OpenSearch host is required (--opensearch-host)" >>$LOG;
+        exit 1
+    fi
+
+    # Default OpenSearch port
+    [ -z "${opensearch_port}" ] && opensearch_port=9200
+
     echo $(date -u) "Begin OpenSearch validation (${opensearch_host}:${opensearch_port})" >>$LOG;
 
     if [ -z "${opensearch_username}" ] || [ -z "${opensearch_password}" ]; then
@@ -148,9 +156,13 @@ install(){
     # OpenSearch health check (HTTP only)
     os_url="http://${opensearch_host}:${opensearch_port}/_cluster/health"
     os_ready=0
-    loop_limit=60
+    loop_limit=30
     for (( i=0 ; i<${loop_limit} ; i++ )); do
         http_code=$("${CURL}" -k -sS -o /dev/null -w "%{http_code}" --connect-timeout 5 --max-time 10 "${auth_args[@]}" "${os_url}" || true)
+        if [ "${http_code}" = "401" ]; then
+            echo $(date -u) "ERROR: OpenSearch validation failed (401 Unauthorized). Connection OK, but credentials are invalid." >>$LOG;
+            exit 1
+        fi
         if [ "${http_code}" = "200" ]; then
             os_ready=1
             break
@@ -175,6 +187,7 @@ install(){
         --db-password=${db_password} \
         --search-engine=${search_engine} \
         --opensearch-host=${opensearch_host} \
+        --opensearch-port=${opensearch_port} \
         --opensearch-username=${opensearch_username} \
         --opensearch-password=${opensearch_password} \
         --opensearch-enable-auth=1 \

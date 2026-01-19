@@ -15,6 +15,8 @@ globals:
   ES_PASS: ${settings.es_pass}
   USER_EMAIL: ${settings.user_email}
   CLUSTER: ${settings.cluster:true}
+  MEMCACHED_HOST: ${settings.memcached_host:/var/run/memcached/memcached.sock}
+  MEMCACHED_PORT: ${settings.memcached_port:0}
 
 onInstall:
   - installScripts
@@ -46,14 +48,10 @@ actions:
             --opensearch-host ${globals.ES_HOST} \
             --opensearch-username admin \
             --opensearch-password ${globals.ES_PASS} \
-            --cache-backend redis \
-            --cache-backend-redis-server /var/run/redis/redis.sock \
-            --cache-backend-redis-db 0 \
-            --cache-backend-redis-port 0 \
-            --session-save redis \
-            --session-save-redis-host /var/run/redis/redis.sock \
-            --session-save-redis-port 0 \
-            --session-save-redis-db 1
+            --cache-backend memcached \
+            --cache-backend-memcached-server ${globals.MEMCACHED_HOST} \
+            --cache-backend-memcached-port ${globals.MEMCACHED_PORT} \
+            --session-save files
           
     - else:
         cmd[${nodes.cp.master.id}]: |-    

@@ -65,10 +65,17 @@ resp.nodes.push({
   restartDelay: 10,
   env: {
     SERVER_WEBROOT: "/var/www/webroot/ROOT",
-    REDIS_ENABLED: "true",
     WAF: "${settings.waf:false}",
     WP_PROTECT: "OFF"
   }
+})
+
+resp.nodes.push({
+  nodeType: "memcached-dockerized",
+  count: 1,
+  cloudlets: ${settings.cache.cloudlets:8},
+  diskLimit: "${settings.cache.diskspace:[quota.disk.limitation]}",
+  nodeGroup: "cache"
 })
 
 resp.nodes.push({

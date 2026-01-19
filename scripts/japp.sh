@@ -200,9 +200,6 @@ install(){
 
     # Apply memcached cache settings directly into env.php because Magento CLI lacks memcached flags
     if [ "${cache_backend}" = "memcached" ]; then
-        memc_server=${cache_backend_memcached_server}
-        memc_port=${cache_backend_memcached_port}
-
         php -r '
         $f = "'"${MAGENTO_DIR}"'/app/etc/env.php";
         $env = include $f;
@@ -215,8 +212,8 @@ install(){
             return "{$host}:{$port}";
         };
 
-        $memcServer = "'"${memc_server}"'";
-        $memcPort = "'"${memc_port}"'";
+        $memcServer = "'"${cache_backend_memcached_server}"'";
+        $memcPort = "'"${cache_backend_memcached_port}"'";
 
         $serverCfg = [["host" => $memcServer, "port" => $memcPort, "weight" => 0]];
         $backend = [

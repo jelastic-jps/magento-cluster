@@ -13,7 +13,7 @@ description:
   short: Auto-scalable and highly-available Magento cluster with load balancing, 
     data replication, content caching and user session storage.
 
-baseUrl: https://raw.githubusercontent.com/sych74/magento-cluster/JE-75459
+baseUrl: https://cdn.jsdelivr.net/gh/jelastic-jps/magento-cluster@2.2.0
 
 onBeforeInstall: /scripts/beforeInstall.js?_r=${fn.random}
 onBeforeInit: /scripts/beforeInit.js?_r=${fn.random}

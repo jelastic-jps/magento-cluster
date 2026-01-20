@@ -27,13 +27,11 @@ install(){
         "opensearch-username"
         "opensearch-password"
         "cache-backend"
-        "cache-backend-redis-server"
-        "cache-backend-redis-port"
-        "cache-backend-redis-db"
+        "cache-backend-memcached-server"
+        "cache-backend-memcached-port"
         "session-save"
-        "session-save-redis-host"
-        "session-save-redis-port"
-        "session-save-redis-db"
+        "session-save-memcached-host"
+        "session-save-memcached-port"
     )
 
     opts=$(getopt \
@@ -98,32 +96,24 @@ install(){
                 cache_backend=$2
                 shift 2
                 ;;
-            --cache-backend-redis-server)
-                cache_backend_redis_server=$2
+            --cache-backend-memcached-server)
+                cache_backend_memcached_server=$2
                 shift 2
                 ;;
-            --cache-backend-redis-port)
-                cache_backend_redis_port=$2
-                shift 2
-                ;;
-            --cache-backend-redis-db)
-                cache_backend_redis_db=$2
+            --cache-backend-memcached-port)
+                cache_backend_memcached_port=$2
                 shift 2
                 ;;
             --session-save)
                 session_save=$2
                 shift 2
                 ;;
-            --session-save-redis-host)
-                session_save_redis_host=$2
+            --session-save-memcached-host)
+                session_save_memcached_host=$2
                 shift 2
                 ;;
-            --session-save-redis-port)
-                session_save_redis_port=$2
-                shift 2
-                ;;
-            --session-save-redis-db)
-                session_save_redis_db=$2
+            --session-save-memcached-port)
+                session_save_memcached_port=$2
                 shift 2
                 ;;
         *)
@@ -178,6 +168,13 @@ install(){
 
     echo $(date -u) "End OpenSearch validation (OK)" >>$LOG;
 
+    # Default memcached socket/port when not provided
+    [ -z "${cache_backend_memcached_server}" ] && cache_backend_memcached_server=/var/run/memcached/memcached.sock
+    [ -z "${cache_backend_memcached_port}" ] && cache_backend_memcached_port=0
+
+    # Default session storage to files unless explicitly set
+    [ -z "${session_save}" ] && session_save=files
+
     echo $(date -u) "Begin magento installation" >>$LOG;
     ${MAGENTO_BIN} setup:install -s \
         --backend-frontname=admin \
@@ -191,14 +188,7 @@ install(){
         --opensearch-username=${opensearch_username} \
         --opensearch-password=${opensearch_password} \
         --opensearch-enable-auth=1 \
-        --cache-backend=${cache_backend} \
-        --cache-backend-redis-server=${cache_backend_redis_server} \
-        --cache-backend-redis-db=${cache_backend_redis_db} \
-        --cache-backend-redis-port=${cache_backend_redis_port} \
         --session-save=${session_save} \
-        --session-save-redis-host=${session_save_redis_host} \
-        --session-save-redis-port=${session_save_redis_port} \
-        --session-save-redis-db=${session_save_redis_db} \
         --base-url=${base_url} \
         --admin-firstname=Admin \
         --admin-lastname=AdminLast \
@@ -206,7 +196,42 @@ install(){
         --admin-user=admin \
         --admin-password=${admin_password} &>> $LOG;
     
-     echo $(date -u) "End magento installation" >>$LOG;
+    echo $(date -u) "End magento installation" >>$LOG;
+
+    # Apply memcached cache settings directly into env.php because Magento CLI lacks memcached flags
+    if [ "${cache_backend}" = "memcached" ]; then
+        php -r '
+        $f = "'"${MAGENTO_DIR}"'/app/etc/env.php";
+        $env = include $f;
+
+        $toDsn = function ($host, $port) {
+            if (strpos($host, "/") === 0) {
+                // socket path
+                return "unix://{$host}";
+            }
+            return "{$host}:{$port}";
+        };
+
+        $memcServer = "'"${cache_backend_memcached_server}"'";
+        $memcPort = "'"${cache_backend_memcached_port}"'";
+
+        $serverCfg = [["host" => $memcServer, "port" => $memcPort, "weight" => 0]];
+        $backend = [
+            "backend" => "memcached",
+            "backend_options" => [
+                "servers" => $serverCfg,
+                "compression" => 0,
+                "persistent" => "",
+                "force_standalone" => 0
+            ]
+        ];
+        $env["cache"]["frontend"]["default"] = $backend;
+        $env["cache"]["frontend"]["page_cache"] = $backend;
+
+        file_put_contents($f, "<?php\nreturn " . var_export($env, true) . ";\n");
+        ';
+        echo $(date -u) "Applied memcached settings to env.php" >>$LOG;
+    fi
 
     ${MAGENTO_BIN} index:reindex;
 }

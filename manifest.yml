@@ -212,6 +212,8 @@ actions:
         db_pass: ${globals.DB_PASS}
         es_host: nosqldb
         es_pass: ${globals.ES_PASS}
+        memcached_host: cache
+        memcached_port: 11211
         mg_admin_pass: ${globals.MG_ADMIN_PASS}
         mg_url: ${globals.PROTOCOL}://${globals.DOMAIN}/
         version: ${globals.version_magento}
